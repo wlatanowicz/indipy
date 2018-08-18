@@ -88,7 +88,7 @@ class Client:
         for cb in to_rm:
             self.callbacks.remove(cb)
 
-    def waitforchange(self, device=None, vector=None, element=None, what=None, expect=None, cmp=None, timeout=-1):
+    def waitforchange(self, device=None, vector=None, element=None, what=None, expect=None, cmp=None, timeout=-1, initial=None):
         if cmp is None:
             cmp = lambda a, b: a == b
 
@@ -98,7 +98,10 @@ class Client:
             release = False
 
             if expect is None:
-                release = True
+                if initial is None:
+                    release = True
+                elif initial != sender.value:
+                    release = True
             else:
                 try:
                     if what == 'state' and cmp(sender.state, expect):
