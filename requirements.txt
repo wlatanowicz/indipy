@@ -1,1 +1,2 @@
 ddt==1.1.2
+websocket-server==0.4
