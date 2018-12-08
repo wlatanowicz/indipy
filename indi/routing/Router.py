@@ -32,7 +32,7 @@ class Router:
         logging.debug('Router: unregistering client %s', client)
         if client in self.clients:
             self.clients.remove(client)
-        if self.blob_routing.get(client):
+        if client in self.blob_routing:
             del self.blob_routing[client]
 
     def process_message(self, message, sender=None):
@@ -50,6 +50,7 @@ class Router:
             for client in self.clients:
                 if not client == sender:
                     if sender is None and not is_blob \
+                            or sender.routing_key is None and not is_blob \
                             or (is_blob and self.blob_routing[client][sender.routing_key] in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)) \
                             or (not is_blob and self.blob_routing[client][sender.routing_key] == const.BLOBEnable.NEVER):
 

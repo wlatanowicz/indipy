@@ -48,4 +48,4 @@ class WebSocket:
         self.router.unregister_client(handler)
 
     def _message_received(self, client, server, message):
-        self.clients[client].text_message_from_client(message)
+        self.clients[client['id']].text_message_from_client(message)
