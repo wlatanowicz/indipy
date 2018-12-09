@@ -25,7 +25,7 @@ class Driver(Device, metaclass=DriverMeta):
         elif self.__class__.name is not None:
             self._name = self.__class__.name
 
-        self._groups = {k: Group(self, v) for k, v in self.__class__.__dict__.items() if isinstance(v, GroupDefinition)}
+        self._groups = {k: Group(self, v) for k, v in self.__class__._group_definitions().items()}
         self._router = router
 
         self._vectors = {}
@@ -36,14 +36,27 @@ class Driver(Device, metaclass=DriverMeta):
         if self._router:
             self._router.register_device(self)
 
+    @classmethod
+    def _group_definitions(cls):
+        groups = {}
+        for base in cls.__bases__:
+            if issubclass(base, Driver) or base is Driver:
+                groups = {
+                    **groups,
+                    **base._group_definitions()
+                }
+        for k, v in cls.__dict__.items():
+            if isinstance(v, GroupDefinition):
+                groups[k] = v
+        return groups
+
     @property
     def name(self):
         return self._name
 
-    @property
-    def routing_key(self):
-        return self._name
-        
+    def accepts(self, device):
+        return self.name == device
+
     def get_group(self, name):
         return self._groups.get(name)
 

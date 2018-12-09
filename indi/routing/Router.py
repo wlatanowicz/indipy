@@ -7,6 +7,8 @@ from indi.message import NewBLOBVector, EnableBLOB
 class Router:
     instance = None
 
+    DEFAULT_BLOB_POLICY = const.BLOBEnable.NEVER
+
     def __init__(self):
         self.clients = []
         self.devices = []
@@ -20,13 +22,11 @@ class Router:
 
     def register_device(self, device):
         self.devices.append(device)
-        for client in self.clients:
-            self.blob_routing[client][device.routing_key] = const.BLOBEnable.NEVER
 
     def register_client(self, client):
         logging.debug('Router: registering client %s', client)
         self.clients.append(client)
-        self.blob_routing[client] = {d.routing_key: const.BLOBEnable.NEVER for d in self.devices}
+        self.blob_routing[client] = {}
 
     def unregister_client(self, client):
         logging.debug('Router: unregistering client %s', client)
@@ -43,23 +43,22 @@ class Router:
                 self.process_enable_blob(message, sender)
 
             for device in self.devices:
-                if not device == sender and (not message.device or message.device == device.routing_key):
+                if not device == sender and (not message.device or device.accepts(message.device)):
                     device.message_from_client(message)
 
         if message.from_device:
             for client in self.clients:
                 if not client == sender:
-                    if sender is None and not is_blob \
-                            or sender.routing_key is None and not is_blob \
-                            or (is_blob and self.blob_routing[client][sender.routing_key] in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)) \
-                            or (not is_blob and self.blob_routing[client][sender.routing_key] == const.BLOBEnable.NEVER):
+                    device = getattr(message, 'device', None)
+                    client_blob_policy = self.blob_routing.get(client, {}).get(device, self.DEFAULT_BLOB_POLICY)
+                    if (is_blob and client_blob_policy in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)) \
+                            or (not is_blob and client_blob_policy == const.BLOBEnable.NEVER):
 
                         def send():
                             client.message_from_device(message)
 
                         th = threading.Thread(target=send, daemon=True)
                         th.start()
-
 
     def process_enable_blob(self, message, sender):
         self.blob_routing[sender][message.name] = message.value
