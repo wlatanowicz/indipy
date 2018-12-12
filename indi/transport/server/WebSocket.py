@@ -12,7 +12,10 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string()
-        self.server.send_message(self.client, data)
+        try:
+            self.server.send_message(self.client, data)
+        except:
+            pass
 
     def message_from_client(self, message):
         if self.router:
@@ -43,9 +46,10 @@ class WebSocket:
         self.router.register_client(handler)
 
     def _client_left(self, client, server):
-        handler = self.clients[client['id']]
-        del self.clients[client['id']]
-        self.router.unregister_client(handler)
+        if client:
+            handler = self.clients[client['id']]
+            del self.clients[client['id']]
+            self.router.unregister_client(handler)
 
     def _message_received(self, client, server, message):
         self.clients[client['id']].text_message_from_client(message)
