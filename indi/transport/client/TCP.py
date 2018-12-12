@@ -29,10 +29,9 @@ class ConnectionHandler:
 
     def send_message(self, message):
         data = message.to_string()
-        self.sender_lock.acquire()
-        logging.debug(f'TCP: sending data: {data}')
-        self.client_socket.sendall(data)
-        self.sender_lock.release()
+        with self.sender_lock:
+            logging.debug(f'TCP: sending data: {data}')
+            self.client_socket.sendall(data)
 
     def close(self):
         if self.client_socket:
