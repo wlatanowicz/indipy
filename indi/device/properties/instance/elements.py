@@ -1,8 +1,9 @@
 import logging
 import base64
-from ....message import parts
-from ....message import const
-from ....message import checks
+
+from indi.message import parts
+from indi.message import const
+from indi.message import checks
 
 
 class Element:

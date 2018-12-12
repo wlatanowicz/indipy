@@ -1,7 +1,6 @@
-from .IndiMessage import  IndiMessage
-from . import checks
-from .parts import OneBLOB, OneLight, OneNumber, OneSwitch, OneText
-from . import const
+from indi.message.IndiMessage import IndiMessage
+from indi.message import checks, const
+from indi.message.parts import OneBLOB, OneLight, OneNumber, OneSwitch, OneText
 
 
 class SetVector(IndiMessage):

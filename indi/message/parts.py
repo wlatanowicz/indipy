@@ -1,6 +1,5 @@
-import xml.etree.cElementTree as ET
-from . import checks
-from . import const
+import xml.etree.ElementTree as ET
+from indi.message import checks, const
 
 
 class IndiMessagePart:

@@ -1,6 +1,6 @@
-from .IndiMessage import IndiMessage
-from . import checks
-from .parts import OneBLOB, OneNumber, OneSwitch, OneText
+from indi.message.IndiMessage import IndiMessage
+from indi.message import checks
+from indi.message.parts import OneBLOB, OneNumber, OneSwitch, OneText
 
 
 class NewVector(IndiMessage):

@@ -1,5 +1,5 @@
-from .. import message
-from .vectors import Vector
+from indi import message
+from indi.client.vectors import Vector
 
 
 class Device:

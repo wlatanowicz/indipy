@@ -1,6 +1,5 @@
 from indi.device import Driver, properties
 from indi.message import GetProperties
-from .properties.instance.group import Group
 from indi.transport.client.TCP import TCP as TCPClient
 
 

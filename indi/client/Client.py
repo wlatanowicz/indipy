@@ -2,9 +2,9 @@ import uuid
 import threading
 from indi.client.elements import Element
 from indi.client.vectors import Vector
-from .. import message
-from ..message import const
-from .device import Device
+from indi import message
+from indi.message import const
+from indi.client.device import Device
 
 
 class Client:

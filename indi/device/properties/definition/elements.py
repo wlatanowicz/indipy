@@ -1,4 +1,4 @@
-from ..instance import elements as instance_elements
+from indi.device.properties.instance import elements as instance_elements
 from indi.message import const
 
 

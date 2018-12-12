@@ -1,10 +1,9 @@
-from .properties.instance.group import Group
-from .properties import Group as GroupDefinition
-from ..routing import Device
-
-from .. import message
-
 import logging
+
+from indi.device.properties.instance.group import Group
+from indi.device.properties import Group as GroupDefinition
+from indi.routing import Device
+from indi import message
 
 
 class DriverMeta(type):

@@ -1,4 +1,4 @@
-from ..message import parts
+from indi.message import parts
 
 
 class Element:

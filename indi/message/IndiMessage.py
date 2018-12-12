@@ -1,6 +1,6 @@
 import xml.etree.cElementTree as ET
 
-from .parts import IndiMessagePart
+from indi.message.parts import IndiMessagePart
 
 
 class IndiMessage:

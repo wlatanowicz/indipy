@@ -1,5 +1,5 @@
-from .... import message
-from ....message import checks, const
+from indi import message
+from indi.message import checks, const
 
 
 class Vector:

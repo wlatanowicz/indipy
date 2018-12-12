@@ -1,6 +1,6 @@
-from .elements import Number, Text, Switch, Light, BLOB
-from ..const import Permissions, State, SwitchRule
-from ..instance import vectors as instance_vectors
+from indi.device.properties.definition.elements import Number, Text, Switch, Light, BLOB
+from indi.device.properties.const import Permissions, State, SwitchRule
+from indi.device.properties.instance import vectors as instance_vectors
 from indi.message import const
 
 

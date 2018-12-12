@@ -1,4 +1,4 @@
-from .IndiMessage import IndiMessage
+from indi.message.IndiMessage import IndiMessage
 
 
 class Message(IndiMessage):

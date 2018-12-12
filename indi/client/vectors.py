@@ -1,6 +1,6 @@
-from .. import message
-from ..message import checks
-from . import elements
+from indi import message
+from indi.message import checks
+from indi.client import elements
 
 
 class Vector:
