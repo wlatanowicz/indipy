@@ -19,7 +19,9 @@ class Proxy(Driver):
         super().__init__(*args, **kwargs)
 
     def message_from_client(self, message):
-        super().message_from_client(message)
+        if getattr(message, 'device', None) in (None, self.name):
+            super().message_from_client(message)
+
         if self._connection:
             self._connection.send_message(message)
 
