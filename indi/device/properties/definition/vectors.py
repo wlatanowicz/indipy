@@ -11,7 +11,7 @@ class Vector:
     def __init__(self, name, label=None, state=State.OK, perm=Permissions.READ_WRITE,
                  timeout=0, enabled=True, elements=None, onchange=None):
         self.name = name
-        self.label = label
+        self.label = label or name
         self.state = state
         self.perm = perm
         self.timeout = timeout

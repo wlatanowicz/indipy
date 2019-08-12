@@ -8,7 +8,7 @@ class Element:
 
     def __init__(self, name, label=None, default=None, enabled=True, onchange=None, onwrite=None, onread=None):
         self.name = name
-        self.label = label
+        self.label = label or name
         self.default = self.default_value if default is None else default
         self.enabled = enabled
 

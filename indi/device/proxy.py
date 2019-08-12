@@ -40,3 +40,7 @@ class Proxy(Driver):
             if self._connection:
                 self._connection.close()
             self._connection = None
+
+    @property
+    def client(self):
+        return self._client
