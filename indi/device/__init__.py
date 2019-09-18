@@ -1,8 +1,8 @@
 import logging
 from functools import wraps
 
-from .Driver import Driver
-from .Proxy import Proxy
+from .driver import Driver
+from .proxy import Proxy
 
 
 def non_blocking(fun):

@@ -1,6 +1,6 @@
 from indi.device import Driver, properties
 from indi.message import GetProperties
-from indi.transport.client.TCP import TCP as TCPClient
+from indi.transport.client.tcp import TCP as TCPClient
 
 
 class Proxy(Driver):

@@ -1,2 +1,2 @@
-from .TCP import TCP
-from .WebSocket import WebSocket
+from .tcp import TCP
+from .websocket import WebSocket

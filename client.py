@@ -1,4 +1,4 @@
-from indi.client.Client import Client
+from indi.client.client import Client
 from indi.transport.client import TCP
 from indi.message import const
 from indi.client import elements
