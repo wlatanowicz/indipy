@@ -6,8 +6,8 @@ from indi.typing import CallbackDefinition
 
 
 class Element:
-    instance_class = None
-    default_value = None
+    instance_class = Union[Type[instance_elements.BLOB], Type[instance_elements.Light], Type[instance_elements.Number], Type[instance_elements.Switch], Type[instance_elements.Text]]
+    default_value: Any
 
     def __init__(
         self,

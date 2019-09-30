@@ -1,7 +1,7 @@
 import unittest
-from indi.message import GetProperties
-from indi.message import IndiMessage
-from ddt import ddt, data, unpack
+
+from ddt import data, ddt, unpack
+from indi.message import GetProperties, IndiMessage
 
 
 @ddt

@@ -1,3 +1,5 @@
+from typing import Type, Union
+
 from indi.message import checks, const
 from indi.message.IndiMessage import IndiMessage
 from indi.message.parts import DefBLOB, DefLight, DefNumber, DefSwitch, DefText
@@ -5,7 +7,7 @@ from indi.message.parts import DefBLOB, DefLight, DefNumber, DefSwitch, DefText
 
 class DefVector(IndiMessage):
     from_device = True
-    children_class = None
+    children_class: Union[Type[DefBLOB], Type[DefLight], Type[DefNumber], Type[DefSwitch], Type[DefText]]
 
     def __init__(
         self,
@@ -30,8 +32,6 @@ class DefVector(IndiMessage):
 
 
 class DefWritableVector(DefVector):
-    children_class = None
-
     def __init__(self, *args, perm, timeout=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.perm = checks.dictionary(perm, const.Permissions)

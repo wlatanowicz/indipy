@@ -1,11 +1,10 @@
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from ddt import ddt, data, unpack
 
-from indi.routing import Router
-from indi.routing import Device
+from ddt import data, ddt, unpack
 from indi import message
+from indi.routing import Device, Router
 
 
 @ddt

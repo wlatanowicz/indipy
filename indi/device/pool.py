@@ -5,9 +5,9 @@ from indi.routing import Router
 
 
 class DevicePool:
-    device_classes = []
+    device_classes: List[type] = []
 
-    devices = {}
+    devices: Dict[str, Driver] = {}
 
     @classmethod
     def register(cls, device_class: Type[Driver]):

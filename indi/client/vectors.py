@@ -1,13 +1,15 @@
+from typing import Type, Union
+
 from indi import message
 from indi.client import elements
 from indi.message import checks
 
 
 class Vector:
-    def_message_class = None
-    set_message_class = None
-    new_message_class = None
-    children_class = None
+    def_message_class: Type[message.DefVector]
+    set_message_class: Union[Type[message.SetBLOBVector], Type[message.SetLightVector], Type[message.SetNumberVector], Type[message.SetSwitchVector], Type[message.SetTextVector]]
+    new_message_class: Union[Type[message.NewBLOBVector], Type[message.NewNumberVector], Type[message.NewSwitchVector], Type[message.NewTextVector]]
+    children_class: Type[elements.Element]
 
     def __init__(self, device, msg: message.DefVector):
         self.group = msg.group

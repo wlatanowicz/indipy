@@ -2,8 +2,8 @@ import threading
 import time
 
 from indi.device import Driver, properties
-from indi.message import const
 from indi.device.pool import DevicePool
+from indi.message import const
 
 
 @DevicePool.register
