@@ -1,5 +1,7 @@
 import uuid
 import threading
+import time
+
 from indi.client.elements import Element
 from indi.client.vectors import Vector
 from indi import message
@@ -62,16 +64,42 @@ class Client:
             message.GetProperties(version='2.0')
         )
 
-    def onchange(self, *, callback, device=None, vector=None, element=None, what='value'):
+    def onchange(self, *, callback, device=None, vector=None, element=None, what='value', polling_enabled=True, polling_delay=0.0, polling_interval=1.0):
         uid = uuid.uuid4()
-        self.callbacks.append(dict(
+        callback_config = dict(
             what=what,
             device=device,
             vector=vector,
             element=element,
             callback=callback,
             uuid=uid,
-        ))
+            polling_enabled=polling_enabled,
+        )
+
+        if polling_enabled:
+            def poll():
+                kwargs = {}
+                if device:
+                    kwargs['device'] = device
+                if vector:
+                    kwargs['name'] = vector
+
+                msg = message.GetProperties(
+                    version='2.0',
+                    **kwargs
+                )
+
+                time.sleep(polling_delay)
+                while callback_config['polling_enabled']:
+                    self.send_message(msg)
+                    time.sleep(polling_interval)
+
+            t = threading.Thread(
+                target=poll
+            )
+            t.start()
+
+        self.callbacks.append(callback_config)
         return uid
 
     def rmonchange(self, uuid=None, device=None, vector=None, element=None, what=None, callback=None):
@@ -86,6 +114,7 @@ class Client:
                 to_rm.append(cb)
 
         for cb in to_rm:
+            cb['polling_enabled'] = False
             self.callbacks.remove(cb)
 
     def waitforchange(self, device=None, vector=None, element=None, what=None, expect=None, cmp=None, timeout=-1, initial=None):
