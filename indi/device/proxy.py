@@ -1,10 +1,12 @@
+from typing import Optional
+
 from indi.device import Driver, properties
 from indi.message import GetProperties
 from indi.transport.client.tcp import TCP as TCPClient
 
 
 class Proxy(Driver):
-    address = None
+    address: Optional[str] = None
     port = 7624
 
     general = properties.Group('GENERAL',

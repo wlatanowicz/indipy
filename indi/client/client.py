@@ -64,7 +64,7 @@ class Client:
             message.GetProperties(version='2.0')
         )
 
-    def onchange(self, *, callback, device=None, vector=None, element=None, what='value', polling_enabled=True, polling_delay=0.0, polling_interval=1.0):
+    def onchange(self, *, callback, device=None, vector=None, element=None, what='value', polling_enabled=True, polling_delay=1.0, polling_interval=1.0):
         uid = uuid.uuid4()
         callback_config = dict(
             what=what,

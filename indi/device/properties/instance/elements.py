@@ -1,6 +1,7 @@
 import logging
 import base64
 
+from indi.device.properties.instance.vectors import Vector
 from indi.message import parts
 from indi.message import const
 from indi.message import checks
@@ -10,7 +11,7 @@ class Element:
     def_message_class = None
     set_message_class = None
 
-    def __init__(self, vector, definition):
+    def __init__(self, vector: Vector, definition):
         self._vector = vector
         self._definition = definition
         self._value = definition.default

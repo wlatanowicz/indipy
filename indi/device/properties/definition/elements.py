@@ -1,12 +1,15 @@
+from typing import Type, Union, Any, Optional
+
 from indi.device.properties.instance import elements as instance_elements
 from indi.message import const
+from indi.typing import CallbackDefinition
 
 
 class Element:
     instance_class = None
     default_value = None
 
-    def __init__(self, name, label=None, default=None, enabled=True, onchange=None, onwrite=None, onread=None):
+    def __init__(self, name: str, label: Optional[str]=None, default=None, enabled: bool=True, onchange: Optional[CallbackDefinition]=None, onwrite: Optional[CallbackDefinition]=None, onread: Optional[CallbackDefinition]=None):
         self.name = name
         self.label = label or name
         self.default = self.default_value if default is None else default

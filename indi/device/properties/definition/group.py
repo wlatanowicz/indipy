@@ -1,5 +1,9 @@
+from typing import Optional
+from indi.typing import Callback
+
+
 class Group:
-    def __init__(self, name, enabled=True, onchange=None, vectors=None):
+    def __init__(self, name: str, enabled=True, onchange: Optional[Callback]=None, vectors=None):
         self.name = name
         self.vectors = vectors
         self.property_name = None
