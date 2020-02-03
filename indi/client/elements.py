@@ -33,7 +33,7 @@ class Element:
             old_value = self.value
             self._value = msg.value
             if self._value != old_value:
-                self.vector.device.client.trigger_change(self, 'value')
+                self.vector.device.client.trigger_update(self, 'value')
 
     def to_new_message(self):
         return self.new_message_class(

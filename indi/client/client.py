@@ -1,11 +1,12 @@
 import uuid
 import threading
 import time
+from typing import Any
 
 from indi.client.elements import Element
 from indi.client.vectors import Vector
 from indi import message
-from indi.message import const
+from indi.message import const, IndiMessage
 from indi.client.device import Device
 
 
@@ -18,16 +19,16 @@ class Client:
         self.blob_connection_handler = None
         self.callbacks = []
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Device:
         return self.devices[key]
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         return key in self.devices
 
-    def get_device(self, name):
+    def get_device(self, name: str) -> Device:
         return self.devices.get(name)
 
-    def set_device(self, name, device):
+    def set_device(self, name: str, device: Device):
         self.devices[name] = device
         self.control_connection_handler.send_message(
             message.EnableBLOB(device=name, value=const.BLOBEnable.NEVER)
@@ -36,7 +37,7 @@ class Client:
             message.EnableBLOB(device=name, value=const.BLOBEnable.ONLY)
         )
 
-    def process_message(self, msg):
+    def process_message(self, msg: IndiMessage):
         device = None
         if isinstance(msg, message.DefVector):
             device = self.get_device(msg.device)
@@ -53,7 +54,7 @@ class Client:
         if device:
             device.process_message(msg)
 
-    def send_message(self, msg):
+    def send_message(self, msg: IndiMessage):
         self.control_connection_handler.send_message(msg)
 
     def start(self):
@@ -64,7 +65,7 @@ class Client:
             message.GetProperties(version='2.0')
         )
 
-    def onchange(self, *, callback, device=None, vector=None, element=None, what='value', polling_enabled=True, polling_delay=1.0, polling_interval=1.0):
+    def onupdate(self, *, callback, device=None, vector=None, element=None, what='value'):
         uid = uuid.uuid4()
         callback_config = dict(
             what=what,
@@ -73,36 +74,12 @@ class Client:
             element=element,
             callback=callback,
             uuid=uid,
-            polling_enabled=polling_enabled,
         )
-
-        if polling_enabled:
-            def poll():
-                kwargs = {}
-                if device:
-                    kwargs['device'] = device
-                if vector:
-                    kwargs['name'] = vector
-
-                msg = message.GetProperties(
-                    version='2.0',
-                    **kwargs
-                )
-
-                time.sleep(polling_delay)
-                while callback_config['polling_enabled']:
-                    self.send_message(msg)
-                    time.sleep(polling_interval)
-
-            t = threading.Thread(
-                target=poll
-            )
-            t.start()
 
         self.callbacks.append(callback_config)
         return uid
 
-    def rmonchange(self, uuid=None, device=None, vector=None, element=None, what=None, callback=None):
+    def rmonupdate(self, uuid=None, device=None, vector=None, element=None, what=None, callback=None):
         to_rm = list()
         for cb in self.callbacks:
             if uuid in (None, cb['uuid'],) \
@@ -117,7 +94,7 @@ class Client:
             cb['polling_enabled'] = False
             self.callbacks.remove(cb)
 
-    def waitforchange(self, device=None, vector=None, element=None, what=None, expect=None, cmp=None, timeout=-1, initial=None):
+    def waitforupdate(self, device=None, vector=None, element=None, what=None, expect=None, initial=None, cmp=None, timeout=-1, polling_enabled=True, polling_delay=1.0, polling_interval=1.0):
         if cmp is None:
             cmp = lambda a, b: a == b
 
@@ -147,19 +124,43 @@ class Client:
             if release and lock.locked():
                 lock.release()
 
+        if polling_enabled:
+            def poll():
+                kwargs = {}
+                if device:
+                    kwargs['device'] = device
+                if vector:
+                    kwargs['name'] = vector
+
+                msg = message.GetProperties(
+                    version='2.0',
+                    **kwargs
+                )
+
+                time.sleep(polling_delay)
+                while lock.locked():
+                    self.send_message(msg)
+                    time.sleep(polling_interval)
+
+            t = threading.Thread(
+                target=poll
+            )
+            t.start()
+
         lock.acquire()
-        uid = self.onchange(device=device, vector=vector, element=element, what=what, callback=cb)
+        uid = self.onupdate(device=device, vector=vector, element=element, what=what, callback=cb)
 
         acquired = lock.acquire(timeout=timeout)
 
-        self.rmonchange(uuid=uid)
+        self.rmonupdate(uuid=uid)
 
-        if acquired:
+        if lock.locked():
             lock.release()
-        else:
+
+        if not acquired:
             raise Exception('Timeout occurred')
 
-    def trigger_change(self, sender, what, **kwargs):
+    def trigger_update(self, sender: Any[Element, Vector], what, **kwargs):
         sender_device = None
         sender_vector = None
         sender_element = None

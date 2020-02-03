@@ -43,7 +43,7 @@ class Vector:
             self.state = msg.state
 
             if old_state != self.state:
-                self.device.client.trigger_change(self, 'state')
+                self.device.client.trigger_update(self, 'state')
 
             for ch in msg.children:
                 el = self.elements.get(ch.name)

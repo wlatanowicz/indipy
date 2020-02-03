@@ -1,7 +1,12 @@
+import logging
+
 from websocket_server import WebsocketServer
 
 from indi.message import IndiMessage
 from indi.routing import Client
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler(Client):
@@ -34,6 +39,7 @@ class WebSocket:
         self.clients = {}
 
     def start(self):
+        logger.info("Starting WebSocket INDI server on %s:%s", self.address, self.port)
         server = WebsocketServer(self.port, host=self.address)
         server.set_fn_new_client(self._new_client)
         server.set_fn_client_left(self._client_left)

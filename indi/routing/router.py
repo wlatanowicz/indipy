@@ -4,6 +4,9 @@ from indi.message import const
 from indi.message import NewBLOBVector, EnableBLOB
 
 
+logger = logging.getLogger(__name__)
+
+
 class Router:
     instance = None
 
@@ -24,12 +27,12 @@ class Router:
         self.devices.append(device)
 
     def register_client(self, client):
-        logging.debug('Router: registering client %s', client)
+        logger.debug('Router: registering client %s', client)
         self.clients.append(client)
         self.blob_routing[client] = {}
 
     def unregister_client(self, client):
-        logging.debug('Router: unregistering client %s', client)
+        logger.debug('Router: unregistering client %s', client)
         if client in self.clients:
             self.clients.remove(client)
         if client in self.blob_routing:
