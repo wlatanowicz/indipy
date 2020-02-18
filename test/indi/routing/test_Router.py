@@ -11,7 +11,7 @@ from indi import message
 @ddt
 class TestRouter(unittest.TestCase):
     messages = [
-        ('SOME_DEVICE', ((True, True), (False, False))),
+        ("SOME_DEVICE", ((True, True), (False, False))),
         (None, ((None, True), (None, True))),
     ]
 
@@ -19,28 +19,24 @@ class TestRouter(unittest.TestCase):
     @unpack
     def test_message_from_client(self, message_device, device_specs):
         devices = [
-            {
-                'mock': mock.Mock(),
-                'accepts': ds[0],
-                'processes': ds[1],
-            }
+            {"mock": mock.Mock(), "accepts": ds[0], "processes": ds[1],}
             for ds in device_specs
         ]
 
-        msg = message.GetProperties(version='2.0', device=message_device)
+        msg = message.GetProperties(version="2.0", device=message_device)
         router = Router()
 
         for device in devices:
-            device['mock'].accepts.return_value = device['accepts']
-            router.register_device(device['mock'])
+            device["mock"].accepts.return_value = device["accepts"]
+            router.register_device(device["mock"])
 
         router.process_message(message=msg)
 
         for device in devices:
-            if device['accepts'] is not None:
-                device['mock'].accepts.assert_called_once_with(msg.device)
-            if device['processes']:
-                device['mock'].message_from_client.assert_called_once_with(msg)
+            if device["accepts"] is not None:
+                device["mock"].accepts.assert_called_once_with(msg.device)
+            if device["processes"]:
+                device["mock"].message_from_client.assert_called_once_with(msg)
 
     class fake_threading:
         class Thread:
@@ -50,7 +46,7 @@ class TestRouter(unittest.TestCase):
             def start(self):
                 self.target()
 
-    @patch('indi.routing.router.threading', new_callable=fake_threading)
+    @patch("indi.routing.router.threading", new_callable=fake_threading)
     def test_message_from_device(self, mocked_threading):
         router = Router()
 
@@ -58,7 +54,7 @@ class TestRouter(unittest.TestCase):
 
         router.register_client(client)
 
-        msg = message.DelProperty(device='SOME_DEVICE')
+        msg = message.DelProperty(device="SOME_DEVICE")
 
         router.process_message(msg)
 

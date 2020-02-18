@@ -9,7 +9,16 @@ class Element:
     instance_class = None
     default_value = None
 
-    def __init__(self, name: str, label: Optional[str]=None, default=None, enabled: bool=True, onchange: Optional[CallbackDefinition]=None, onwrite: Optional[CallbackDefinition]=None, onread: Optional[CallbackDefinition]=None):
+    def __init__(
+        self,
+        name: str,
+        label: Optional[str] = None,
+        default=None,
+        enabled: bool = True,
+        onchange: Optional[CallbackDefinition] = None,
+        onwrite: Optional[CallbackDefinition] = None,
+        onread: Optional[CallbackDefinition] = None,
+    ):
         self.name = name
         self.label = label or name
         self.default = self.default_value if default is None else default
@@ -27,7 +36,7 @@ class Number(Element):
     instance_class = instance_elements.Number
     default_value = 0.0
 
-    def __init__(self, *args, format='%f', min=0, max=None, step=0, **kwargs):
+    def __init__(self, *args, format="%f", min=0, max=None, step=0, **kwargs):
         super().__init__(*args, **kwargs)
         self.format = format
         self.min = min
@@ -37,7 +46,7 @@ class Number(Element):
 
 class Text(Element):
     instance_class = instance_elements.Text
-    default_value = ''
+    default_value = ""
 
 
 class Switch(Element):
@@ -52,4 +61,4 @@ class Light(Element):
 
 class BLOB(Element):
     instance_class = instance_elements.BLOB
-    default_value = ''
+    default_value = ""

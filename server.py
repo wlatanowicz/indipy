@@ -7,7 +7,7 @@ from indi.transport.server import TCP as TCPServer
 from devices import *
 
 
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
+logging.basicConfig(format="%(asctime)s %(message)s", level=logging.DEBUG)
 
 router = Router()
 

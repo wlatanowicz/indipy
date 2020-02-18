@@ -9,11 +9,10 @@ class Proxy(Driver):
     address: Optional[str] = None
     port = 7624
 
-    general = properties.Group('GENERAL',
-                               vectors=dict(
-                                            connection=properties.Standard('CONNECTION', onchange='connect'),
-                                       )
-                               )
+    general = properties.Group(
+        "GENERAL",
+        vectors=dict(connection=properties.Standard("CONNECTION", onchange="connect"),),
+    )
 
     def __init__(self, *args, **kwargs):
         self._connection = None
@@ -21,7 +20,7 @@ class Proxy(Driver):
         super().__init__(*args, **kwargs)
 
     def message_from_client(self, message):
-        if getattr(message, 'device', None) in (None, self.name):
+        if getattr(message, "device", None) in (None, self.name):
             super().message_from_client(message)
 
         if self._connection:
@@ -34,10 +33,10 @@ class Proxy(Driver):
         return True
 
     def connect(self, sender):
-        connected = self.get_group('general').connection.connect.bool_value
+        connected = self.get_group("general").connection.connect.bool_value
         if connected:
             self._connection = self._client.connect(self._message_from_server)
-            self._connection.send_message(GetProperties(version='1.0'))
+            self._connection.send_message(GetProperties(version="1.0"))
         else:
             if self._connection:
                 self._connection.close()

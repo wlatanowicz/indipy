@@ -21,13 +21,15 @@ class DriverMeta(type):
 class Driver(Device, metaclass=DriverMeta):
     onchange = None
 
-    def __init__(self, name: Optional[str]=None, router: Optional[Router]=None):
+    def __init__(self, name: Optional[str] = None, router: Optional[Router] = None):
         if name is not None:
             self._name = name
         elif self.__class__.name is not None:
             self._name = self.__class__.name
 
-        self._groups: Dict[str, Group] = {k: Group(self, v) for k, v in self.__class__._group_definitions().items()}
+        self._groups: Dict[str, Group] = {
+            k: Group(self, v) for k, v in self.__class__._group_definitions().items()
+        }
         self._router = router
 
         self._vectors: Dict[str, Vector] = {}
@@ -43,10 +45,7 @@ class Driver(Device, metaclass=DriverMeta):
         groups: Dict[str, GroupDefinition] = {}
         for base in cls.__bases__:
             if issubclass(base, Driver) or base is Driver:
-                groups = {
-                    **groups,
-                    **base._group_definitions()
-                }
+                groups = {**groups, **base._group_definitions()}
         for k, v in cls.__dict__.items():
             if isinstance(v, GroupDefinition):
                 groups[k] = v
@@ -81,7 +80,9 @@ class Driver(Device, metaclass=DriverMeta):
         if isinstance(msg, message.news.NewVector):
             self._vectors[msg.name].from_new_message(msg)
 
-    def trigger_callback(self, callback: Optional[Union[str, Callable]], sender, **kwargs):
+    def trigger_callback(
+        self, callback: Optional[Union[str, Callable]], sender, **kwargs
+    ):
         if not callback:
             return
 

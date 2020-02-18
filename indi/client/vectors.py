@@ -18,7 +18,10 @@ class Vector:
         self.state = msg.state
         self.device = device
 
-        children = checks.children([elements.Element.from_message(self, c) for c in msg.children], self.children_class)
+        children = checks.children(
+            [elements.Element.from_message(self, c) for c in msg.children],
+            self.children_class,
+        )
         self.elements = {ch.name: ch for ch in children}
 
     def __getitem__(self, key):
@@ -43,7 +46,7 @@ class Vector:
             self.state = msg.state
 
             if old_state != self.state:
-                self.device.client.trigger_update(self, 'state')
+                self.device.client.trigger_update(self, "state")
 
             for ch in msg.children:
                 el = self.elements.get(ch.name)
@@ -59,7 +62,7 @@ class Vector:
             device=self.device.name,
             name=self.name,
             timestamp=message.now(),
-            children=ch
+            children=ch,
         )
 
         self.device.send_message(msg)

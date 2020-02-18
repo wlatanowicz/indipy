@@ -7,7 +7,17 @@ class SetVector(IndiMessage):
     child_class = None
     from_device = True
 
-    def __init__(self, device, name, state, timeout=None, timestamp=None, message=None, children=None, **junk):
+    def __init__(
+        self,
+        device,
+        name,
+        state,
+        timeout=None,
+        timestamp=None,
+        message=None,
+        children=None,
+        **junk
+    ):
         self.device = device
         self.name = name
         self.state = checks.dictionary(state, const.State)

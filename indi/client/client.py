@@ -58,14 +58,20 @@ class Client:
         self.control_connection_handler.send_message(msg)
 
     def start(self):
-        self.control_connection_handler = self.control_connection.connect(self.process_message)
-        self.blob_connection_handler = self.blob_connection.connect(self.process_message)
-
-        self.control_connection_handler.send_message(
-            message.GetProperties(version='2.0')
+        self.control_connection_handler = self.control_connection.connect(
+            self.process_message
+        )
+        self.blob_connection_handler = self.blob_connection.connect(
+            self.process_message
         )
 
-    def onupdate(self, *, callback, device=None, vector=None, element=None, what='value'):
+        self.control_connection_handler.send_message(
+            message.GetProperties(version="2.0")
+        )
+
+    def onupdate(
+        self, *, callback, device=None, vector=None, element=None, what="value"
+    ):
         uid = uuid.uuid4()
         callback_config = dict(
             what=what,
@@ -79,22 +85,45 @@ class Client:
         self.callbacks.append(callback_config)
         return uid
 
-    def rmonupdate(self, uuid=None, device=None, vector=None, element=None, what=None, callback=None):
+    def rmonupdate(
+        self,
+        uuid=None,
+        device=None,
+        vector=None,
+        element=None,
+        what=None,
+        callback=None,
+    ):
         to_rm = list()
         for cb in self.callbacks:
-            if uuid in (None, cb['uuid'],) \
-                    and device in (None, cb['device'],) \
-                    and vector in (None, cb['vector'],) \
-                    and element in (None, cb['element'],) \
-                    and what in (None, cb['what'],) \
-                    and callback in (None, cb['callback']):
+            if (
+                uuid in (None, cb["uuid"],)
+                and device in (None, cb["device"],)
+                and vector in (None, cb["vector"],)
+                and element in (None, cb["element"],)
+                and what in (None, cb["what"],)
+                and callback in (None, cb["callback"])
+            ):
                 to_rm.append(cb)
 
         for cb in to_rm:
-            cb['polling_enabled'] = False
+            cb["polling_enabled"] = False
             self.callbacks.remove(cb)
 
-    def waitforupdate(self, device=None, vector=None, element=None, what=None, expect=None, initial=None, cmp=None, timeout=-1, polling_enabled=True, polling_delay=1.0, polling_interval=1.0):
+    def waitforupdate(
+        self,
+        device=None,
+        vector=None,
+        element=None,
+        what=None,
+        expect=None,
+        initial=None,
+        cmp=None,
+        timeout=-1,
+        polling_enabled=True,
+        polling_delay=1.0,
+        polling_interval=1.0,
+    ):
         if cmp is None:
             cmp = lambda a, b: a == b
 
@@ -110,13 +139,13 @@ class Client:
                     release = True
             else:
                 try:
-                    if what == 'state' and cmp(sender.state, expect):
+                    if what == "state" and cmp(sender.state, expect):
                         release = True
                 except AttributeError:
                     pass
 
                 try:
-                    if what == 'value' and cmp(sender.value, expect):
+                    if what == "value" and cmp(sender.value, expect):
                         release = True
                 except AttributeError:
                     pass
@@ -125,30 +154,28 @@ class Client:
                 lock.release()
 
         if polling_enabled:
+
             def poll():
                 kwargs = {}
                 if device:
-                    kwargs['device'] = device
+                    kwargs["device"] = device
                 if vector:
-                    kwargs['name'] = vector
+                    kwargs["name"] = vector
 
-                msg = message.GetProperties(
-                    version='2.0',
-                    **kwargs
-                )
+                msg = message.GetProperties(version="2.0", **kwargs)
 
                 time.sleep(polling_delay)
                 while lock.locked():
                     self.send_message(msg)
                     time.sleep(polling_interval)
 
-            t = threading.Thread(
-                target=poll
-            )
+            t = threading.Thread(target=poll)
             t.start()
 
         lock.acquire()
-        uid = self.onupdate(device=device, vector=vector, element=element, what=what, callback=cb)
+        uid = self.onupdate(
+            device=device, vector=vector, element=element, what=what, callback=cb
+        )
 
         acquired = lock.acquire(timeout=timeout)
 
@@ -158,7 +185,7 @@ class Client:
             lock.release()
 
         if not acquired:
-            raise Exception('Timeout occurred')
+            raise Exception("Timeout occurred")
 
     def trigger_update(self, sender: Any[Element, Vector], what, **kwargs):
         sender_device = None
@@ -174,9 +201,11 @@ class Client:
             sender_vector = sender.name
 
         for callback in self.callbacks:
-            if callback['device'] in (None, sender_device,) \
-                    and callback['vector'] in (None, sender_vector,) \
-                    and callback['element'] in (None, sender_element,) \
-                    and callback['what'] in (None, what,):
+            if (
+                callback["device"] in (None, sender_device,)
+                and callback["vector"] in (None, sender_vector,)
+                and callback["element"] in (None, sender_element,)
+                and callback["what"] in (None, what,)
+            ):
 
-                callback['callback'](sender, what=what, **kwargs)
+                callback["callback"](sender, what=what, **kwargs)

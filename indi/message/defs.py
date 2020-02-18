@@ -7,7 +7,18 @@ class DefVector(IndiMessage):
     from_device = True
     children_class = None
 
-    def __init__(self, device, name, state, label=None, group=None, timestamp=None, message=None, children=None, **junk):
+    def __init__(
+        self,
+        device,
+        name,
+        state,
+        label=None,
+        group=None,
+        timestamp=None,
+        message=None,
+        children=None,
+        **junk
+    ):
         self.device = device
         self.name = name
         self.state = checks.dictionary(state, const.State)
@@ -49,4 +60,3 @@ class DefSwitchVector(DefWritableVector):
 
 class DefTextVector(DefWritableVector):
     children_class = DefText
-

@@ -8,8 +8,17 @@ class Vector:
     element_class = None
     instance_class = None
 
-    def __init__(self, name, label=None, state=State.OK, perm=Permissions.READ_WRITE,
-                 timeout=0, enabled=True, elements=None, onchange=None):
+    def __init__(
+        self,
+        name,
+        label=None,
+        state=State.OK,
+        perm=Permissions.READ_WRITE,
+        timeout=0,
+        enabled=True,
+        elements=None,
+        onchange=None,
+    ):
         self.name = name
         self.label = label or name
         self.state = state
@@ -19,19 +28,18 @@ class Vector:
         self.onchange = onchange
 
         if not elements:
-            raise Exception('No vector elements declared')
+            raise Exception("No vector elements declared")
 
         for k, element in elements.items():
-            if self.__class__.element_class and not isinstance(element, self.__class__.element_class):
-                raise Exception('')
+            if self.__class__.element_class and not isinstance(
+                element, self.__class__.element_class
+            ):
+                raise Exception("")
 
         self.elements = elements
 
     def instance(self, group):
-        return self.instance_class(
-            group=group,
-            definition=self
-        )
+        return self.instance_class(group=group, definition=self)
 
     def __getattr__(self, item):
         element = self.elements.get(item)
@@ -72,10 +80,10 @@ class LightVector(Vector):
     instance_class = instance_vectors.LightVector
 
     def __init__(self, *args, **kwargs):
-        if kwargs.get('perm'):
-            del kwargs['perm']
-        if kwargs.get('timeout'):
-            del kwargs['timeout']
+        if kwargs.get("perm"):
+            del kwargs["perm"]
+        if kwargs.get("timeout"):
+            del kwargs["timeout"]
 
         super().__init__(*args, **kwargs)
 

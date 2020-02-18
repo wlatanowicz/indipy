@@ -75,7 +75,7 @@ class Vector:
             perm=self._definition.perm,
             timeout=self._definition.timeout,
             timestamp=message.now(),
-            children=elements
+            children=elements,
         )
 
     def to_set_message(self):
@@ -89,7 +89,7 @@ class Vector:
             state=self._state,
             timeout=self._definition.timeout,
             timestamp=message.now(),
-            children=elements
+            children=elements,
         )
 
     def from_new_message(self, msg):
@@ -118,7 +118,7 @@ class SwitchVector(Vector):
     def selected_value(self):
         res = self.selected_values
         if len(res) > 1:
-            raise Exception('Multiple values selected')
+            raise Exception("Multiple values selected")
 
         try:
             return res[0]
@@ -161,13 +161,25 @@ class SwitchVector(Vector):
 
     def apply_rule(self, sender, new_value):
         if new_value == const.SwitchState.ON:
-            if self._definition.rule in (const.SwitchRule.AT_MOST_ONE, const.SwitchRule.ONE_OF_MANY,):
+            if self._definition.rule in (
+                const.SwitchRule.AT_MOST_ONE,
+                const.SwitchRule.ONE_OF_MANY,
+            ):
                 for k, el in self._elements.items():
                     if el != sender and el._value == const.SwitchState.ON:
                         el._value = const.SwitchState.OFF
         else:
             if self._definition.rule in (const.SwitchRule.ONE_OF_MANY,):
-                if len([el for k, el in self._elements.items() if el != sender and el._value == const.SwitchState.ON]) <= 0:
+                if (
+                    len(
+                        [
+                            el
+                            for k, el in self._elements.items()
+                            if el != sender and el._value == const.SwitchState.ON
+                        ]
+                    )
+                    <= 0
+                ):
                     new_value = const.SwitchState.ON
 
         return new_value
@@ -191,7 +203,7 @@ class SwitchVector(Vector):
             rule=self._definition.rule,
             timeout=self._definition.timeout,
             timestamp=message.now(),
-            children=elements
+            children=elements,
         )
 
 
@@ -215,7 +227,7 @@ class LightVector(Vector):
             label=self._definition.label,
             state=self._state,
             timestamp=message.now(),
-            children=elements
+            children=elements,
         )
 
     def to_set_message(self):
@@ -228,7 +240,7 @@ class LightVector(Vector):
             name=self._definition.name,
             state=self._state,
             timestamp=message.now(),
-            children=elements
+            children=elements,
         )
 
 

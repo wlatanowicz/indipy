@@ -36,12 +36,12 @@ class ConnectionHandler(Client):
 
     def wait_for_messages(self):
         while True:
-            logger.debug(f'TCP: waiting for data')
+            logger.debug(f"TCP: waiting for data")
             message = self.client_socket.recv(1024)
             if not message:
-                logger.debug(f'TCP: no data, breaking')
+                logger.debug(f"TCP: no data, breaking")
                 break
-            logger.debug(f'TCP: got data: {message}')
+            logger.debug(f"TCP: got data: {message}")
             self.buffer.append(message.decode("latin1"))
             self.buffer.process(self.message_from_client)
 
@@ -52,7 +52,7 @@ class ConnectionHandler(Client):
     def message_from_device(self, message):
         data = message.to_string()
         with self.sender_lock:
-            logger.debug(f'TCP: sending data: {data}')
+            logger.debug(f"TCP: sending data: {data}")
             self.client_socket.sendall(data)
 
     def close(self):
@@ -63,7 +63,7 @@ class ConnectionHandler(Client):
 
 
 class TCP:
-    def __init__(self, address='0.0.0.0', port=7624, max_connections=5, router=None):
+    def __init__(self, address="0.0.0.0", port=7624, max_connections=5, router=None):
         self.address = address
         self.port = port
         self.max_connections = max_connections
@@ -79,7 +79,9 @@ class TCP:
         try:
             while True:
                 client_sock, address = server.accept()
-                logger.info('Accepted connection from {}:{}'.format(address[0], address[1]))
+                logger.info(
+                    "Accepted connection from {}:{}".format(address[0], address[1])
+                )
                 client_handler = threading.Thread(
                     target=ConnectionHandler.handler(self.router),
                     args=(client_sock,),

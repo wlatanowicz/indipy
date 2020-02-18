@@ -28,7 +28,7 @@ class Device:
         if isinstance(msg, message.DefVector):
             vector = Vector.from_message(self, msg)
             self.set_vector(msg.name, vector)
-            self.client.trigger_update(vector, 'definition')
+            self.client.trigger_update(vector, "definition")
 
         if isinstance(msg, message.SetVector):
             vector = self.get_vector(msg.name)

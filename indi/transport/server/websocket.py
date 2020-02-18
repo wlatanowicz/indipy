@@ -32,7 +32,7 @@ class ConnectionHandler(Client):
 
 
 class WebSocket:
-    def __init__(self, address='0.0.0.0', port=8001, router=None):
+    def __init__(self, address="0.0.0.0", port=8001, router=None):
         self.address = address
         self.port = port
         self.router = router
@@ -48,14 +48,14 @@ class WebSocket:
 
     def _new_client(self, client, server):
         handler = ConnectionHandler(server, client, self.router)
-        self.clients[client['id']] = handler
+        self.clients[client["id"]] = handler
         self.router.register_client(handler)
 
     def _client_left(self, client, server):
         if client:
-            handler = self.clients[client['id']]
-            del self.clients[client['id']]
+            handler = self.clients[client["id"]]
+            del self.clients[client["id"]]
             self.router.unregister_client(handler)
 
     def _message_received(self, client, server, message):
-        self.clients[client['id']].text_message_from_client(message)
+        self.clients[client["id"]].text_message_from_client(message)
