@@ -1,9 +1,9 @@
+import logging
 import socket
 import threading
-import logging
-from indi.transport import Buffer
-from indi.routing import Client
 
+from indi.routing import Client
+from indi.transport import Buffer
 
 logger = logging.getLogger(__name__)
 

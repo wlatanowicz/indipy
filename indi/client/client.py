@@ -1,13 +1,13 @@
-import uuid
 import threading
 import time
+import uuid
 from typing import Any
 
+from indi import message
+from indi.client.device import Device
 from indi.client.elements import Element
 from indi.client.vectors import Vector
-from indi import message
-from indi.message import const, IndiMessage
-from indi.client.device import Device
+from indi.message import IndiMessage, const
 
 
 class Client:

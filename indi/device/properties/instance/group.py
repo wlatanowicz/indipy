@@ -1,7 +1,7 @@
 from typing import Optional
 
-from indi.typing import Callback
 from indi.device.properties.definition.group import Group as GroupDefinition
+from indi.typing import Callback
 
 
 class Group:

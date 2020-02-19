@@ -1,4 +1,5 @@
 from typing import Optional
+
 from indi.typing import Callback
 
 

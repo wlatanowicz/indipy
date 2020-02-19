@@ -1,10 +1,8 @@
-import logging
 import base64
+import logging
 
 from indi.device.properties.instance.vectors import Vector
-from indi.message import parts
-from indi.message import const
-from indi.message import checks
+from indi.message import checks, const, parts
 
 
 class Element:

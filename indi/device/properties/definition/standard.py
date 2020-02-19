@@ -1,5 +1,5 @@
-from indi.message import const
 from indi.device import properties
+from indi.message import const
 
 """
 Standard property vector factory as defined in http://indilib.org/develop/developer-manual/101-standard-properties.html

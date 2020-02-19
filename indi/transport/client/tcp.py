@@ -1,5 +1,5 @@
-import socket
 import logging
+import socket
 import threading
 
 from indi.transport import Buffer

@@ -1,4 +1,4 @@
-from typing import List, Dict, Type
+from typing import Dict, List, Type
 
 from indi.device import Driver
 from indi.routing import Router

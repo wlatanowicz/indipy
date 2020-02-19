@@ -1,8 +1,7 @@
 import logging
 import threading
-from indi.message import const
-from indi.message import NewBLOBVector, EnableBLOB
 
+from indi.message import EnableBLOB, NewBLOBVector, const
 
 logger = logging.getLogger(__name__)
 

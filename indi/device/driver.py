@@ -1,12 +1,12 @@
 import logging
-from typing import Optional, Callable, Union, Dict
+from typing import Callable, Dict, Optional, Union
 
+from indi import message
+from indi.device.properties import Group as GroupDefinition
 from indi.device.properties.definition.vectors import Vector
 from indi.device.properties.instance.group import Group
-from indi.device.properties import Group as GroupDefinition
 from indi.message import IndiMessage
 from indi.routing import Device, Router
-from indi import message
 
 
 class DriverMeta(type):

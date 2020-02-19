@@ -1,4 +1,4 @@
-from typing import Type, Union, Any, Optional
+from typing import Any, Optional, Type, Union
 
 from indi.device.properties.instance import elements as instance_elements
 from indi.message import const
