@@ -1,7 +1,9 @@
 import logging
 import threading
-from indi.message import const
-from indi.message import NewBLOBVector, EnableBLOB
+
+from indi.message import EnableBLOB, NewBLOBVector, const
+
+logger = logging.getLogger(__name__)
 
 
 class Router:
@@ -24,12 +26,12 @@ class Router:
         self.devices.append(device)
 
     def register_client(self, client):
-        logging.debug('Router: registering client %s', client)
+        logger.debug("Router: registering client %s", client)
         self.clients.append(client)
         self.blob_routing[client] = {}
 
     def unregister_client(self, client):
-        logging.debug('Router: unregistering client %s', client)
+        logger.debug("Router: unregistering client %s", client)
         if client in self.clients:
             self.clients.remove(client)
         if client in self.blob_routing:
@@ -43,16 +45,23 @@ class Router:
                 self.process_enable_blob(message, sender)
 
             for device in self.devices:
-                if not device == sender and (not message.device or device.accepts(message.device)):
+                if not device == sender and (
+                    not message.device or device.accepts(message.device)
+                ):
                     device.message_from_client(message)
 
         if message.from_device:
             for client in self.clients:
                 if not client == sender:
-                    device = getattr(message, 'device', None)
-                    client_blob_policy = self.blob_routing.get(client, {}).get(device, self.DEFAULT_BLOB_POLICY)
-                    if (is_blob and client_blob_policy in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)) \
-                            or (not is_blob and client_blob_policy == const.BLOBEnable.NEVER):
+                    device = getattr(message, "device", None)
+                    client_blob_policy = self.blob_routing.get(client, {}).get(
+                        device, self.DEFAULT_BLOB_POLICY
+                    )
+                    if (
+                        is_blob
+                        and client_blob_policy
+                        in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)
+                    ) or (not is_blob and client_blob_policy == const.BLOBEnable.NEVER):
 
                         def send():
                             client.message_from_device(message)

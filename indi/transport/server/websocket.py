@@ -1,7 +1,11 @@
+import logging
+
 from websocket_server import WebsocketServer
 
 from indi.message import IndiMessage
 from indi.routing import Client
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler(Client):
@@ -27,13 +31,14 @@ class ConnectionHandler(Client):
 
 
 class WebSocket:
-    def __init__(self, address='0.0.0.0', port=8001, router=None):
+    def __init__(self, address="0.0.0.0", port=8001, router=None):
         self.address = address
         self.port = port
         self.router = router
         self.clients = {}
 
     def start(self):
+        logger.info("Starting WebSocket INDI server on %s:%s", self.address, self.port)
         server = WebsocketServer(self.port, host=self.address)
         server.set_fn_new_client(self._new_client)
         server.set_fn_client_left(self._client_left)
@@ -42,14 +47,14 @@ class WebSocket:
 
     def _new_client(self, client, server):
         handler = ConnectionHandler(server, client, self.router)
-        self.clients[client['id']] = handler
+        self.clients[client["id"]] = handler
         self.router.register_client(handler)
 
     def _client_left(self, client, server):
         if client:
-            handler = self.clients[client['id']]
-            del self.clients[client['id']]
+            handler = self.clients[client["id"]]
+            del self.clients[client["id"]]
             self.router.unregister_client(handler)
 
     def _message_received(self, client, server, message):
-        self.clients[client['id']].text_message_from_client(message)
+        self.clients[client["id"]].text_message_from_client(message)

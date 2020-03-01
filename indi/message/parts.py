@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+
 from indi.message import checks, const
 
 
@@ -21,19 +22,23 @@ class IndiMessagePart:
                 message_class = subclass
 
         if not message_class:
-            raise Exception(f'Invalid part: {tag}')
+            raise Exception(f"Invalid part: {tag}")
 
         kwargs = xml.attrib
 
-        kwargs['value'] = xml.text.strip() if xml.text else None
+        kwargs["value"] = xml.text.strip() if xml.text else None
 
         return message_class(**kwargs)
 
     def to_xml(self, parent):
-        kwargs = {k: str(v) for k, v in self.__dict__.items() if v is not None and k not in ('value',)}
+        kwargs = {
+            k: str(v)
+            for k, v in self.__dict__.items()
+            if v is not None and k not in ("value",)
+        }
 
         element = ET.SubElement(parent, self.__class__.tag_name(), **kwargs)
-        if hasattr(self, 'value') and self.value is not None:
+        if hasattr(self, "value") and self.value is not None:
             element.text = str(self.value)
 
         return element

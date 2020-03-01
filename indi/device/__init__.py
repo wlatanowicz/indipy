@@ -9,6 +9,7 @@ def non_blocking(fun):
     @wraps(fun)
     def wrapped(*args, **kwargs):
         import threading
+
         def inner_fun():
             try:
                 fun(*args, **kwargs)
@@ -17,4 +18,5 @@ def non_blocking(fun):
 
         th = threading.Thread(target=inner_fun)
         th.start()
+
     return wrapped

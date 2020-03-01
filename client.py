@@ -9,7 +9,7 @@ import threading
 
 weakref.ReferenceError = ReferenceError
 
-ip = '127.0.0.1'
+ip = "127.0.0.1"
 port = 7624
 
 conn = TCP(ip, port)
@@ -32,9 +32,7 @@ class TestApp(npyscreen.StandardApp):
 
     def client_callback(self, sender):
         self.callbacks += 1
-        self.queue_event(
-            npyscreen.Event(name='set', payload=sender)
-        )
+        self.queue_event(npyscreen.Event(name="set", payload=sender))
 
     def start_client(self):
         client = Client(control_connection, blob_connection)
@@ -48,7 +46,7 @@ class TestApp(npyscreen.StandardApp):
         th.start()
 
     def add_handlers(self):
-        self.add_event_hander('set', self.event_handler)
+        self.add_event_hander("set", self.event_handler)
 
     def event_handler(self, event):
         if self.last_callbacks != self.callbacks:
@@ -59,12 +57,14 @@ class TestApp(npyscreen.StandardApp):
         self.form = npyscreen.Form(name="Welcome to Npyscreen", parentApp=self)
         for device in self.client.devices:
             self.form.add(
-                npyscreen.TitleFixedText,
-                name=device,
-                begin_entry_at=24,
+                npyscreen.TitleFixedText, name=device, begin_entry_at=24,
             )
             for vector in self.client[device].vectors:
-                color = 'GOOD' if self.client[device][vector].state == const.State.OK else 'CAUTION'
+                color = (
+                    "GOOD"
+                    if self.client[device][vector].state == const.State.OK
+                    else "CAUTION"
+                )
                 self.form.add(
                     npyscreen.TitleFixedText,
                     name=vector,
@@ -80,7 +80,7 @@ class TestApp(npyscreen.StandardApp):
                         value=el.value,
                         begin_entry_at=24,
                         relx=10,
-                        labelColor='DEFAULT',
+                        labelColor="DEFAULT",
                     )
         self.form.edit()
 

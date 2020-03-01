@@ -1,16 +1,15 @@
-import logging
 import base64
+import logging
 
-from indi.message import parts
-from indi.message import const
-from indi.message import checks
+from indi.device.properties.instance.vectors import Vector
+from indi.message import checks, const, parts
 
 
 class Element:
     def_message_class = None
     set_message_class = None
 
-    def __init__(self, vector, definition):
+    def __init__(self, vector: Vector, definition):
         self._vector = vector
         self._definition = definition
         self._value = definition.default
@@ -45,7 +44,9 @@ class Element:
 
     @value.setter
     def value(self, value):
-        logging.debug(f'Element: setting value of element {self._definition.name} to {value}')
+        logging.debug(
+            f"Element: setting value of element {self._definition.name} to {value}"
+        )
         prev_value = self._value
         self._value = self.check_value(value)
         self.device.send_message(self._vector.to_set_message())
@@ -53,7 +54,9 @@ class Element:
         if prev_value != self._value:
             self.device.trigger_callback(self._definition.onchange, self)
             self.device.trigger_callback(self._vector.onchange, self._vector)
-            self.device.trigger_callback(self._vector.group.onchange, self._vector.group)
+            self.device.trigger_callback(
+                self._vector.group.onchange, self._vector.group
+            )
             self.device.trigger_callback(self.device.onchange, self.device)
 
     def reset_value(self, value):
@@ -64,15 +67,11 @@ class Element:
 
     def to_def_message(self):
         return self.def_message_class(
-            name=self._definition.name,
-            label=self._definition.label,
+            name=self._definition.name, label=self._definition.label,
         )
 
     def to_set_message(self):
-        return self.set_message_class(
-            name=self._definition.name,
-            value=self.value
-        )
+        return self.set_message_class(name=self._definition.name, value=self.value)
 
 
 class Number(Element):

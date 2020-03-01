@@ -1,7 +1,13 @@
+from typing import Optional
+
+from indi.device.properties.definition.group import Group as GroupDefinition
+from indi.typing import Callback
+
+
 class Group:
     def __init__(self, device, definition):
         self._device = device
-        self._definition = definition
+        self._definition: GroupDefinition = definition
         self._vectors = {k: v.instance(self) for k, v in definition.vectors.items()}
         self._enabled = definition.enabled
 
@@ -25,11 +31,11 @@ class Group:
         return self._vectors
 
     @property
-    def onchange(self):
+    def onchange(self) -> Optional[Callback]:
         return self._definition.onchange
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @enabled.setter

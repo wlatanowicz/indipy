@@ -9,12 +9,12 @@ class TestIndiMessage(unittest.TestCase):
 
     messages = [
         (
-            bytes('<getProperties device="CAMERA" version="2.0" />', encoding='ascii'),
-            GetProperties(version='2.0', device='CAMERA'),
+            bytes('<getProperties device="CAMERA" version="2.0" />', encoding="ascii"),
+            GetProperties(version="2.0", device="CAMERA"),
         ),
         (
-            bytes('<getProperties version="2.0" />', encoding='ascii'),
-            GetProperties(version='2.0'),
+            bytes('<getProperties version="2.0" />', encoding="ascii"),
+            GetProperties(version="2.0"),
         ),
     ]
 

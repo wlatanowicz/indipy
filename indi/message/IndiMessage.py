@@ -30,7 +30,7 @@ class IndiMessage:
                 message_class = subclass
 
         if not message_class:
-            raise Exception(f'Invalid message: {tag}')
+            raise Exception(f"Invalid message: {tag}")
 
         kwargs = xml.attrib
 
@@ -39,10 +39,10 @@ class IndiMessage:
             children.append(IndiMessagePart.from_xml(child))
 
         if len(children) > 0:
-            kwargs['children'] = children
+            kwargs["children"] = children
 
         if xml.text:
-            kwargs['value'] = xml.text.strip()
+            kwargs["value"] = xml.text.strip()
 
         return message_class(**kwargs)
 
@@ -53,11 +53,15 @@ class IndiMessage:
 
     def to_xml(self):
 
-        kwargs = {k: str(v) for k, v in self.__dict__.items() if v is not None and k not in ('children',)}
+        kwargs = {
+            k: str(v)
+            for k, v in self.__dict__.items()
+            if v is not None and k not in ("children",)
+        }
 
         element = ET.Element(self.__class__.tag_name(), **kwargs)
 
-        if hasattr(self, 'children'):
+        if hasattr(self, "children"):
             for child in self.children:
                 child.to_xml(element)
 
