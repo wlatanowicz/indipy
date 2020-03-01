@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Router:
-    instance = None
+    _instance = None
 
     DEFAULT_BLOB_POLICY = const.BLOBEnable.NEVER
 
@@ -18,9 +18,9 @@ class Router:
 
     @classmethod
     def instance(cls):
-        if not cls.instance:
-            cls.instance = cls()
-        return cls.instance
+        if not cls._instance:
+            cls._instance = cls()
+        return cls._instance
 
     def register_device(self, device):
         self.devices.append(device)

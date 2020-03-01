@@ -1,13 +1,16 @@
+from typing import Type
+
 from indi.device.properties.const import Permissions, State, SwitchRule
 from indi.device.properties.definition.elements import (BLOB, Light, Number,
                                                         Switch, Text)
+from indi.device.properties.instance import elements as instance_elements
 from indi.device.properties.instance import vectors as instance_vectors
 from indi.message import const
 
 
 class Vector:
-    element_class = None
-    instance_class = None
+    element_class = Type[instance_elements.Element]
+    instance_class: Type[instance_vectors.Vector]
 
     def __init__(
         self,

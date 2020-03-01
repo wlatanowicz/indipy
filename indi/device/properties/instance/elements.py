@@ -1,13 +1,14 @@
 import base64
 import logging
+from typing import Type, Union
 
 from indi.device.properties.instance.vectors import Vector
 from indi.message import checks, const, parts
 
 
 class Element:
-    def_message_class = None
-    set_message_class = None
+    def_message_class: Union[Type[parts.DefSwitch], Type[parts.DefNumber], Type[parts.DefLight], Type[parts.DefBLOB], Type[parts.DefText]]
+    set_message_class: Union[Type[parts.OneSwitch], Type[parts.OneNumber], Type[parts.OneLight], Type[parts.OneBLOB], Type[parts.OneText]]
 
     def __init__(self, vector: Vector, definition):
         self._vector = vector
@@ -36,12 +37,6 @@ class Element:
         self.device.trigger_callback(self._definition.onread, self)
         return self._value
 
-    def set_value(self, value):
-        if self._definition.onwrite is not None:
-            self.device.trigger_callback(self._definition.onwrite, self, value=value)
-        else:
-            self.value = value
-
     @value.setter
     def value(self, value):
         logging.debug(
@@ -58,6 +53,12 @@ class Element:
                 self._vector.group.onchange, self._vector.group
             )
             self.device.trigger_callback(self.device.onchange, self.device)
+
+    def set_value(self, value):
+        if self._definition.onwrite is not None:
+            self.device.trigger_callback(self._definition.onwrite, self, value=value)
+        else:
+            self.value = value
 
     def reset_value(self, value):
         self._value = self.check_value(value)

@@ -1,11 +1,11 @@
-from indi.client.client import Client
-from indi.transport.client import TCP
-from indi.message import const
-from indi.client import elements
-
-import weakref
-import npyscreen
 import threading
+import weakref
+
+import npyscreen
+from indi.client import elements
+from indi.client.client import Client
+from indi.message import const
+from indi.transport.client import TCP
 
 weakref.ReferenceError = ReferenceError
 

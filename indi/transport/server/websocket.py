@@ -1,9 +1,8 @@
 import logging
 
-from websocket_server import WebsocketServer
-
 from indi.message import IndiMessage
 from indi.routing import Client
+from websocket_server import WebsocketServer
 
 logger = logging.getLogger(__name__)
 
