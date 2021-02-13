@@ -19,7 +19,6 @@ class Handler(logging.Handler):
                 device = device.name
 
         if device:
-            print(device)
             msg = Message(
                 device=device, timestamp=timestamp, message=self.format(record)
             )

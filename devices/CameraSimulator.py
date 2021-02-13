@@ -1,9 +1,13 @@
 import threading
 import time
+import logging
 
 from indi.device import Driver, properties
 from indi.device.pool import DevicePool
 from indi.message import const
+
+
+logger = logging.getLogger(__name__)
 
 
 @DevicePool.register
@@ -52,13 +56,14 @@ class CameraSimulator(Driver):
         self.exposition.enabled = connected
         self.settings.enabled = connected
 
-    def expose(self, sender):
+    def expose(self, sender, value):
         def worker():
-            print(f"EXPOSE for {self.exposition.exposure.time.value}!!!!!")
+            logger.info(f"EXPOSE for {value}!!!!!")
+            self.exposition.exposure.time.value = value
             self.exposition.exposure.state_ = const.State.BUSY
-            time.sleep(int(float(self.exposition.exposure.time.value)))
+            time.sleep(float(value))
             self.exposition.exposure.state_ = const.State.OK
-            print(f"FINISHED EXPOSE for {self.exposition.exposure.time.value}!!!!!")
+            logger.info(f"FINISHED EXPOSE for {value}!!!!!")
 
         w = threading.Thread(name="worker", target=worker)
         w.start()
