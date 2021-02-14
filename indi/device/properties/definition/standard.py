@@ -1,5 +1,10 @@
+import sys
+import indi
+
+from functools import reduce
+
 from indi.device import properties
-from indi.message import const
+from indi.device.properties import const
 
 """
 Standard property vector factory as defined in http://indilib.org/develop/developer-manual/101-standard-properties.html
@@ -57,3 +62,24 @@ def Standard(name, **kwargs):
     }
 
     return definition["class"](name, **kwargs)
+
+
+def DriverInfo(name=None, exec=None, version=None, interface=None):
+    name = name or "INDIpy Driver"
+    exec = exec or sys.argv[0]
+    version = version or indi.__version__
+    interface = interface or []
+    interface = reduce(
+        lambda a, b: a | b,
+        interface,
+        const.DriverInterface.GENERAL
+    )
+
+    elements = {
+        "name": properties.TextVector.element_class(name="DRIVER_NAME", default=name),
+        "exec": properties.TextVector.element_class(name="DRIVER_EXEC", default=exec),
+        "version": properties.TextVector.element_class(name="DRIVER_VERSION", default=version),
+        "interface": properties.TextVector.element_class(name="DRIVER_INTERFACE", default=interface),
+    }
+
+    return properties.TextVector("DRIVER_INFO", elements=elements, perm=const.Permissions.READ_ONLY)

@@ -4,8 +4,7 @@ import logging
 
 from indi.device import Driver, properties
 from indi.device.pool import DevicePool
-from indi.message import const
-
+from indi.device.properties import const
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +18,7 @@ class CameraSimulator(Driver):
         "GENERAL",
         vectors=dict(
             connection=properties.Standard("CONNECTION", onchange="connect"),
+            driver_info = properties.DriverInfo(interface=(const.DriverInterface.CCD,)),
             active_device=properties.Standard(
                 "ACTIVE_DEVICES",
                 elements=dict(camera=properties.Text("ACTIVE_CCD", default=name)),
