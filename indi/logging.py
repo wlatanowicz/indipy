@@ -12,15 +12,13 @@ class Handler(logging.Handler):
 
     def emit(self, record):
         timestamp = record.timestamp if hasattr(record, "timestamp") else now()
-        device = None
-        if hasattr(record, "device"):
-            device = record.device
-            if isinstance(device, Driver):
-                device = device.name
 
-        if device:
-            msg = Message(
-                device=device, timestamp=timestamp, message=self.format(record)
-            )
+        device = getattr(record, "device", None)
+        if isinstance(device, Driver):
+            device = device.name
 
-            self.router.process_message(message=msg)
+        msg = Message(
+            device=device, timestamp=timestamp, message=self.format(record)
+        )
+
+        self.router.process_message(message=msg)

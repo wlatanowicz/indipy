@@ -58,12 +58,12 @@ class CameraSimulator(Driver):
 
     def expose(self, sender, value):
         def worker():
-            logger.info(f"EXPOSE for {value}!!!!!")
+            logger.info(f"EXPOSE for {value}!!!!!", extra={"device": self})
             self.exposition.exposure.time.value = value
             self.exposition.exposure.state_ = const.State.BUSY
             time.sleep(float(value))
             self.exposition.exposure.state_ = const.State.OK
-            logger.info(f"FINISHED EXPOSE for {value}!!!!!")
+            logger.info(f"FINISHED EXPOSE for {value}!!!!!", extra={"device": self})
 
         w = threading.Thread(name="worker", target=worker)
         w.start()

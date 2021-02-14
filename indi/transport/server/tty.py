@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler(Client):
-    def __init__(self, router):
+    def __init__(self, router, stdin, stdout):
+        self.stdin = stdin
+        self.stdout = stdout
         self.buffer = Buffer()
         self.router = router
         self.sender_lock = threading.Lock()
@@ -21,19 +23,19 @@ class ConnectionHandler(Client):
         try:
             self.wait_for_messages()
         except:
-            logger.exception("")
-            pass
+            logger.exception("Uncaugth error")
 
+        logger.info("Stopping INDIpy server on TTY")
         self.close()
 
     def wait_for_messages(self):
         while True:
-            logger.debug(f"TTY: waiting for data")
+            logger.debug(f"Waiting for data")
             message = self._read()
             if not message:
-                logger.debug(f"TTY: no data, breaking")
+                logger.debug(f"No data, exiting")
                 break
-            logger.debug(f"TTY: got data: {message}")
+            logger.debug("Received data: %s", message)
             self.buffer.append(message)
             self.buffer.process(self.message_from_client)
 
@@ -44,7 +46,7 @@ class ConnectionHandler(Client):
     def message_from_device(self, message):
         data = message.to_string().decode("latin1")
         with self.sender_lock:
-            logger.debug(f"TTY: sending data: {data}")
+            logger.debug("Sending data: %s", data)
             self._write(data)
 
     def close(self):
@@ -52,18 +54,20 @@ class ConnectionHandler(Client):
             self.router.unregister_client(self)
 
     def _read(self):
-        return sys.stdin.readline()
+        return self.stdin.readline()
 
     def _write(self, data):
-        sys.stdout.write(data)
-        sys.stdout.flush()
+        self.stdout.write(data)
+        self.stdout.flush()
 
 
 class TTY:
-    def __init__(self, router=None):
+    def __init__(self, router=None, stdin=None, stdout=None):
         self.router = router
+        self.stdin = stdin or sys.stdin
+        self.stdout = stdout or sys.stdout
 
     def start(self):
-        logger.info("Starting INDI server on TTY")
-        conn_handler = ConnectionHandler(self.router)
+        logger.info("Starting INDIpy server on TTY")
+        conn_handler = ConnectionHandler(self.router, self.stdin, self.stdout)
         conn_handler.handle()
