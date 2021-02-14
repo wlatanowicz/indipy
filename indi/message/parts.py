@@ -4,6 +4,13 @@ from indi.message import checks, const
 
 
 class IndiMessagePart:
+    def __init__(self, name, value, **junk):
+        self.name = name
+        self.value = self.check_value(value)
+
+    def check_value(self, value):
+        return value
+
     @classmethod
     def tag_name(cls):
         return cls.__name__[:1].lower() + cls.__name__[1:]
@@ -38,73 +45,63 @@ class IndiMessagePart:
         }
 
         element = ET.SubElement(parent, self.__class__.tag_name(), **kwargs)
-        if hasattr(self, "value") and self.value is not None:
+        if self.value is not None:
             element.text = str(self.value)
 
         return element
 
 
-class DefBLOB(IndiMessagePart):
-    def __init__(self, name, label=None, **junk):
-        self.name = name
+class DefIndiMessagePart(IndiMessagePart):
+    def __init__(self, name, value=None, label=None, **junk):
+        super().__init__(name=name, value=value)
         self.label = label
 
 
-class DefLight(IndiMessagePart):
-    def __init__(self, name, label=None, **junk):
-        self.name = name
-        self.label = label
+class DefBLOB(DefIndiMessagePart):
+    pass
 
 
-class DefNumber(IndiMessagePart):
-    def __init__(self, name, format, min, max, step, label=None, **junk):
-        self.name = name
+class DefLight(DefIndiMessagePart):
+    pass
+
+
+class DefNumber(DefIndiMessagePart):
+    def __init__(self, name, format, min, max, step, value=None, label=None, **junk):
+        super().__init__(name=name, value=value, label=label)
         self.format = format
         self.min = min
         self.max = max
         self.step = step
-        self.label = label
 
 
-class DefSwitch(IndiMessagePart):
-    def __init__(self, name, label=None, **junk):
-        self.name = name
-        self.label = label
+class DefSwitch(DefIndiMessagePart):
+    pass
 
 
-class DefText(IndiMessagePart):
-    def __init__(self, name, label=None, **junk):
-        self.name = name
-        self.label = label
+class DefText(DefIndiMessagePart):
+    pass
 
 
 class OneBLOB(IndiMessagePart):
     def __init__(self, name, size, format, value, **junk):
-        self.name = name
+        super().__init__(name=name, value=value)
         self.size = size
         self.format = format
-        self.value = value
 
 
 class OneLight(IndiMessagePart):
-    def __init__(self, name, value, **junk):
-        self.name = name
-        self.value = checks.dictionary(value, const.State)
+    def check_value(self, value):
+        return checks.dictionary(value, const.State)
 
 
 class OneNumber(IndiMessagePart):
-    def __init__(self, name, value, **junk):
-        self.name = name
-        self.value = value
+    pass
 
 
 class OneSwitch(IndiMessagePart):
-    def __init__(self, name, value, **junk):
-        self.name = name
-        self.value = checks.dictionary(value, const.SwitchState)
+    def check_value(self, value):
+        return checks.dictionary(value, const.SwitchState)
 
 
 class OneText(IndiMessagePart):
-    def __init__(self, name, value, **junk):
-        self.name = name
-        self.value = value
+    pass

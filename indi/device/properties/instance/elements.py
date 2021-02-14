@@ -68,7 +68,7 @@ class Element:
 
     def to_def_message(self):
         return self.def_message_class(
-            name=self._definition.name, label=self._definition.label,
+            name=self._definition.name, value=self.value, label=self._definition.label,
         )
 
     def to_set_message(self):
@@ -82,6 +82,7 @@ class Number(Element):
     def to_def_message(self):
         return self.def_message_class(
             name=self._definition.name,
+            value=self.value,
             label=self._definition.label,
             format=self._definition.format,
             min=self._definition.min,

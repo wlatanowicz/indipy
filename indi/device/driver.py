@@ -70,12 +70,9 @@ class Driver(Device, metaclass=DriverMeta):
             if not msg.name:
                 for k, v in self._vectors.items():
                     self.send_message(v.to_def_message())
-                for k, v in self._vectors.items():
-                    self.send_message(v.to_set_message())
             else:
                 v = self._vectors[msg.name]
                 self.send_message(v.to_def_message())
-                self.send_message(v.to_set_message())
 
         if isinstance(msg, message.news.NewVector):
             self._vectors[msg.name].from_new_message(msg)
