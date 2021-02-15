@@ -1,0 +1,8 @@
+version: "3.0"
+services:
+  indiserver:
+    build:
+      context: ../../..
+      dockerfile: docker-examples/server/standalone/Dockerfile
+    ports:
+      - 7624:7624

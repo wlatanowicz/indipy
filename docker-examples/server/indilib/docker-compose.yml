@@ -1,0 +1,12 @@
+version: "3.0"
+services:
+  indiserver:
+    build:
+      context: ../../..
+      dockerfile: docker-examples/server/indilib/Dockerfile
+    ports:
+      - 7624:7624
+    command:
+      - indi_simulator_ccd
+      - indi_simulator_focus
+      - /app/tty.py
