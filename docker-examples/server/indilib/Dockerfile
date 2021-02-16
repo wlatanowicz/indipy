@@ -10,6 +10,7 @@ RUN apt-get update \
  && apt-get install -y python3-pip
 
 COPY indi /indi/indi/
+COPY requirements /indi/requirements/
 COPY setup.py /indi/setup.py
 RUN pip3 install -e /indi
 

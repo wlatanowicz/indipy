@@ -1,6 +1,7 @@
 FROM python:3.7-slim
 
 COPY indi /indi/indi/
+COPY requirements /indi/requirements/
 COPY setup.py /indi/setup.py
 RUN pip3 install -e /indi
 
