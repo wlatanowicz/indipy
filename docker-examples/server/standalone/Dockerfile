@@ -5,7 +5,7 @@ COPY requirements /indi/requirements/
 COPY setup.py /indi/setup.py
 RUN pip3 install -e /indi
 
-COPY docker-examples/server/_common/devices /app/devices/
+COPY docker-examples/server/standalone/devices /app/devices/
 COPY docker-examples/server/standalone/server.py /app/server.py
 
 EXPOSE 7624
