@@ -41,17 +41,29 @@ def extras_require():
     return {x: extras(x + '.txt') for x in BUNDLES}
     
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+
 setup(
     name="indipy",
-    version="0.1",
+    version="0.1.0",
     description="Python implementation of INDI server and client",
     url="http://github.com/wlatanowicz/indipy",
     author="Wiktor Latanowicz",
     author_email="indipy@wiktor.latanowicz.com",
     license="MIT",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(exclude=["test*", "devices"]),
     zip_safe=False,
     install_requires=reqs('base.txt'),
     tests_require=reqs('tests.txt'),
     extras_require=extras_require(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires=">=3.6",
 )
