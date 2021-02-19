@@ -55,7 +55,7 @@ setup(
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(exclude=["test*", "devices"]),
+    packages=find_packages(exclude=["tests*", "docker-examples"]),
     zip_safe=False,
     install_requires=reqs('base.txt'),
     tests_require=reqs('tests.txt'),
@@ -66,4 +66,5 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
+    test_suite="tests",
 )

@@ -15,10 +15,14 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string()
-        try:
-            self.server.send_message(self.client, data)
-        except:
-            pass
+        def send():
+            try:
+                self.server.send_message(self.client, data)
+            except:
+                pass
+
+        th = threading.Thread(target=send, daemon=True)
+        th.start()
 
     def message_from_client(self, message):
         if self.router:

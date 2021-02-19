@@ -17,7 +17,13 @@ class IndiMessagePart:
 
     @classmethod
     def _all_subclasses(cls):
-        return cls.__subclasses__()
+        all_subclasses = []
+
+        for subclass in cls.__subclasses__():
+            all_subclasses.append(subclass)
+            all_subclasses.extend(subclass._all_subclasses())
+
+        return set(all_subclasses)
 
     @classmethod
     def from_xml(cls, xml):
@@ -50,6 +56,21 @@ class IndiMessagePart:
 
         return element
 
+    def to_dict(self):
+        res = {
+            k: str(v)
+            for k, v in sorted(self.__dict__.items())
+            if v is not None and k not in ("value",)
+        }
+
+        if getattr(self, "value", None) is not None:
+            res["_value"] = str(self.value)
+
+        return res
+
+    def __eq__(self, other):
+        return other.__class__ == self.__class__ and self.to_dict() == other.to_dict()
+
 
 class DefIndiMessagePart(IndiMessagePart):
     def __init__(self, name, value=None, label=None, **junk):
@@ -62,7 +83,8 @@ class DefBLOB(DefIndiMessagePart):
 
 
 class DefLight(DefIndiMessagePart):
-    pass
+    def check_value(self, value):
+        return checks.dictionary(value, const.State)
 
 
 class DefNumber(DefIndiMessagePart):
@@ -73,9 +95,13 @@ class DefNumber(DefIndiMessagePart):
         self.max = max
         self.step = step
 
+    def check_value(self, value):
+        return checks.number(value)
+
 
 class DefSwitch(DefIndiMessagePart):
-    pass
+    def check_value(self, value):
+        return checks.dictionary(value, const.SwitchState)
 
 
 class DefText(DefIndiMessagePart):
@@ -95,7 +121,8 @@ class OneLight(IndiMessagePart):
 
 
 class OneNumber(IndiMessagePart):
-    pass
+    def check_value(self, value):
+        return checks.number(value)
 
 
 class OneSwitch(IndiMessagePart):

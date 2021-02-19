@@ -3,13 +3,13 @@ import time
 import logging
 
 from indi.device import Driver, properties
-from indi.device.pool import DevicePool
+from indi.device.pool import default_pool
 from indi.device.properties import const
 
 logger = logging.getLogger(__name__)
 
 
-@DevicePool.register
+@default_pool.register
 class CameraSimulator(Driver):
 
     name = "CAMERA_SIMULATOR"

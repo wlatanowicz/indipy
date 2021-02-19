@@ -36,11 +36,11 @@ class Number(Element):
     instance_class = instance_elements.Number
     default_value = 0.0
 
-    def __init__(self, *args, format="%f", min=0, max=None, step=0, **kwargs):
+    def __init__(self, *args, format="%f", min=None, max=None, step=0, **kwargs):
         super().__init__(*args, **kwargs)
         self.format = format
         self.min = min
-        self.max = max if max else min
+        self.max = max
         self.step = step
 
 
@@ -61,4 +61,4 @@ class Light(Element):
 
 class BLOB(Element):
     instance_class = instance_elements.BLOB
-    default_value = ""
+    default_value = None

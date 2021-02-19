@@ -1,3 +1,9 @@
 env
 __pycache__
 .mypy_cache
+docs/_build
+dist
+build
+indipy.egg-info
+.tox
+.eggs

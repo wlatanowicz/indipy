@@ -4,11 +4,13 @@ from typing import Type, Union
 
 from indi.device.properties.instance.vectors import Vector
 from indi.message import checks, const, parts
+from indi.device import values
 
 
 class Element:
     def_message_class: Union[Type[parts.DefSwitch], Type[parts.DefNumber], Type[parts.DefLight], Type[parts.DefBLOB], Type[parts.DefText]]
     set_message_class: Union[Type[parts.OneSwitch], Type[parts.OneNumber], Type[parts.OneLight], Type[parts.OneBLOB], Type[parts.OneText]]
+    allowed_value_types = (None.__class__,)
 
     def __init__(self, vector: Vector, definition):
         self._vector = vector
@@ -43,6 +45,7 @@ class Element:
             f"Element: setting value of element {self._definition.name} to {value}"
         )
         prev_value = self._value
+        self.check_value_type(value)
         self._value = self.check_value(value)
         self.device.send_message(self._vector.to_set_message())
 
@@ -60,11 +63,17 @@ class Element:
         else:
             self.value = value
 
+    def set_value_from_message(self, msg):
+        self.set_value(msg.value)
+
     def reset_value(self, value):
         self._value = self.check_value(value)
 
     def check_value(self, value):
         return value
+
+    def check_value_type(self, value):
+        assert isinstance(value, self.allowed_value_types), f"Value of {self.name} should be of type {self.allowed_value_types}"
 
     def to_def_message(self):
         return self.def_message_class(
@@ -78,11 +87,12 @@ class Element:
 class Number(Element):
     def_message_class = parts.DefNumber
     set_message_class = parts.OneNumber
+    allowed_value_types = (int, float, ) + Element.allowed_value_types
 
     def to_def_message(self):
         return self.def_message_class(
             name=self._definition.name,
-            value=self.value,
+            value=values.num_to_str(self.value, self._definition.format),
             label=self._definition.label,
             format=self._definition.format,
             min=self._definition.min,
@@ -90,15 +100,23 @@ class Number(Element):
             step=self._definition.step,
         )
 
+    def to_set_message(self):
+        return self.set_message_class(name=self._definition.name, value=values.num_to_str(self.value, self._definition.format))
+
+    def set_value_from_message(self, msg):
+        self.set_value(values.str_to_num(msg.value, self._definition.format))
+
 
 class Text(Element):
     def_message_class = parts.DefText
     set_message_class = parts.OneText
+    allowed_value_types = (str,) + Element.allowed_value_types
 
 
 class Switch(Element):
     def_message_class = parts.DefSwitch
     set_message_class = parts.OneSwitch
+    allowed_value_types = (str,) + Element.allowed_value_types
 
     def check_value(self, value):
         value = checks.dictionary(value, const.SwitchState)
@@ -119,6 +137,7 @@ class Switch(Element):
 class Light(Element):
     def_message_class = parts.DefLight
     set_message_class = parts.OneLight
+    allowed_value_types = (str,) + Element.allowed_value_types
 
     def check_value(self, value):
         return checks.dictionary(value, const.State)
@@ -127,11 +146,14 @@ class Light(Element):
 class BLOB(Element):
     def_message_class = parts.DefBLOB
     set_message_class = parts.OneBLOB
+    allowed_value_types = (values.BLOB,) + Element.allowed_value_types
 
-    @property
-    def bin_value(self):
-        return base64.b64decode(self.value)
+    def to_set_message(self):
+        if self.value is None:
+            return self.set_message_class(name=self._definition.name, value=None, format=None, size=None)
+        return self.set_message_class(name=self._definition.name, value=self.value.binary_base64, format=self.value.format, size=self.value.size)
 
-    @bin_value.setter
-    def bin_value(self, value):
-        self.value = base64.b64encode(value)
+    def set_value_from_message(self, msg):
+        blob_value = values.BLOB.from_base64(msg.value, msg.format)
+        assert msg.size == blob_value.size
+        self.set_value(blob_value)

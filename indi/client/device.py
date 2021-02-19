@@ -1,8 +1,12 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, TYPE_CHECKING, List
 
 from indi import message
-from indi.client.client import Client
 from indi.client.vectors import Vector
+from indi.client.events import DefinitionUpdate
+
+if TYPE_CHECKING:
+    from indi.client.client import Client
 
 
 class Device:
@@ -20,6 +24,9 @@ class Device:
     def get_vector(self, name) -> Optional[Vector]:
         return self.vectors.get(name)
 
+    def list_vectors(self) -> List[str]:
+        return tuple(self.vectors.keys())
+
     def set_vector(self, name: str, vector: Vector):
         self.vectors[name] = vector
 
@@ -28,7 +35,8 @@ class Device:
         if isinstance(msg, message.DefVector):
             vector = Vector.from_message(self, msg)
             self.set_vector(msg.name, vector)
-            self.client.trigger_update(vector, "definition")
+            event = DefinitionUpdate(vector)
+            self.client.trigger_event(event)
 
         if isinstance(msg, message.SetVector):
             vector = self.get_vector(msg.name)

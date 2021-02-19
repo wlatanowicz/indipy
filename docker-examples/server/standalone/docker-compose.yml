@@ -2,7 +2,8 @@ version: "3.0"
 services:
   indiserver:
     build:
-      context: ../../..
-      dockerfile: docker-examples/server/standalone/Dockerfile
+      context: .
+      args:
+        INDIPY_BRANCH: master
     ports:
       - 7624:7624

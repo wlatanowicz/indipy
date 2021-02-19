@@ -45,9 +45,13 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string().decode("latin1")
-        with self.sender_lock:
-            logger.debug("Sending data: %s", data)
-            self._write(data)
+        def send():
+            with self.sender_lock:
+                logger.debug("Sending data: %s", data)
+                self._write(data)
+
+        th = threading.Thread(target=send, daemon=True)
+        th.start()
 
     def close(self):
         if self.router:

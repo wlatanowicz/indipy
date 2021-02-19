@@ -1,7 +1,8 @@
-from typing import Type, Union
+from typing import Type, Union, List
 
 from indi import message
 from indi.client import elements
+from indi.client.events import StateUpdate
 from indi.message import checks
 
 
@@ -36,11 +37,17 @@ class Vector:
     def from_message(cls, device, msg):
         for subclass in cls.__subclasses__():
             if isinstance(msg, subclass.def_message_class):
-                return subclass(device, msg)
+                vector = subclass(device, msg)
+                event = StateUpdate(vector, None, vector.state)
+                device.client.trigger_event(event)
+                return vector
         return None
 
     def get_element(self, name):
         return self.elements.get(name)
+
+    def list_elements(self) -> List[str]:
+        return tuple(self.elements.keys())
 
     def process_message(self, msg):
         if isinstance(msg, self.set_message_class):
@@ -48,7 +55,8 @@ class Vector:
             self.state = msg.state
 
             if old_state != self.state:
-                self.device.client.trigger_update(self, "state")
+                event = StateUpdate(self, old_state, self.state)
+                self.device.client.trigger_event(event)
 
             for ch in msg.children:
                 el = self.elements.get(ch.name)
@@ -58,7 +66,9 @@ class Vector:
     def submit(self):
         ch = []
         for k, el in self.elements.items():
-            ch.append(el.to_new_message())
+            if el.has_new_value:
+                ch.append(el.to_new_message())
+                el.reset_new_value()
 
         msg = self.new_message_class(
             device=self.device.name,

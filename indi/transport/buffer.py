@@ -35,11 +35,12 @@ class Buffer:
                     xml = ET.fromstring(partial)
                     self.data = self.data[end:]
                     end = 0
+                    message = None
                     try:
                         message = IndiMessage.from_string(partial)
-                        callback(message)
                     except Exception as ex:
                         logging.warning("Buffer: Contents is not a valid message")
-                        logging.exception(ex)
+                    if message:
+                        callback(message)
                 except ET.ParseError:
                     pass

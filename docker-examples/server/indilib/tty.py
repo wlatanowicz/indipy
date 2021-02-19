@@ -5,7 +5,7 @@ from logging import config
 
 from indi.routing import Router
 from devices import *
-from indi.device.pool import DevicePool
+from indi.device.pool import default_pool
 from indi.transport.server import TTY as TTYServer
 
 router = Router()
@@ -39,7 +39,7 @@ config.dictConfig({
             },
         })
 
-DevicePool.init(router)
+default_pool.init(router)
 
 server = TTYServer(router=router)
 server.start()

@@ -96,7 +96,7 @@ class Vector:
 
     def from_new_message(self, msg):
         for child in msg.children:
-            self._elements_by_name[child.name].set_value(child.value)
+            self._elements_by_name[child.name].set_value_from_message(child)
 
 
 class NumberVector(Vector):

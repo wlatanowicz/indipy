@@ -1,5 +1,4 @@
 import logging
-import threading
 
 from indi.message import EnableBLOB, NewBLOBVector, const
 
@@ -62,12 +61,7 @@ class Router:
                         and client_blob_policy
                         in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)
                     ) or (not is_blob and client_blob_policy == const.BLOBEnable.NEVER):
-
-                        def send():
-                            client.message_from_device(message)
-
-                        th = threading.Thread(target=send, daemon=True)
-                        th.start()
+                        client.message_from_device(message)
 
     def process_enable_blob(self, message, sender):
         self.blob_routing[sender][message.name] = message.value

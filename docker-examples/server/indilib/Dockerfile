@@ -1,21 +1,19 @@
 FROM ubuntu:20.04
 
-RUN apt-get update \
- && apt-get install -y software-properties-common
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-add-repository -y ppa:mutlaqja/ppa \
- && apt-get install -y indi-full gsc
+RUN apt-get -y update \
+ && apt-get -y install software-properties-common git python3-pip \
+ && apt-add-repository -y ppa:mutlaqja/ppa \
+ && apt-get -y update \
+ && apt-get -y install indi-full gsc \
+ && apt-get -y clean
 
-RUN apt-get update \
- && apt-get install -y python3-pip
+ARG INDIPY_BRANCH=master
+RUN pip3 install git+https://github.com/wlatanowicz/indipy.git@${INDIPY_BRANCH}
 
-COPY indi /indi/indi/
-COPY requirements /indi/requirements/
-COPY setup.py /indi/setup.py
-RUN pip3 install -e /indi
-
-COPY docker-examples/server/indilib/devices /app/devices/
-COPY docker-examples/server/indilib/tty.py /app/tty.py
+COPY devices /app/devices/
+COPY tty.py /app/tty.py
 
 EXPOSE 7624
 ENTRYPOINT ["indiserver"]

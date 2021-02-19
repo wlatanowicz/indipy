@@ -1,4 +1,6 @@
 from indi.message import parts
+from indi.client.events import ValueUpdate
+from indi.device import values
 
 
 class Element:
@@ -10,19 +12,29 @@ class Element:
     def from_message(cls, vector, msg):
         for subclass in cls.__subclasses__():
             if isinstance(msg, subclass.def_message_class):
-                return subclass(vector, msg)
+                element = subclass(vector, msg)
+                event = ValueUpdate(element, None, element._value)
+                vector.device.client.trigger_event(event)
+                return element
         return None
 
     def __init__(self, vector, msg):
         self.name = msg.name
         self.label = msg.label
         self.vector = vector
-        self._value = None
+        self._value = msg.value
         self._new_value = None
 
     @property
     def value(self):
         return self._value
+
+    @property
+    def has_new_value(self) -> bool:
+        return self._new_value is not None
+
+    def reset_new_value(self):
+        self._new_value = None
 
     @value.setter
     def value(self, value):
@@ -31,9 +43,13 @@ class Element:
     def process_message(self, msg):
         if isinstance(msg, self.set_message_class):
             old_value = self.value
-            self._value = msg.value
+            self.set_value_from_message(msg)
             if self._value != old_value:
-                self.vector.device.client.trigger_update(self, "value")
+                event = ValueUpdate(self, old_value, self._value)
+                self.vector.device.client.trigger_event(event)
+
+    def set_value_from_message(self, msg):
+        self._value = msg.value
 
     def to_new_message(self):
         return self.new_message_class(name=self.name, value=self._new_value)
@@ -67,3 +83,9 @@ class BLOB(Element):
     def_message_class = parts.DefBLOB
     set_message_class = parts.OneBLOB
     new_message_class = parts.OneBLOB
+
+    def set_value_from_message(self, msg):
+        blob_value = values.BLOB.from_base64(msg.value, msg.format)
+        assert int(msg.size) == blob_value.size, f"Blob size differs: {msg.size} declared vs {blob_value.size} measured"
+
+        self._value = blob_value

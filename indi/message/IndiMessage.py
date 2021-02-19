@@ -55,11 +55,14 @@ class IndiMessage:
 
         kwargs = {
             k: str(v)
-            for k, v in self.__dict__.items()
-            if v is not None and k not in ("children",)
+            for k, v in sorted(self.__dict__.items())
+            if v is not None and k not in ("children", "value",)
         }
 
         element = ET.Element(self.__class__.tag_name(), **kwargs)
+
+        if getattr(self, "value", None) is not None:
+            element.text = str(self.value)
 
         if hasattr(self, "children"):
             for child in self.children:
@@ -70,3 +73,23 @@ class IndiMessage:
     def to_string(self):
         xml = self.to_xml()
         return ET.tostring(xml)
+
+    def to_dict(self):
+        res = {
+            k: str(v)
+            for k, v in sorted(self.__dict__.items())
+            if v is not None and k not in ("children", "value",)
+        }
+
+        if getattr(self, "value", None) is not None:
+            res["_value"] = str(self.value)
+
+        
+        if hasattr(self, "children"):
+            for child in self.children:
+                res["_children"] = child.to_dict()
+
+        return res
+
+    def __eq__(self, other):
+        return other.__class__ == self.__class__ and self.to_dict() == other.to_dict()

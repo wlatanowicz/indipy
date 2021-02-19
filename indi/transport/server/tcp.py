@@ -51,9 +51,13 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string()
-        with self.sender_lock:
-            logger.debug(f"TCP: sending data: {data}")
-            self.client_socket.sendall(data)
+        def send():
+            with self.sender_lock:
+                logger.debug(f"TCP: sending data: {data}")
+                self.client_socket.sendall(data)
+
+        th = threading.Thread(target=send, daemon=True)
+        th.start()
 
     def close(self):
         if self.client_socket:
