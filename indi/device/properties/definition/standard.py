@@ -44,6 +44,27 @@ _STANDARD_VECTORS = {
         "class": properties.NumberVector,
         "elements": dict(position="FOCUS_ABSOLUTE_POSITION",),
     },
+    "REL_FOCUS_POSITION": {
+        "class": properties.NumberVector,
+        "elements": dict(position="FOCUS_RELATIVE_POSITION",),
+    },
+    "FOCUS_MAX": {
+        "class": properties.NumberVector,
+        "elements": dict(position="FOCUS_MAX_VALUE",),
+    },
+    "FOCUS_BACKLASH_STEPS": {
+        "class": properties.NumberVector,
+        "elements": dict(position="FOCUS_BACKLASH_VALUE",),
+    },
+    "FOCUS_SPEED": {
+        "class": properties.NumberVector,
+        "elements": dict(position="FOCUS_SPEED_VALUE",),
+    },
+    "FOCUS_MOTION": {
+        "class": properties.SwitchVector,
+        "elements": dict(connect="FOCUS_INWARD", disconnect="FOCUS_OUTWARD",),
+        "kwargs": {"rule": const.SwitchRule.ONE_OF_MANY, "default_on": "FOCUS_INWARD",},
+    },
 }
 
 
