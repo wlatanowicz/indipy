@@ -3,6 +3,7 @@ from typing import Optional
 from indi.device import Driver, properties
 from indi.message import GetProperties
 from indi.transport.client.tcp import TCP as TCPClient
+from indi.device.properties import standard
 
 
 class Proxy(Driver):
@@ -11,7 +12,9 @@ class Proxy(Driver):
 
     general = properties.Group(
         "GENERAL",
-        vectors=dict(connection=properties.Standard("CONNECTION", onchange="connect"),),
+        vectors=dict(
+            connection=standard.common.Connection(onchange="connect"),
+        ),
     )
 
     def __init__(self, *args, **kwargs):

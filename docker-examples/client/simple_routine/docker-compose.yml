@@ -4,7 +4,7 @@ services:
     build:
       context: .
       args:
-        INDIPY_BRANCH: refactor-client
+        INDIPY_BRANCH: master
     tty: true
     stdin_open: true
     environment:

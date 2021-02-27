@@ -5,6 +5,8 @@ import logging
 from indi.device import Driver, properties
 from indi.device.pool import default_pool
 from indi.device.properties import const
+from indi.device.properties.const import DriverInterface
+from indi.device.properties import standard
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +19,8 @@ class CameraSimulator(Driver):
     general = properties.Group(
         "GENERAL",
         vectors=dict(
-            connection=properties.Standard("CONNECTION", onchange="connect"),
-            driver_info = properties.DriverInfo(interface=(const.DriverInterface.CCD,)),
-            active_device=properties.Standard(
-                "ACTIVE_DEVICES",
-                elements=dict(camera=properties.Text("ACTIVE_CCD", default=name)),
-            ),
+            connection=standard.common.Connection(onchange="connect"),
+            driver_info = standard.common.DriverInfo(interface=(DriverInterface.CCD,)),
         ),
     )
 
@@ -30,7 +28,7 @@ class CameraSimulator(Driver):
         "SETTINGS",
         enabled=False,
         vectors=dict(
-            upload_mode=properties.Standard("UPLOAD_MODE", default_on="UPLOAD_LOCAL"),
+            upload_mode=standard.ccd.UploadMode(),
             iso=properties.SwitchVector(
                 "ISO",
                 rule=properties.SwitchVector.RULES.ONE_OF_MANY,
@@ -47,12 +45,14 @@ class CameraSimulator(Driver):
     exposition = properties.Group(
         "EXPOSITION",
         enabled=False,
-        vectors=dict(exposure=properties.Standard("CCD_EXPOSURE")),
+        vectors=dict(
+            exposure=standard.ccd.Exposure()
+        ),
     )
     exposition.exposure.time.onwrite = "expose"
 
     def connect(self, sender):
-        connected = sender.connect.bool_value
+        connected = self.general.connection.connect.bool_value
         self.exposition.enabled = connected
         self.settings.enabled = connected
 
