@@ -20,12 +20,12 @@ def dictionary(value, dictionary_class):
 
 def number(value):
     regexps = (
-        r"^\d+$", # int
-        r"^\d+\.\d$", r"^\d+\.$", r"^\d+\.\d+$", # float
-        r"^\d+:\d{2}$", # :mm
-        r"^\d+:\d{2}\.\d+$", # :mm.m
-        r"^\d+:\d{2}:\d{2}$", # :mm:ss
-        r"^\d+:\d{2}:\d{2}\.\d+$", # :mm:ss.s
+        r"^\-?\d+$", # int
+        r"^\-?\d+\.\d+$", r"^\-?\d+\.$", r"^\-?\.\d+$", # float
+        r"^\-?\d+:\d{2}$", # :mm
+        r"^\-?\d+:\d{2}\.\d+$", # :mm.m
+        r"^\-?\d+:\d{2}:\d{2}$", # :mm:ss
+        r"^\-?\d+:\d{2}:\d{2}\.\d+$", # :mm:ss.s
     )
     if value is None:
         return None

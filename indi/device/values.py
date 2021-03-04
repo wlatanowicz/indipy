@@ -43,11 +43,11 @@ def str_to_num(s: str, fmt: str) -> Any[float, int]:
         assert fraction_length in (3, 5, 6, 8, 9), f"Invalid sexagesimal number format: {fmt}"
 
         regexps = {
-            3: r"^(\d+)[:; ](\d{2})$",
-            5: r"^(\d+)[:; ](\d{2}\.\d+)$",
-            6: r"^(\d+)[:; ](\d{2})[:; ](\d{2})$",
-            8: r"^(\d+)[:; ](\d{2})[:; ](\d{2}.\d+)$",
-            9: r"^(\d+)[:; ](\d{2})[:; ](\d{2}.\d+)$",
+            3: r"^(\-?\d+)[:; ](\d{2})$",
+            5: r"^(\-?\d+)[:; ](\d{2}\.\d+)$",
+            6: r"^(\-?\d+)[:; ](\d{2})[:; ](\d{2})$",
+            8: r"^(\-?\d+)[:; ](\d{2})[:; ](\d{2}.\d+)$",
+            9: r"^(\-?\d+)[:; ](\d{2})[:; ](\d{2}.\d+)$",
         }
 
         num_match = re.match(regexps[fraction_length], s)
