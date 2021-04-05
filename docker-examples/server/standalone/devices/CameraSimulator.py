@@ -7,6 +7,8 @@ from indi.device.pool import default_pool
 from indi.device.properties import const
 from indi.device.properties.const import DriverInterface
 from indi.device.properties import standard
+from indi.device.events import on, Write, Change
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ class CameraSimulator(Driver):
     general = properties.Group(
         "GENERAL",
         vectors=dict(
-            connection=standard.common.Connection(onchange="connect"),
+            connection=standard.common.Connection(),
             driver_info = standard.common.DriverInfo(interface=(DriverInterface.CCD,)),
         ),
     )
@@ -49,15 +51,17 @@ class CameraSimulator(Driver):
             exposure=standard.ccd.Exposure()
         ),
     )
-    exposition.exposure.time.onwrite = "expose"
 
-    def connect(self, sender):
+    @on(general.connection.connect, Change)
+    def connect(self, event):
         connected = self.general.connection.connect.bool_value
         self.exposition.enabled = connected
         self.settings.enabled = connected
 
-    def expose(self, sender, value):
+    @on(exposition.exposure.time, Write)
+    def expose(self, event):
         def worker():
+            value = event.new_value
             logger.info(f"EXPOSE for {value}!!!!!", extra={"device": self})
             self.exposition.exposure.time.value = value
             self.exposition.exposure.state_ = const.State.BUSY

@@ -37,10 +37,6 @@ class Vector:
         return self._definition.name
 
     @property
-    def onchange(self):
-        return self._definition.onchange
-
-    @property
     def enabled(self):
         return self._enabled and self.group.enabled
 

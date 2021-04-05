@@ -11,12 +11,11 @@ def Exposure(label=None,
         perm=const.Permissions.READ_WRITE,
         timeout=0,
         enabled=True,
-        onchange=None
 ):
     return properties.NumberVector(
         name="CCD_EXPOSURE",
         elements=dict(
-            time=properties.Number(name="CCD_EXPOSURE_VALUE", onchange=onchange, default=default, min=min, max=max, step=step)
+            time=properties.Number(name="CCD_EXPOSURE_VALUE", default=default, min=min, max=max, step=step)
         ),
     )
 
@@ -27,7 +26,6 @@ def UploadMode(label=None,
         perm=const.Permissions.READ_WRITE,
         timeout=0,
         enabled=True,
-        onchange=None
 ):
     return properties.SwitchVector(
         name="UPLOAD_MODE",

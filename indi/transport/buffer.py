@@ -40,7 +40,11 @@ class Buffer:
                         message = IndiMessage.from_string(partial)
                     except Exception as ex:
                         logging.warning("Buffer: Contents is not a valid message")
+
                     if message:
-                        callback(message)
+                        try:
+                            callback(message)
+                        except:
+                            logging.exception("Error procesing message")
                 except ET.ParseError:
                     pass

@@ -7,6 +7,7 @@ from indi.device.properties.definition.vectors import Vector
 from indi.device.properties.instance.group import Group
 from indi.message import IndiMessage
 from indi.routing import Device, Router
+from indi.device.events import attach_event_handlers
 
 
 class DriverMeta(type):
@@ -19,9 +20,9 @@ class DriverMeta(type):
 
 
 class Driver(Device, metaclass=DriverMeta):
-    onchange = None
-
     def __init__(self, name: Optional[str] = None, router: Optional[Router] = None):
+        attach_event_handlers(self)
+
         if name is not None:
             self._name = name
         elif self.__class__.name is not None:

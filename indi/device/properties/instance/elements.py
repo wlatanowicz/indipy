@@ -5,9 +5,11 @@ from typing import Type, Union
 from indi.device.properties.instance.vectors import Vector
 from indi.message import checks, const, parts
 from indi.device import values
+from indi.device.events import EventSource
+from indi.device import events
 
 
-class Element:
+class Element(EventSource):
     def_message_class: Union[Type[parts.DefSwitch], Type[parts.DefNumber], Type[parts.DefLight], Type[parts.DefBLOB], Type[parts.DefText]]
     set_message_class: Union[Type[parts.OneSwitch], Type[parts.OneNumber], Type[parts.OneLight], Type[parts.OneBLOB], Type[parts.OneText]]
     allowed_value_types = (None.__class__,)
@@ -27,6 +29,10 @@ class Element:
         return self._vector.device
 
     @property
+    def vector(self):
+        return self._vector
+
+    @property
     def enabled(self):
         return self._enabled
 
@@ -36,7 +42,8 @@ class Element:
 
     @property
     def value(self):
-        self.device.trigger_callback(self._definition.onread, self)
+        e = events.Read(element=self)
+        self.raise_event(e)
         return self._value
 
     @value.setter
@@ -50,17 +57,14 @@ class Element:
         self.device.send_message(self._vector.to_set_message())
 
         if prev_value != self._value:
-            self.device.trigger_callback(self._definition.onchange, self)
-            self.device.trigger_callback(self._vector.onchange, self._vector)
-            self.device.trigger_callback(
-                self._vector.group.onchange, self._vector.group
-            )
-            self.device.trigger_callback(self.device.onchange, self.device)
+            e = events.Change(element=self, old_value=prev_value, new_value=self._value)
+            self.raise_event(e)
 
     def set_value(self, value):
-        if self._definition.onwrite is not None:
-            self.device.trigger_callback(self._definition.onwrite, self, value=value)
-        else:
+        e = events.Write(element=self, new_value=value)
+        self.raise_event(e)
+
+        if not e.prevent_default:
             self.value = value
 
     def set_value_from_message(self, msg):

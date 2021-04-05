@@ -12,13 +12,12 @@ def Connection(label=None,
         perm=const.Permissions.READ_WRITE,
         timeout=0,
         enabled=True,
-        onchange=None,
 ):
     return properties.SwitchVector(
         name="CONNECTION",
         default_on=default,
         elements=dict(
-            connect=properties.Switch(name="CONNECT", onchange=onchange),
+            connect=properties.Switch(name="CONNECT"),
             disconnect=properties.Switch(name="DISCONNECT"),
         )
     )

@@ -11,12 +11,11 @@ def AbsolutePosition(label=None,
         perm=const.Permissions.READ_WRITE,
         timeout=0,
         enabled=True,
-        onchange=None
 ):
     return properties.NumberVector(
         name="ABS_FOCUS_POSITION",
         elements=dict(
-            position=properties.Number(name="FOCUS_ABSOLUTE_POSITION", onchange=onchange, default=default, min=min, max=max, step=step)
+            position=properties.Number(name="FOCUS_ABSOLUTE_POSITION", default=default, min=min, max=max, step=step)
         ),
     )
 
@@ -29,12 +28,11 @@ def RelativePosition(label=None,
         perm=const.Permissions.READ_WRITE,
         timeout=0,
         enabled=True,
-        onchange=None
 ):
     return properties.NumberVector(
         name="REL_FOCUS_POSITION",
         elements=dict(
-            position=properties.Number(name="FOCUS_RELATIVE_POSITION", onchange=onchange, min=min, max=max, step=step)
+            position=properties.Number(name="FOCUS_RELATIVE_POSITION", min=min, max=max, step=step)
         )
     )
 
@@ -45,12 +43,11 @@ def FocusMax(label=None,
         perm=const.Permissions.READ_ONLY,
         timeout=0,
         enabled=True,
-        onchange=None
 ):
     return properties.NumberVector(
         name="FOCUS_MAX",
         elements=dict(
-            max=properties.Number(name="FOCUS_MAX_VALUE", onchange=onchange, default=default)
+            max=properties.Number(name="FOCUS_MAX_VALUE", default=default)
         )
     )
 
@@ -60,7 +57,6 @@ def FocusMotion(label=None,
         perm=const.Permissions.READ_WRITE,
         timeout=0,
         enabled=True,
-        onchange=None
 ):
     return properties.SwitchVector(
         name="FOCUS_MOTION",

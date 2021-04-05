@@ -23,7 +23,7 @@ class ConnectionHandler(Client):
         try:
             self.wait_for_messages()
         except:
-            logger.exception("Uncaugth error")
+            logger.exception("Error in client handler loop")
 
         logger.info("Stopping INDIpy server on TTY")
         self.close()

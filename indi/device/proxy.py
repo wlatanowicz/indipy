@@ -4,6 +4,7 @@ from indi.device import Driver, properties
 from indi.message import GetProperties
 from indi.transport.client.tcp import TCP as TCPClient
 from indi.device.properties import standard
+from indi.device.events import on, Change
 
 
 class Proxy(Driver):
@@ -13,7 +14,7 @@ class Proxy(Driver):
     general = properties.Group(
         "GENERAL",
         vectors=dict(
-            connection=standard.common.Connection(onchange="connect"),
+            connection=standard.common.Connection(),
         ),
     )
 
@@ -35,6 +36,7 @@ class Proxy(Driver):
     def accepts(self, device):
         return True
 
+    @on(general.connection.connect, Change)
     def connect(self, sender):
         connected = self.get_group("general").connection.connect.bool_value
         if connected:

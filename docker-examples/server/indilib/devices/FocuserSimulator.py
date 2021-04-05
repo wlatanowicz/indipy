@@ -6,6 +6,7 @@ from indi.device.pool import default_pool
 from indi.message import const
 from indi.device.properties.const import DriverInterface
 from indi.device.properties import standard
+from indi.device.events import on, Write
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,6 @@ class FocuserSimulator(Driver):
             ),
         ),
     )
-    general.connection.connect.onwrite = "connect"
 
     position = properties.Group(
         "POSITION",
@@ -48,11 +48,11 @@ class FocuserSimulator(Driver):
             fmax=standard.focuser.FocusMax(default=max_position),
         ),
     )
-    position.position.position.onwrite = "reposition"
-    position.rel_position.position.onwrite = "step"
 
+    @on(general.connection.connect, Write)
     @non_blocking
-    def connect(self, sender, value):
+    def connect(self, event):
+        value = event.new_value
         connected = value == const.SwitchState.ON
         self.general.connection.state_ = const.State.BUSY
 
@@ -70,13 +70,16 @@ class FocuserSimulator(Driver):
         self.general.info.enabled = connected
 
 
+    @on(position.position.position, Write)
     @non_blocking
-    def reposition(self, sender, value):
+    def reposition(self, event):
+        value = event.new_value
         self._move(value)
 
-
+    @on(position.rel_position.position, Write)
     @non_blocking
-    def step(self, sender, value):
+    def step(self, event):
+        value = event.new_value
         self.position.rel_position.position.state_ = const.State.BUSY
         current_position = self.position.position.position.value
         direction = 1 if self.position.motion.outward.bool_value else -1

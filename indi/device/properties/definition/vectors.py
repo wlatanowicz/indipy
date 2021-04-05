@@ -6,9 +6,10 @@ from indi.device.properties.definition.elements import (BLOB, Light, Number,
 from indi.device.properties.instance import elements as instance_elements
 from indi.device.properties.instance import vectors as instance_vectors
 from indi.message import const
+from indi.device.events import EventSourceDefinition
 
 
-class Vector:
+class Vector(EventSourceDefinition):
     element_class = Type[instance_elements.Element]
     instance_class: Type[instance_vectors.Vector]
 
@@ -21,15 +22,14 @@ class Vector:
         timeout=0,
         enabled=True,
         elements=None,
-        onchange=None,
     ):
+        super().__init__()
         self.name = name
         self.label = label or name
         self.state = state
         self.perm = perm
         self.timeout = timeout
         self.enabled = enabled
-        self.onchange = onchange
 
         if not elements:
             raise Exception("No vector elements declared")

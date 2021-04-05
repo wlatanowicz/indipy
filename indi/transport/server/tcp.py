@@ -27,7 +27,7 @@ class ConnectionHandler(Client):
             try:
                 conn.wait_for_messages()
             except:
-                pass
+                logger.exception("Error in client handler loop")
 
             conn.close()
             cls.connections.remove(conn)

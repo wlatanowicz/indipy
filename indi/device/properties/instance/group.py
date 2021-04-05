@@ -1,7 +1,6 @@
 from typing import Optional
 
 from indi.device.properties.definition.group import Group as GroupDefinition
-from indi.typing import Callback
 
 
 class Group:
@@ -29,10 +28,6 @@ class Group:
     @property
     def vectors(self):
         return self._vectors
-
-    @property
-    def onchange(self) -> Optional[Callback]:
-        return self._definition.onchange
 
     @property
     def enabled(self) -> bool:

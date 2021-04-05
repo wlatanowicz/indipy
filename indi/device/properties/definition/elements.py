@@ -2,10 +2,10 @@ from typing import Any, Optional, Type, Union
 
 from indi.device.properties.instance import elements as instance_elements
 from indi.message import const
-from indi.typing import CallbackDefinition
+from indi.device.events import EventSourceDefinition
 
 
-class Element:
+class Element(EventSourceDefinition):
     instance_class = Union[Type[instance_elements.BLOB], Type[instance_elements.Light], Type[instance_elements.Number], Type[instance_elements.Switch], Type[instance_elements.Text]]
     default_value: Any
 
@@ -15,18 +15,12 @@ class Element:
         label: Optional[str] = None,
         default=None,
         enabled: bool = True,
-        onchange: Optional[CallbackDefinition] = None,
-        onwrite: Optional[CallbackDefinition] = None,
-        onread: Optional[CallbackDefinition] = None,
     ):
+        super().__init__()
         self.name = name
         self.label = label or name
         self.default = self.default_value if default is None else default
         self.enabled = enabled
-
-        self.onchange = onchange
-        self.onwrite = onwrite
-        self.onread = onread
 
     def instance(self, vector):
         return self.instance_class(vector, self)

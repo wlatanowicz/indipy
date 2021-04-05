@@ -47,7 +47,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="indipy",
-    version="0.1.0",
+    version="0.2.0",
     description="Python implementation of INDI server and client",
     url="http://github.com/wlatanowicz/indipy",
     author="Wiktor Latanowicz",

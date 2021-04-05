@@ -1,16 +1,15 @@
 from typing import Optional
 
-from indi.typing import Callback
+from indi.device.events import EventSourceDefinition
 
-
-class Group:
+class Group(EventSourceDefinition):
     def __init__(
-        self, name: str, enabled=True, onchange: Optional[Callback] = None, vectors=None
+        self, name: str, enabled=True, vectors=None
     ):
+        super().__init__()
         self.name = name
         self.vectors = vectors
         self.property_name = None
-        self.onchange = onchange
         self.enabled = enabled
 
     def __get__(self, instance, objtype=None):
