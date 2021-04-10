@@ -7,7 +7,11 @@ INDIpy is an open source Python implementation of the INDI (Instrument Neutral D
 
 ## Examples
 
-You can find docker-based examples [here](../../tree/master/docker-examples/).
+You can find docker-based examples [here](./docker-examples/).
+
+## Qcuikstart
+
+Quickstart tutorial can be found [here](./QUICKSTART.md).
 
 ## Resources
 
