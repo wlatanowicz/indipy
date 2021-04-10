@@ -1,8 +1,9 @@
 import logging
 
+from websocket_server import WebsocketServer
+
 from indi.message import IndiMessage
 from indi.routing import Client
-from websocket_server import WebsocketServer
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string()
+
         def send():
             try:
                 self.server.send_message(self.client, data)

@@ -59,7 +59,10 @@ class Router:
                     if (
                         is_blob
                         and client_blob_policy
-                        in (const.BLOBEnable.ALSO, const.BLOBEnable.ONLY,)
+                        in (
+                            const.BLOBEnable.ALSO,
+                            const.BLOBEnable.ONLY,
+                        )
                     ) or (not is_blob and client_blob_policy == const.BLOBEnable.NEVER):
                         client.message_from_device(message)
 

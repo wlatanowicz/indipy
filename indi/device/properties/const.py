@@ -1,5 +1,6 @@
 from indi.message.const import *
 
+
 class DriverInterface:
     GENERAL = 0
     TELESCOPE = 1 << 0

@@ -2,16 +2,27 @@ import base64
 import logging
 from typing import Type, Union
 
+from indi.device import events, values
+from indi.device.events import EventSource
 from indi.device.properties.instance.vectors import Vector
 from indi.message import checks, const, parts
-from indi.device import values
-from indi.device.events import EventSource
-from indi.device import events
 
 
 class Element(EventSource):
-    def_message_class: Union[Type[parts.DefSwitch], Type[parts.DefNumber], Type[parts.DefLight], Type[parts.DefBLOB], Type[parts.DefText]]
-    set_message_class: Union[Type[parts.OneSwitch], Type[parts.OneNumber], Type[parts.OneLight], Type[parts.OneBLOB], Type[parts.OneText]]
+    def_message_class: Union[
+        Type[parts.DefSwitch],
+        Type[parts.DefNumber],
+        Type[parts.DefLight],
+        Type[parts.DefBLOB],
+        Type[parts.DefText],
+    ]
+    set_message_class: Union[
+        Type[parts.OneSwitch],
+        Type[parts.OneNumber],
+        Type[parts.OneLight],
+        Type[parts.OneBLOB],
+        Type[parts.OneText],
+    ]
     allowed_value_types = (None.__class__,)
 
     def __init__(self, vector: Vector, definition):
@@ -77,11 +88,15 @@ class Element(EventSource):
         return value
 
     def check_value_type(self, value):
-        assert isinstance(value, self.allowed_value_types), f"Value of {self.name} should be of type {self.allowed_value_types}"
+        assert isinstance(
+            value, self.allowed_value_types
+        ), f"Value of {self.name} should be of type {self.allowed_value_types}"
 
     def to_def_message(self):
         return self.def_message_class(
-            name=self._definition.name, value=self.value, label=self._definition.label,
+            name=self._definition.name,
+            value=self.value,
+            label=self._definition.label,
         )
 
     def to_set_message(self):
@@ -91,7 +106,10 @@ class Element(EventSource):
 class Number(Element):
     def_message_class = parts.DefNumber
     set_message_class = parts.OneNumber
-    allowed_value_types = (int, float, ) + Element.allowed_value_types
+    allowed_value_types = (
+        int,
+        float,
+    ) + Element.allowed_value_types
 
     def to_def_message(self):
         return self.def_message_class(
@@ -105,7 +123,10 @@ class Number(Element):
         )
 
     def to_set_message(self):
-        return self.set_message_class(name=self._definition.name, value=values.num_to_str(self.value, self._definition.format))
+        return self.set_message_class(
+            name=self._definition.name,
+            value=values.num_to_str(self.value, self._definition.format),
+        )
 
     def set_value_from_message(self, msg):
         self.set_value(values.str_to_num(msg.value, self._definition.format))
@@ -154,8 +175,15 @@ class BLOB(Element):
 
     def to_set_message(self):
         if self.value is None:
-            return self.set_message_class(name=self._definition.name, value=None, format=None, size=None)
-        return self.set_message_class(name=self._definition.name, value=self.value.binary_base64, format=self.value.format, size=self.value.size)
+            return self.set_message_class(
+                name=self._definition.name, value=None, format=None, size=None
+            )
+        return self.set_message_class(
+            name=self._definition.name,
+            value=self.value.binary_base64,
+            format=self.value.format,
+            size=self.value.size,
+        )
 
     def set_value_from_message(self, msg):
         blob_value = values.BLOB.from_base64(msg.value, msg.format)

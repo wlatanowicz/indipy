@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 import base64
 import hashlib
-from typing import Any
-import re
 import math
+import re
+from typing import Any
 
 
 class BLOB:
@@ -14,7 +15,7 @@ class BLOB:
     @property
     def size(self) -> int:
         return len(self.binary)
-    
+
     @property
     def binary_base64(self) -> str:
         return base64.b64encode(self.binary).decode("latin1")
@@ -40,7 +41,13 @@ def str_to_num(s: str, fmt: str) -> Any[float, int]:
     sexagesimal_match = re.match(r"^%(\d*)\.(\d+)m$", fmt)
     if sexagesimal_match:
         fraction_length = int(sexagesimal_match.groups()[1])
-        assert fraction_length in (3, 5, 6, 8, 9), f"Invalid sexagesimal number format: {fmt}"
+        assert fraction_length in (
+            3,
+            5,
+            6,
+            8,
+            9,
+        ), f"Invalid sexagesimal number format: {fmt}"
 
         regexps = {
             3: r"^(\-?\d+)[:; ](\d{2})$",
@@ -60,7 +67,7 @@ def str_to_num(s: str, fmt: str) -> Any[float, int]:
 
     if "." in s:
         return float(s)
-    
+
     return int(s)
 
 

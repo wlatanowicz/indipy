@@ -1,12 +1,18 @@
 from typing import Any, Optional, Type, Union
 
+from indi.device.events import EventSourceDefinition
 from indi.device.properties.instance import elements as instance_elements
 from indi.message import const
-from indi.device.events import EventSourceDefinition
 
 
 class Element(EventSourceDefinition):
-    instance_class = Union[Type[instance_elements.BLOB], Type[instance_elements.Light], Type[instance_elements.Number], Type[instance_elements.Switch], Type[instance_elements.Text]]
+    instance_class = Union[
+        Type[instance_elements.BLOB],
+        Type[instance_elements.Light],
+        Type[instance_elements.Number],
+        Type[instance_elements.Switch],
+        Type[instance_elements.Text],
+    ]
     default_value: Any
 
     def __init__(

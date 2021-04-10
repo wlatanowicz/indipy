@@ -56,7 +56,12 @@ class IndiMessage:
         kwargs = {
             k: str(v)
             for k, v in sorted(self.__dict__.items())
-            if v is not None and k not in ("children", "value",)
+            if v is not None
+            and k
+            not in (
+                "children",
+                "value",
+            )
         }
 
         element = ET.Element(self.__class__.tag_name(), **kwargs)
@@ -78,13 +83,17 @@ class IndiMessage:
         res = {
             k: str(v)
             for k, v in sorted(self.__dict__.items())
-            if v is not None and k not in ("children", "value",)
+            if v is not None
+            and k
+            not in (
+                "children",
+                "value",
+            )
         }
 
         if getattr(self, "value", None) is not None:
             res["_value"] = str(self.value)
 
-        
         if hasattr(self, "children"):
             for child in self.children:
                 res["_children"] = child.to_dict()

@@ -6,8 +6,19 @@ from indi.message import checks, const
 
 class Vector:
     def_message_class: Type[message.DefVector]
-    set_message_class: Union[Type[message.SetBLOBVector], Type[message.SetLightVector], Type[message.SetNumberVector], Type[message.SetSwitchVector], Type[message.SetTextVector]]
-    new_message_class: Union[Type[message.NewBLOBVector], Type[message.NewNumberVector], Type[message.NewSwitchVector], Type[message.NewTextVector]]
+    set_message_class: Union[
+        Type[message.SetBLOBVector],
+        Type[message.SetLightVector],
+        Type[message.SetNumberVector],
+        Type[message.SetSwitchVector],
+        Type[message.SetTextVector],
+    ]
+    new_message_class: Union[
+        Type[message.NewBLOBVector],
+        Type[message.NewNumberVector],
+        Type[message.NewSwitchVector],
+        Type[message.NewTextVector],
+    ]
 
     def __init__(self, group, definition):
         self._state = definition.state

@@ -1,12 +1,11 @@
 from typing import Type
 
+from indi.device.events import EventSourceDefinition
 from indi.device.properties.const import Permissions, State, SwitchRule
-from indi.device.properties.definition.elements import (BLOB, Light, Number,
-                                                        Switch, Text)
+from indi.device.properties.definition.elements import BLOB, Light, Number, Switch, Text
 from indi.device.properties.instance import elements as instance_elements
 from indi.device.properties.instance import vectors as instance_vectors
 from indi.message import const
-from indi.device.events import EventSourceDefinition
 
 
 class Vector(EventSourceDefinition):

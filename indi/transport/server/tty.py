@@ -1,7 +1,7 @@
 import logging
 import socket
-import threading
 import sys
+import threading
 
 from indi.routing import Client
 from indi.transport import Buffer
@@ -45,6 +45,7 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string().decode("latin1")
+
         def send():
             with self.sender_lock:
                 logger.debug("Sending data: %s", data)

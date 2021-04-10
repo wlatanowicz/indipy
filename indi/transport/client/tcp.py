@@ -49,7 +49,8 @@ class TCP:
         handler = ConnectionHandler(sock, callback)
 
         handler_thread = threading.Thread(
-            target=handler.wait_for_messages, daemon=True,
+            target=handler.wait_for_messages,
+            daemon=True,
         )
         handler_thread.start()
 

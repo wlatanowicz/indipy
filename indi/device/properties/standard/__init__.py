@@ -1,4 +1,1 @@
-from . import common
-
-from . import ccd
-from . import focuser
+from . import ccd, common, focuser

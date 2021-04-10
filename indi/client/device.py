@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING, List
+
+from typing import TYPE_CHECKING, List, Optional
 
 from indi import message
-from indi.client.vectors import Vector
 from indi.client.events import DefinitionUpdate
+from indi.client.vectors import Vector
 
 if TYPE_CHECKING:
     from indi.client.client import Client

@@ -51,6 +51,7 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string()
+
         def send():
             with self.sender_lock:
                 logger.debug(f"TCP: sending data: {data}")
@@ -77,7 +78,12 @@ class TCP:
         logger.info("Starting TCP INDI server on %s:%s", self.address, self.port)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind((self.address, self.port,))
+        server.bind(
+            (
+                self.address,
+                self.port,
+            )
+        )
         server.listen(self.max_connections)
 
         try:

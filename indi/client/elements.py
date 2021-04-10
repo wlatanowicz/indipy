@@ -1,6 +1,6 @@
-from indi.message import parts
 from indi.client.events import ValueUpdate
 from indi.device import values
+from indi.message import parts
 
 
 class Element:
@@ -86,6 +86,8 @@ class BLOB(Element):
 
     def set_value_from_message(self, msg):
         blob_value = values.BLOB.from_base64(msg.value, msg.format)
-        assert int(msg.size) == blob_value.size, f"Blob size differs: {msg.size} declared vs {blob_value.size} measured"
+        assert (
+            int(msg.size) == blob_value.size
+        ), f"Blob size differs: {msg.size} declared vs {blob_value.size} measured"
 
         self._value = blob_value

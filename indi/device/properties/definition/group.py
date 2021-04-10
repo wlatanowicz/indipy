@@ -2,10 +2,9 @@ from typing import Optional
 
 from indi.device.events import EventSourceDefinition
 
+
 class Group(EventSourceDefinition):
-    def __init__(
-        self, name: str, enabled=True, vectors=None
-    ):
+    def __init__(self, name: str, enabled=True, vectors=None):
         super().__init__()
         self.name = name
         self.vectors = vectors

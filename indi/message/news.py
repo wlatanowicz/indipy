@@ -6,7 +6,9 @@ from indi.message.parts import OneBLOB, OneNumber, OneSwitch, OneText
 
 
 class NewVector(IndiMessage):
-    children_class: Union[Type[OneBLOB], Type[OneNumber], Type[OneSwitch], Type[OneText]]
+    children_class: Union[
+        Type[OneBLOB], Type[OneNumber], Type[OneSwitch], Type[OneText]
+    ]
     from_client = True
 
     def __init__(self, device, name, timestamp=None, children=None, **junk):

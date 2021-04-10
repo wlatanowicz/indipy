@@ -1,10 +1,10 @@
 from typing import Optional
 
 from indi.device import Driver, properties
+from indi.device.events import Change, on
+from indi.device.properties import standard
 from indi.message import GetProperties
 from indi.transport.client.tcp import TCP as TCPClient
-from indi.device.properties import standard
-from indi.device.events import on, Change
 
 
 class Proxy(Driver):

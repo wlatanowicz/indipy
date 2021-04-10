@@ -1,10 +1,9 @@
-import threading
 import logging
+import threading
 from functools import wraps
 
 from .driver import Driver
 from .proxy import Proxy
-
 
 NON_BLOCKING_ENABLED = True
 

@@ -1,40 +1,59 @@
 from __future__ import annotations
 
+import logging
 import threading
 import time
 import uuid
-from typing import Any, Optional, Type, Callable, List
+from typing import Any, Callable, List, Optional, Type
 
 import indi
 from indi import message
+from indi.client import events
 from indi.client.device import Device
 from indi.client.elements import Element
 from indi.client.vectors import Vector
-from indi.client import events
 from indi.message import IndiMessage, const
-import logging
-from typing import List
-
 
 logger = logging.getLogger(__name__)
 
 
 class Client:
     class CallbackConfig:
-        def __init__(self, device:Optional[str], vector:Optional[str], element:Optional[str], event_type:Type[events.Event], callback:Callable, uuid:uuid.UUID):
-            self.device=device
-            self.vector=vector
-            self.element=element
-            self.event_type=event_type
-            self.callback=callback
-            self.uuid=uuid
-        
-        def accepts_event(self, event:events.Event)->bool:
-            return (self.device in (None, event.device.name if event.device else None,)
-                and self.vector in (None, event.vector.name if event.vector else None,)
-                and self.element in (None, event.element.name if event.element else None,)
-                and isinstance(event, self.event_type))
+        def __init__(
+            self,
+            device: Optional[str],
+            vector: Optional[str],
+            element: Optional[str],
+            event_type: Type[events.Event],
+            callback: Callable,
+            uuid: uuid.UUID,
+        ):
+            self.device = device
+            self.vector = vector
+            self.element = element
+            self.event_type = event_type
+            self.callback = callback
+            self.uuid = uuid
 
+        def accepts_event(self, event: events.Event) -> bool:
+            return (
+                self.device
+                in (
+                    None,
+                    event.device.name if event.device else None,
+                )
+                and self.vector
+                in (
+                    None,
+                    event.vector.name if event.vector else None,
+                )
+                and self.element
+                in (
+                    None,
+                    event.element.name if event.element else None,
+                )
+                and isinstance(event, self.event_type)
+            )
 
     def __init__(self, control_connection, blob_connection):
         self.devices = {}
@@ -42,7 +61,7 @@ class Client:
         self.blob_connection = blob_connection
         self.control_connection_handler = None
         self.blob_connection_handler = None
-        self.callbacks:List[self.CallbackConfig] = []
+        self.callbacks: List[self.CallbackConfig] = []
 
     def __getitem__(self, key) -> Device:
         return self.devices[key]
@@ -98,7 +117,13 @@ class Client:
         )
 
     def onevent(
-        self, *, callback, device=None, vector=None, element=None, event_type=events.BaseEvent
+        self,
+        *,
+        callback,
+        device=None,
+        vector=None,
+        element=None,
+        event_type=events.BaseEvent
     ):
         uid = uuid.uuid4()
         callback_config = self.CallbackConfig(
@@ -125,11 +150,31 @@ class Client:
         to_rm = list()
         for cb in self.callbacks:
             if (
-                uuid in (None, cb.uuid,)
-                and device in (None, cb.device,)
-                and vector in (None, cb.vector,)
-                and element in (None, cb.element,)
-                and event_type in (None, cb.event_type,)
+                uuid
+                in (
+                    None,
+                    cb.uuid,
+                )
+                and device
+                in (
+                    None,
+                    cb.device,
+                )
+                and vector
+                in (
+                    None,
+                    cb.vector,
+                )
+                and element
+                in (
+                    None,
+                    cb.element,
+                )
+                and event_type
+                in (
+                    None,
+                    cb.event_type,
+                )
                 and callback in (None, cb.callback)
             ):
                 to_rm.append(cb)
@@ -140,30 +185,40 @@ class Client:
 
     def waitforevent(
         self,
-        device:str=None,
-        vector:str=None,
-        element:str=None,
-        event_type:Type[events.BaseEvent]=events.BaseEvent,
-        expect:Any=None,
-        initial:Any=None,
-        check:Callable=None,
-        timeout:float=-1,
-        polling_enabled:bool=True,
-        polling_delay:float=1.0,
-        polling_interval:float=1.0,
+        device: str = None,
+        vector: str = None,
+        element: str = None,
+        event_type: Type[events.BaseEvent] = events.BaseEvent,
+        expect: Any = None,
+        initial: Any = None,
+        check: Callable = None,
+        timeout: float = -1,
+        polling_enabled: bool = True,
+        polling_delay: float = 1.0,
+        polling_interval: float = 1.0,
     ):
-        assert 1 == sum(1 for _ in filter(None.__ne__, (expect, initial, check,))), "Exactly one of `expect`, `initial`, `check` has to be passed"
+        assert 1 == sum(
+            1
+            for _ in filter(
+                None.__ne__,
+                (
+                    expect,
+                    initial,
+                    check,
+                ),
+            )
+        ), "Exactly one of `expect`, `initial`, `check` has to be passed"
 
         lock = threading.Lock()
         res_event = {}
 
-        def cb(event:events.BaseEvent):
+        def cb(event: events.BaseEvent):
             release = False
 
             if check is not None:
                 if check(event):
                     release = True
-            
+
             if expect is not None:
                 if isinstance(event, events.ValueUpdate):
                     if event.new_value == expect:
@@ -171,7 +226,7 @@ class Client:
                 if isinstance(event, events.StateUpdate):
                     if event.new_state == expect:
                         release = True
-            
+
             if initial is not None:
                 if isinstance(event, events.ValueUpdate):
                     if event.new_value != initial:
@@ -185,6 +240,7 @@ class Client:
                 lock.release()
 
         if polling_enabled:
+
             def poll():
                 kwargs = {}
                 if device:
@@ -204,7 +260,11 @@ class Client:
 
         lock.acquire()
         uid = self.onevent(
-            device=device, vector=vector, element=element, event_type=event_type, callback=cb
+            device=device,
+            vector=vector,
+            element=element,
+            event_type=event_type,
+            callback=cb,
         )
 
         acquired = lock.acquire(timeout=timeout)
@@ -219,7 +279,7 @@ class Client:
 
         return res_event["event"]
 
-    def trigger_event(self, event:events.BaseEvent):
+    def trigger_event(self, event: events.BaseEvent):
         for callback in self.callbacks:
             if callback.accepts_event(event):
                 try:

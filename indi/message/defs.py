@@ -7,7 +7,9 @@ from indi.message.parts import DefBLOB, DefLight, DefNumber, DefSwitch, DefText
 
 class DefVector(IndiMessage):
     from_device = True
-    children_class: Union[Type[DefBLOB], Type[DefLight], Type[DefNumber], Type[DefSwitch], Type[DefText]]
+    children_class: Union[
+        Type[DefBLOB], Type[DefLight], Type[DefNumber], Type[DefSwitch], Type[DefText]
+    ]
 
     def __init__(
         self,

@@ -17,8 +17,6 @@ class Handler(logging.Handler):
         if isinstance(device, Driver):
             device = device.name
 
-        msg = Message(
-            device=device, timestamp=timestamp, message=self.format(record)
-        )
+        msg = Message(device=device, timestamp=timestamp, message=self.format(record))
 
         self.router.process_message(message=msg)

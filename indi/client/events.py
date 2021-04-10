@@ -1,22 +1,30 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 from indi.message.const import State, SwitchState
 
 if TYPE_CHECKING:
     from indi.client.device import Device
-    from indi.client.vectors import Vector
     from indi.client.elements import Element
+    from indi.client.vectors import Vector
 
 
 class BaseEvent:
-    def __init__(self, device:Device=None, vector:Vector=None, element:Element=None):
+    def __init__(
+        self, device: Device = None, vector: Vector = None, element: Element = None
+    ):
         self.device = device
         self.vector = vector
         self.element = element
 
     def __str__(self):
         res = f"Event <{self.__class__.__name__}>:"
-        props = ("device", "vector", "element",)
+        props = (
+            "device",
+            "vector",
+            "element",
+        )
         for prop in props:
             obj = getattr(self, prop)
             if obj:
@@ -25,13 +33,15 @@ class BaseEvent:
 
 
 class DefinitionUpdate(BaseEvent):
-    def __init__(self, vector:Vector):
+    def __init__(self, vector: Vector):
         super().__init__(device=vector.device, vector=vector)
 
 
 class ValueUpdate(BaseEvent):
-    def __init__(self, element:Element, old_value, new_value):
-        super().__init__(device=element.vector.device, vector=element.vector, element=element)
+    def __init__(self, element: Element, old_value, new_value):
+        super().__init__(
+            device=element.vector.device, vector=element.vector, element=element
+        )
         self.old_value = old_value
         self.new_value = new_value
 
@@ -65,8 +75,9 @@ class ValueUpdate(BaseEvent):
         new_value = "\033[1m" + new_value + "\033[0m"
         return super().__str__() + f" {old_value} → {new_value}"
 
+
 class StateUpdate(BaseEvent):
-    def __init__(self, vector:Vector, old_state, new_state):
+    def __init__(self, vector: Vector, old_state, new_state):
         super().__init__(device=vector.device, vector=vector)
         self.old_state = old_state
         self.new_state = new_state
@@ -79,4 +90,7 @@ class StateUpdate(BaseEvent):
             State.BUSY: "🟡",
             State.ALERT: "🔴",
         }
-        return super().__str__() + f" {state_icons[self.old_state]} → {state_icons[self.new_state]}"
+        return (
+            super().__str__()
+            + f" {state_icons[self.old_state]} → {state_icons[self.new_state]}"
+        )

@@ -2,12 +2,12 @@ import logging
 from typing import Callable, Dict, Optional, Union
 
 from indi import message
+from indi.device.events import attach_event_handlers
 from indi.device.properties import Group as GroupDefinition
 from indi.device.properties.definition.vectors import Vector
 from indi.device.properties.instance.group import Group
 from indi.message import IndiMessage
 from indi.routing import Device, Router
-from indi.device.events import attach_event_handlers
 
 
 class DriverMeta(type):
