@@ -5,23 +5,23 @@ from typing import Type, Union
 from indi.device import events, values
 from indi.device.events import EventSource
 from indi.device.properties.instance.vectors import Vector
-from indi.message import checks, const, parts
+from indi.message import checks, const, def_parts, one_parts
 
 
 class Element(EventSource):
     def_message_class: Union[
-        Type[parts.DefSwitch],
-        Type[parts.DefNumber],
-        Type[parts.DefLight],
-        Type[parts.DefBLOB],
-        Type[parts.DefText],
+        Type[def_parts.DefSwitch],
+        Type[def_parts.DefNumber],
+        Type[def_parts.DefLight],
+        Type[def_parts.DefBLOB],
+        Type[def_parts.DefText],
     ]
     set_message_class: Union[
-        Type[parts.OneSwitch],
-        Type[parts.OneNumber],
-        Type[parts.OneLight],
-        Type[parts.OneBLOB],
-        Type[parts.OneText],
+        Type[one_parts.OneSwitch],
+        Type[one_parts.OneNumber],
+        Type[one_parts.OneLight],
+        Type[one_parts.OneBLOB],
+        Type[one_parts.OneText],
     ]
     allowed_value_types = (None.__class__,)
 
@@ -104,8 +104,8 @@ class Element(EventSource):
 
 
 class Number(Element):
-    def_message_class = parts.DefNumber
-    set_message_class = parts.OneNumber
+    def_message_class = def_parts.DefNumber
+    set_message_class = one_parts.OneNumber
     allowed_value_types = (
         int,
         float,
@@ -133,14 +133,14 @@ class Number(Element):
 
 
 class Text(Element):
-    def_message_class = parts.DefText
-    set_message_class = parts.OneText
+    def_message_class = def_parts.DefText
+    set_message_class = one_parts.OneText
     allowed_value_types = (str,) + Element.allowed_value_types
 
 
 class Switch(Element):
-    def_message_class = parts.DefSwitch
-    set_message_class = parts.OneSwitch
+    def_message_class = def_parts.DefSwitch
+    set_message_class = one_parts.OneSwitch
     allowed_value_types = (str,) + Element.allowed_value_types
 
     def check_value(self, value):
@@ -160,8 +160,8 @@ class Switch(Element):
 
 
 class Light(Element):
-    def_message_class = parts.DefLight
-    set_message_class = parts.OneLight
+    def_message_class = def_parts.DefLight
+    set_message_class = one_parts.OneLight
     allowed_value_types = (str,) + Element.allowed_value_types
 
     def check_value(self, value):
@@ -169,8 +169,8 @@ class Light(Element):
 
 
 class BLOB(Element):
-    def_message_class = parts.DefBLOB
-    set_message_class = parts.OneBLOB
+    def_message_class = def_parts.DefBLOB
+    set_message_class = one_parts.OneBLOB
     allowed_value_types = (values.BLOB,) + Element.allowed_value_types
 
     def to_set_message(self):

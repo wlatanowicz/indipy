@@ -1,5 +1,6 @@
 import datetime
 
+from .base import IndiMessage, Message
 from .defs import (
     DefBLOBVector,
     DefLightVector,
@@ -8,11 +9,9 @@ from .defs import (
     DefTextVector,
     DefVector,
 )
-from .DelProperty import DelProperty
-from .EnableBLOB import EnableBLOB
-from .GetProperties import GetProperties
-from .IndiMessage import IndiMessage
-from .Message import Message
+from .del_property import DelProperty
+from .enable_blob import EnableBLOB
+from .get_properties import GetProperties
 from .news import (
     NewBLOBVector,
     NewNumberVector,
@@ -20,6 +19,7 @@ from .news import (
     NewTextVector,
     NewVector,
 )
+from .one_light import OneLight
 from .sets import (
     SetBLOBVector,
     SetLightVector,

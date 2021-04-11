@@ -1,2 +1,2 @@
-from .CameraSimulator import CameraSimulator
-from .FocuserSimulator import FocuserSimulator
+from .camera_simulator import CameraSimulator
+from .focuser_simulator import FocuserSimulator

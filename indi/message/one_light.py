@@ -1,4 +1,4 @@
-from indi.message.IndiMessage import IndiMessage
+from indi.message.base import IndiMessage
 
 
 class OneLight(IndiMessage):

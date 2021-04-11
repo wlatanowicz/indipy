@@ -1,5 +1,5 @@
 from indi.message import checks, const
-from indi.message.IndiMessage import IndiMessage
+from indi.message.base import IndiMessage
 
 
 class EnableBLOB(IndiMessage):

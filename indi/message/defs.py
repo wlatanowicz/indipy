@@ -1,8 +1,8 @@
 from typing import Type, Union
 
 from indi.message import checks, const
-from indi.message.IndiMessage import IndiMessage
-from indi.message.parts import DefBLOB, DefLight, DefNumber, DefSwitch, DefText
+from indi.message.base import IndiMessage
+from indi.message.def_parts import DefBLOB, DefLight, DefNumber, DefSwitch, DefText
 
 
 class DefVector(IndiMessage):

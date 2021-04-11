@@ -1,6 +1,6 @@
 from indi.client.events import ValueUpdate
 from indi.device import values
-from indi.message import parts
+from indi.message import def_parts, one_parts
 
 
 class Element:
@@ -56,33 +56,33 @@ class Element:
 
 
 class Number(Element):
-    def_message_class = parts.DefNumber
-    set_message_class = parts.OneNumber
-    new_message_class = parts.OneNumber
+    def_message_class = def_parts.DefNumber
+    set_message_class = one_parts.OneNumber
+    new_message_class = one_parts.OneNumber
 
 
 class Switch(Element):
-    def_message_class = parts.DefSwitch
-    set_message_class = parts.OneSwitch
-    new_message_class = parts.OneSwitch
+    def_message_class = def_parts.DefSwitch
+    set_message_class = one_parts.OneSwitch
+    new_message_class = one_parts.OneSwitch
 
 
 class Text(Element):
-    def_message_class = parts.DefText
-    set_message_class = parts.OneText
-    new_message_class = parts.OneText
+    def_message_class = def_parts.DefText
+    set_message_class = one_parts.OneText
+    new_message_class = one_parts.OneText
 
 
 class Light(Element):
-    def_message_class = parts.DefLight
-    set_message_class = parts.OneLight
-    new_message_class = parts.OneLight
+    def_message_class = def_parts.DefLight
+    set_message_class = one_parts.OneLight
+    new_message_class = one_parts.OneLight
 
 
 class BLOB(Element):
-    def_message_class = parts.DefBLOB
-    set_message_class = parts.OneBLOB
-    new_message_class = parts.OneBLOB
+    def_message_class = def_parts.DefBLOB
+    set_message_class = one_parts.OneBLOB
+    new_message_class = one_parts.OneBLOB
 
     def set_value_from_message(self, msg):
         blob_value = values.BLOB.from_base64(msg.value, msg.format)
