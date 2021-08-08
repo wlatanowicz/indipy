@@ -39,19 +39,35 @@ def extras_require():
     return {x: extras(x + ".txt") for x in BUNDLES}
 
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+def long_description():
+    with open("README.md", "r") as fh:
+        return fh.read()
+
+
+def get_about():
+    """Parses __init__ on main module in search of all dunder names"""
+    regex = re.compile(r"^__\w+__\s*=.*$")
+    about = dict()
+    with open("indi/__init__.py", "r") as f:
+        dunders = list()
+        for l in f.readlines():
+            if regex.match(l):
+                dunders.append(l)
+        exec("\n".join(dunders), about)
+    return about
+
+about = get_about()
 
 
 setup(
-    name="indipy",
-    version="0.2.0",
+    name="INDIpy",
+    version=about["__version__"],
     description="Python implementation of INDI server and client",
     url="http://github.com/wlatanowicz/indipy",
-    author="Wiktor Latanowicz",
+    author=about["__author__"],
     author_email="indipy@wiktor.latanowicz.com",
     license="MIT",
-    long_description=long_description,
+    long_description=long_description(),
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests*", "docker-examples"]),
     zip_safe=False,

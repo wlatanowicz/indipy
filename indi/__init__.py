@@ -1,2 +1,4 @@
-__version__ = "1.0.0"
+__version__ = "0.2.0"
 __protocol_version__ = "1.7"
+
+__author__ = "Wiktor Latanowicz"
