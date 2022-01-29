@@ -2,7 +2,7 @@ import pytest
 
 from indi import message
 from indi.message import const
-from indi.message import parts
+from indi.message import one_parts, def_parts
 
 
 messages = [
@@ -23,7 +23,7 @@ messages = [
         b'<oneText name="EXPOSE_TIME">2.0</oneText>'
         b'</setTextVector>',
         message.SetTextVector(device="CAMERA", name="EXPOSE", state=const.State.ALERT, children=[
-            parts.OneText(name="EXPOSE_TIME", value="2.0")
+            one_parts.OneText(name="EXPOSE_TIME", value="2.0")
         ]),
     ),
     (
@@ -31,7 +31,7 @@ messages = [
         b'<oneText name="EXPOSE_TIME">2.0</oneText>'
         b'</newTextVector>',
         message.NewTextVector(device="CAMERA", name="EXPOSE", children=[
-            parts.OneText(name="EXPOSE_TIME", value="2.0")
+            one_parts.OneText(name="EXPOSE_TIME", value="2.0")
         ]),
     ),
     (
@@ -39,7 +39,7 @@ messages = [
         b'<defText name="EXPOSE_TIME">2.0</defText>'
         b'</defTextVector>',
         message.DefTextVector(device="CAMERA", name="EXPOSE", perm=const.Permissions.READ_ONLY, state=const.State.BUSY, children=[
-            parts.DefText(name="EXPOSE_TIME", value="2.0")
+            def_parts.DefText(name="EXPOSE_TIME", value="2.0")
         ]),
     ),
 ]

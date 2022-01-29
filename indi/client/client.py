@@ -123,7 +123,7 @@ class Client:
         device=None,
         vector=None,
         element=None,
-        event_type=events.BaseEvent
+        event_type=events.BaseEvent,
     ):
         uid = uuid.uuid4()
         callback_config = self.CallbackConfig(

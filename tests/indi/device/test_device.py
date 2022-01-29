@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from indi.device import Driver, properties, values
 from indi import message
-from indi.message import parts, const
+from indi.message import one_parts, const
 
 
 class DummyDevice(Driver):
@@ -46,7 +46,7 @@ class DummyDevice(Driver):
 
 def test_device_process_new_switch_vector_message():
     msg = message.NewSwitchVector(device="DEVICE", name="SWITCH", children=[
-            parts.OneSwitch(name="THIRD", value=const.SwitchState.ON)
+            one_parts.OneSwitch(name="THIRD", value=const.SwitchState.ON)
         ])
 
     dev = DummyDevice()
@@ -64,7 +64,7 @@ def test_device_process_new_switch_vector_message():
 
 def test_device_process_new_number_vector_message():
     msg = message.NewNumberVector(device="DEVICE", name="NUMBER", children=[
-            parts.OneNumber(name="NUM", value=200)
+            one_parts.OneNumber(name="NUM", value=200)
         ])
 
     dev = DummyDevice()
@@ -78,7 +78,7 @@ def test_device_process_new_number_vector_message():
 
 def test_device_process_new_number_vector_message_sexagesimal():
     msg = message.NewNumberVector(device="DEVICE", name="NUMBER", children=[
-            parts.OneNumber(name="SNUM", value="200:30")
+            one_parts.OneNumber(name="SNUM", value="200:30")
         ])
 
     dev = DummyDevice()
@@ -92,7 +92,7 @@ def test_device_process_new_number_vector_message_sexagesimal():
 
 def test_device_process_new_text_vector_message():
     msg = message.NewTextVector(device="DEVICE", name="TEXT", children=[
-            parts.OneText(name="TXT", value="ipsum")
+            one_parts.OneText(name="TXT", value="ipsum")
         ])
 
     dev = DummyDevice()
@@ -106,7 +106,7 @@ def test_device_process_new_text_vector_message():
 
 def test_device_process_new_text_vector_message():
     msg = message.NewBLOBVector(device="DEVICE", name="BLOB", children=[
-            parts.OneBLOB(name="BLB", value="TG9yZW0gaXBzdW0=", format=".txt", size=11)
+            one_parts.OneBLOB(name="BLB", value="TG9yZW0gaXBzdW0=", format=".txt", size=11)
         ])
 
     dev = DummyDevice()
@@ -126,7 +126,7 @@ def test_device_sends_set_text_vector_message():
     dev.main.text.txt.value = "new value"
 
     expected_msg = message.SetTextVector(device="DEVICE", name="TEXT", state=const.State.OK, children=[
-            parts.OneText(name="TXT", value="new value")
+            one_parts.OneText(name="TXT", value="new value")
         ])
 
     router_mock.process_message.assert_called_once()
@@ -145,7 +145,7 @@ def test_device_sends_set_blob_vector_message():
     dev.main.blob.blb.value = values.BLOB(binary=b"Lorem ipsum", format=".txt")
 
     expected_msg = message.SetBLOBVector(device="DEVICE", name="BLOB", state=const.State.OK, children=[
-            parts.OneBLOB(name="BLB", value="TG9yZW0gaXBzdW0=", size=11, format=".txt")
+            one_parts.OneBLOB(name="BLB", value="TG9yZW0gaXBzdW0=", size=11, format=".txt")
         ])
 
     router_mock.process_message.assert_called_once()
