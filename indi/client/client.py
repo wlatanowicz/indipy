@@ -4,7 +4,7 @@ import logging
 import threading
 import time
 import uuid
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable, List, Optional, Type, Iterable
 
 import indi
 from indi import message
@@ -36,6 +36,13 @@ class Client:
             self.uuid = uuid
 
         def accepts_event(self, event: events.Event) -> bool:
+            """Checks if event should be processed by callbacked associated with this configuration.
+
+            :param event: An event
+            :type event: events.Event
+            :return: True if event should be processed
+            :rtype: bool
+            """
             return (
                 self.device
                 in (
@@ -56,6 +63,13 @@ class Client:
             )
 
     def __init__(self, control_connection, blob_connection):
+        """Constructor for INDI client.
+
+        :param control_connection: [description]
+        :type control_connection: [type]
+        :param blob_connection: [description]
+        :type blob_connection: [type]
+        """
         self.devices = {}
         self.control_connection = control_connection
         self.blob_connection = blob_connection
@@ -72,8 +86,13 @@ class Client:
     def get_device(self, name: str) -> Device:
         return self.devices.get(name)
 
-    def list_devices(self) -> List[str]:
-        return tuple(self.devices.keys())
+    def list_devices(self) -> Iterable[str]:
+        """Lists all known device names.
+
+        :return: List of all known device names
+        :rtype: Iterable[str]
+        """
+        return self.devices.keys()
 
     def set_device(self, name: str, device: Device):
         self.devices[name] = device
@@ -102,9 +121,18 @@ class Client:
             device.process_message(msg)
 
     def send_message(self, msg: IndiMessage):
+        """Sends INDI message to server using control connection.
+
+        :param msg: INDI message to be sent
+        :type msg: IndiMessage
+        """
         self.control_connection_handler.send_message(msg)
 
     def start(self):
+        """Starts client and connects to the server.
+
+        Connects both connections (control and blob) and sends initial GetProperties message to the server.
+        """
         self.control_connection_handler = self.control_connection.connect(
             self.process_message
         )
@@ -119,12 +147,27 @@ class Client:
     def onevent(
         self,
         *,
-        callback,
-        device=None,
-        vector=None,
-        element=None,
-        event_type=events.BaseEvent,
-    ):
+        callback: Callable,
+        device: str = None,
+        vector: str = None,
+        element: str = None,
+        event_type: Type[events.BaseEvent] = events.BaseEvent,
+    ) -> uuid:
+        """Attaches event callback.
+
+        :param callback: Callback
+        :type callback: Callable
+        :param device: Optional device name, defaults to None
+        :type device: str, optional
+        :param vector: Optional vector name, defaults to None
+        :type vector: str, optional
+        :param element: Optional element name, defaults to None
+        :type element: str, optional
+        :param event_type: Optional event type, defaults to events.BaseEvent
+        :type event_type: Type[events.BaseEvent], optional
+        :return: UUID of created event attachment
+        :rtype: uuid
+        """
         uid = uuid.uuid4()
         callback_config = self.CallbackConfig(
             device=device,
@@ -140,12 +183,12 @@ class Client:
 
     def rmonevent(
         self,
-        uuid=None,
-        device=None,
-        vector=None,
-        element=None,
-        event_type=None,
-        callback=None,
+        uuid: uuid = None,
+        device: str = None,
+        vector: str = None,
+        element: str = None,
+        event_type: Type[events.BaseEvent] = None,
+        callback: Callable = None,
     ):
         to_rm = list()
         for cb in self.callbacks:

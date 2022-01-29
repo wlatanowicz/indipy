@@ -8,6 +8,12 @@ from indi.transport.client.tcp import TCP as TCPClient
 
 
 class Proxy(Driver):
+    """Virtual proxy device driver
+
+    Connects to another INDI server and passes all messages in both ways.
+    All devices from remote server become visible in INDIpy.
+    """
+
     address: Optional[str] = None
     port = 7624
 

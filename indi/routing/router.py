@@ -6,6 +6,11 @@ logger = logging.getLogger(__name__)
 
 
 class Router:
+    """Message router
+
+    Passess messages between device drivers and client connections.
+    """
+
     _instance = None
 
     DEFAULT_BLOB_POLICY = const.BLOBEnable.NEVER

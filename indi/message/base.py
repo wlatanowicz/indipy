@@ -73,7 +73,7 @@ class IndiMessage:
 
         return element
 
-    def to_string(self):
+    def to_string(self) -> bytes:
         xml = self.to_xml()
         return ET.tostring(xml)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Union, Type, Callable
 
 if TYPE_CHECKING:
     from indi.device.driver import Device
@@ -14,15 +14,25 @@ class EventSourceDefinition:
         self.event_handlers = {}
         super().__init__()
 
-    def attach_event_handler(self, event_type: type, callback: callable) -> uuid:
+    def attach_event_handler(
+        self, event_type: Type[BaseEvent], callback: Callable
+    ) -> uuid:
         if event_type not in self.event_handlers:
             self.event_handlers[event_type] = {}
 
         uid = uuid.uuid4()
         self.event_handlers[event_type][uid] = callback
+        return uid
+
+    def detach_event_handler(self, uid: uuid):
+        for e in self.event_handlers:
+            if uid in self.event_handlers[e]:
+                del self.event_handlers[e][uid]
 
 
 class EventSource:
+    """Mixin used in all event sources (Device, Vector, Element))"""
+
     def raise_event(self, event: BaseEvent):
         event_type = event.__class__
         callbacks = self._definition.event_handlers.get(event_type, {})
@@ -32,6 +42,15 @@ class EventSource:
 
 
 def attach_event_handlers(obj):
+    """Attaches event handlers marked by @on(...) decorator.
+
+    Meant to be used in device definition constuctor.
+    Attaches event handlers defined as instance method during definition object initialization.
+    It is important to call it at the initialization stage, so `self` argument of event handlers is not broken.
+
+    :param obj: Instance of device definition
+    :type obj: object
+    """
     for f in [
         getattr(obj, fn)
         for fn in dir(obj)
@@ -53,6 +72,16 @@ class EventHandlerAttachment:
 
 
 def on(src: Union[EventSource, List[EventSource]], event_type: type):
+    """Decorator with arguments used to mark instance methods as events handlers.
+
+    Marks device definition instance method to bo attached as event handler during device initialization.
+
+    :param src: Event source or list of event sources
+    :type src: Union[EventSource, List[EventSource]]
+    :param event_type: Event type
+    :type event_type: type
+    """
+
     def wrapper(fn):
         if not hasattr(fn, "event_handler_attachments"):
             fn.event_handler_attachments = []
@@ -71,6 +100,8 @@ def on(src: Union[EventSource, List[EventSource]], event_type: type):
 
 
 class BaseEvent:
+    """Base class for all events."""
+
     def __init__(
         self, device: Driver = None, vector: Vector = None, element: Element = None
     ):
@@ -82,6 +113,11 @@ class BaseEvent:
 
 
 class Write(BaseEvent):
+    """Event raised after receiving new value from client.
+
+    Can be used to write new value to physical device.
+    """
+
     def __init__(self, element: Element, new_value):
         super().__init__(
             element=element, vector=element.vector, device=element.vector.device
@@ -90,6 +126,11 @@ class Write(BaseEvent):
 
 
 class Read(BaseEvent):
+    """Event raised before sending value to client.
+
+    Can be used to read value from physical device.
+    """
+
     def __init__(self, element: Element):
         super().__init__(
             element=element, vector=element.vector, device=element.vector.device
@@ -97,6 +138,8 @@ class Read(BaseEvent):
 
 
 class Change(BaseEvent):
+    """Event raised on value change."""
+
     def __init__(self, element: Element, old_value, new_value):
         super().__init__(
             element=element, vector=element.vector, device=element.vector.device
