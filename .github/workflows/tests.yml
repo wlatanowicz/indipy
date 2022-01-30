@@ -8,12 +8,19 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v2
       with:
-        python-version: "3.8"
+        python-version: ${{ matrix.python }}
 
     - name: Cache python packages
       uses: actions/cache@v2
@@ -21,9 +28,9 @@ jobs:
         cache-name: test-python-packages
       with:
         path: '~/.local/**/site-packages'
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('requirements/**/*.txt') }}
+        key: ${{ runner.os }}-${{ matrix.python }}-${{ env.cache-name }}-${{ hashFiles('requirements/**/*.txt') }}
         restore-keys: |
-          ${{ runner.os }}-${{ env.cache-name }}-
+          ${{ runner.os }}-${{ matrix.python }}-${{ env.cache-name }}-
 
     - name: Install dependencies
       run: |
