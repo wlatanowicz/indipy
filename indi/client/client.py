@@ -144,6 +144,10 @@ class Client:
             message.GetProperties(version=indi.__protocol_version__)
         )
 
+    def stop(self):
+        self.control_connection_handler.close()
+        self.blob_connection_handler.close()
+
     def onevent(
         self,
         *,
