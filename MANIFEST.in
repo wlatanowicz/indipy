@@ -1,0 +1,5 @@
+include indi/VERSION
+recursive-include requirements *.txt
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]

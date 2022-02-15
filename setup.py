@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from os import path
 
 from setuptools import find_packages, setup
 
@@ -55,6 +56,10 @@ def get_about():
             if regex.match(l):
                 dunders.append(l)
         exec("\n".join(dunders), about)
+
+    with open(path.join(path.dirname(__file__), "indi", "VERSION")) as f:
+        about["__version__"] = f.read().strip()
+
     return about
 
 about = get_about()
