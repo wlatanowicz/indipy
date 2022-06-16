@@ -1,6 +1,7 @@
 # INDIpy
 
 [![tests](https://github.com/wlatanowicz/indipy/actions/workflows/tests.yml/badge.svg)](https://github.com/wlatanowicz/indipy/actions/workflows/tests.yml)
+[![pypi](https://img.shields.io/pypi/v/indipy)](https://pypi.org/project/indipy/)
 
 INDIpy is an open source Python implementation of the INDI (Instrument Neutral Distributed Interface) protocol. It can be used to:
 * implement custom device drivers which will be run as subprocess controlled by `indiserver` along with drivers included in [INDI Library](http://indilib.org)
