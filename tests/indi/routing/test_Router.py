@@ -9,7 +9,7 @@ from indi.routing import Device, Router
 
 messages = [
     ("SOME_DEVICE", ((True, True), (False, False))),
-    (None, ((None, True), (None, True))),
+    (None, ((True, True), (False, False))),
 ]
 
 
@@ -17,7 +17,7 @@ messages = [
 def test_message_from_client(message_device, device_specs):
     devices = [
         {"mock": mock.Mock(), "accepts": accepts, "processes": processes,}
-        for accepts,processes  in device_specs
+        for accepts, processes  in device_specs
     ]
 
     msg = message.GetProperties(version="2.0", device=message_device)
@@ -30,10 +30,7 @@ def test_message_from_client(message_device, device_specs):
     router.process_message(message=msg)
 
     for device in devices:
-        if message_device is not None:
-            device["mock"].accepts.assert_called_once_with(msg.device)
-        else:
-            device["mock"].accepts.assert_not_called()
+        device["mock"].accepts.assert_called_once_with(msg.device)
 
         if device["processes"]:
             device["mock"].message_from_client.assert_called_once_with(msg)
