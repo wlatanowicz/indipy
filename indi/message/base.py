@@ -75,7 +75,7 @@ class IndiMessage:
 
     def to_string(self) -> bytes:
         xml = self.to_xml()
-        return ET.tostring(xml)
+        return b'<?xml version="1.0"?>\n' + ET.tostring(xml) + b"\n"
 
     def to_dict(self):
         res = {

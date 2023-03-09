@@ -5,6 +5,8 @@ from indi.message import const
 from indi.message import one_parts, def_parts
 
 
+xml_header = b'<?xml version="1.0"?>\n'
+
 messages = [
     (
         b'<getProperties device="CAMERA" version="1.7" />',
@@ -53,4 +55,5 @@ def test_from_string(in_xml, in_msg):
 @pytest.mark.parametrize('in_xml, in_msg', messages)
 def test_to_string(in_xml, in_msg):
     xml = in_msg.to_string()
-    assert in_xml == xml
+    expected = xml_header + in_xml + b'\n'
+    assert expected == xml
