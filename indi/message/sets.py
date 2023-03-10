@@ -22,7 +22,7 @@ class SetVector(IndiMessage):
         children=None,
         **junk
     ):
-        self.device = device
+        super().__init__(device)
         self.name = name
         self.state = checks.dictionary(state, const.State)
         self.timeout = timeout

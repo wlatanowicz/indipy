@@ -6,6 +6,6 @@ class GetProperties(IndiMessage):
     from_client = True
 
     def __init__(self, version, device=None, name=None, **junk):
+        super().__init__(device)
         self.version = version
-        self.device = device
         self.name = name

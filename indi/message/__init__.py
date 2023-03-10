@@ -28,6 +28,10 @@ from .sets import (
     SetTextVector,
     SetVector,
 )
+from .pings import (
+    PingReply,
+    PingRequest,
+)
 
 
 def now():

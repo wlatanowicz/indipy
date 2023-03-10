@@ -56,8 +56,8 @@ class Driver(Device, metaclass=DriverMeta):
     def name(self) -> Optional[str]:
         return self._name
 
-    def accepts(self, device: str) -> bool:
-        return self.name == device
+    def accepts(self, device: Optional[str]) -> bool:
+        return device is None or self.name == device
 
     def get_group(self, name: str) -> Optional[Group]:
         return self._groups.get(name)
@@ -72,8 +72,9 @@ class Driver(Device, metaclass=DriverMeta):
                 for k, v in self._vectors.items():
                     self.send_message(v.to_def_message())
             else:
-                v = self._vectors[msg.name]
-                self.send_message(v.to_def_message())
+                if msg.name in self._vectors:
+                    v = self._vectors[msg.name]
+                    self.send_message(v.to_def_message())
 
         if isinstance(msg, message.news.NewVector):
             self._vectors[msg.name].from_new_message(msg)

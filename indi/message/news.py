@@ -12,7 +12,7 @@ class NewVector(IndiMessage):
     from_client = True
 
     def __init__(self, device, name, timestamp=None, children=None, **junk):
-        self.device = device
+        super().__init__(device)
         self.name = name
         self.timestamp = timestamp
         self.children = checks.children(children, self.children_class)

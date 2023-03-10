@@ -5,6 +5,9 @@ class IndiMessage:
     from_device = False
     from_client = False
 
+    def __init__(self, device=None, **junk):
+        self.device = device
+
     @classmethod
     def tag_name(cls):
         return cls.__name__[:1].lower() + cls.__name__[1:]
@@ -75,7 +78,7 @@ class IndiMessage:
 
     def to_string(self) -> bytes:
         xml = self.to_xml()
-        return ET.tostring(xml)
+        return b'<?xml version="1.0"?>\n' + ET.tostring(xml) + b"\n"
 
     def to_dict(self):
         res = {
@@ -106,7 +109,7 @@ class Message(IndiMessage):
     from_device = True
 
     def __init__(self, device=None, timestamp=None, message=None, **junk):
-        self.device = device
+        super().__init__(device)
         self.timestamp = timestamp
         self.message = message
 

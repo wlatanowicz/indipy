@@ -49,9 +49,7 @@ class Router:
                 self.process_enable_blob(message, sender)
 
             for device in self.devices:
-                if not device == sender and (
-                    not message.device or device.accepts(message.device)
-                ):
+                if not device == sender and device.accepts(message.device):
                     device.message_from_client(message)
 
         if message.from_device:
