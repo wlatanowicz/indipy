@@ -56,8 +56,8 @@ class Driver(Device, metaclass=DriverMeta):
     def name(self) -> Optional[str]:
         return self._name
 
-    def accepts(self, device: str) -> bool:
-        return self.name == device
+    def accepts(self, device: Optional[str]) -> bool:
+        return device is None or self.name == device
 
     def get_group(self, name: str) -> Optional[Group]:
         return self._groups.get(name)
