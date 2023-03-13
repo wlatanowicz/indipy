@@ -53,7 +53,6 @@ class IndiMessage:
         return cls.from_xml(xml)
 
     def to_xml(self):
-
         kwargs = {
             k: str(v)
             for k, v in sorted(self.__dict__.items())

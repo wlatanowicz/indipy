@@ -8,6 +8,7 @@ from indi.device.properties.definition.vectors import Vector
 from indi.device.properties.instance.group import Group
 from indi.message import IndiMessage
 from indi.routing import Device, Router
+from indi.device.snoop import SnoopingClient
 
 
 class DriverMeta(type):
@@ -40,6 +41,19 @@ class Driver(Device, metaclass=DriverMeta):
 
         if self._router:
             self._router.register_device(self)
+        self._snooping_client = None
+
+    @property
+    def snooping_client(self) -> SnoopingClient:
+        if self._snooping_client is None:
+            self._snooping_client = SnoopingClient(self._router)
+            self._router.register_client(self._snooping_client)
+        return self._snooping_client
+
+    def snoop_device(self, device: str, name: Optional[str] = None):
+        client = self.snooping_client
+        client.handshake(device, name)
+        return client
 
     @classmethod
     def _group_definitions(cls) -> Dict[str, GroupDefinition]:
