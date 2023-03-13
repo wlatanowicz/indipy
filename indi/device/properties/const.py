@@ -2,6 +2,10 @@ from indi.message.const import *
 
 
 class DriverInterface:
+    """Driver interface types
+    Based on http://docs.indilib.org/drivers/driver-interface.html
+    """
+
     GENERAL = 0
     TELESCOPE = 1 << 0
     CCD = 1 << 1

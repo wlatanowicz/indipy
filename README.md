@@ -18,6 +18,14 @@ Quickstart tutorial can be found [here](./QUICKSTART.md).
 
 ## Resources
 
+### General:
+
 INDI Protocol white paper: http://www.clearskyinstitute.com/INDI/INDI.pdf
 
 INDI Project: http://indilib.org
+
+### Technical details:
+
+Standard Properties: https://indilib.org/develop/developer-manual/101-standard-properties.html
+
+Driver Interfaces: http://docs.indilib.org/drivers/driver-interface.html
