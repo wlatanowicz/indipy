@@ -57,6 +57,12 @@ class CameraSimulator(Driver):
         connected = self.general.connection.connect.bool_value
         self.exposition.enabled = connected
         self.settings.enabled = connected
+        client = self.snoop_device("CCD Simulator", "FILTER_SLOT")
+
+        def clb(event):
+            logger.info("Snooped event: %s", event)
+
+        client.onevent(callback=clb)
 
     @on(exposition.exposure.time, Write)
     def expose(self, event):

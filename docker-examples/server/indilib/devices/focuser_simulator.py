@@ -15,7 +15,7 @@ max_position = 5000
 
 @default_pool.register
 class FocuserSimulator(Driver):
-    name = "Focuser Simulator"
+    name = "Python Focuser Simulator"
 
     general = properties.Group(
         "GENERAL",

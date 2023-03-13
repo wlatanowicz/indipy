@@ -17,7 +17,7 @@ from indi.message import IndiMessage, const
 logger = logging.getLogger(__name__)
 
 
-class Client:
+class BaseClient:
     class CallbackConfig:
         def __init__(
             self,
@@ -62,19 +62,9 @@ class Client:
                 and isinstance(event, self.event_type)
             )
 
-    def __init__(self, control_connection, blob_connection):
-        """Constructor for INDI client.
-
-        :param control_connection: [description]
-        :type control_connection: [type]
-        :param blob_connection: [description]
-        :type blob_connection: [type]
-        """
+    def __init__(self):
+        """Constructor for INDI client."""
         self.devices = {}
-        self.control_connection = control_connection
-        self.blob_connection = blob_connection
-        self.control_connection_handler = None
-        self.blob_connection_handler = None
         self.callbacks: List[self.CallbackConfig] = []
 
     def __getitem__(self, key) -> Device:
@@ -96,12 +86,7 @@ class Client:
 
     def set_device(self, name: str, device: Device):
         self.devices[name] = device
-        self.control_connection_handler.send_message(
-            message.EnableBLOB(device=name, value=const.BLOBEnable.NEVER)
-        )
-        self.blob_connection_handler.send_message(
-            message.EnableBLOB(device=name, value=const.BLOBEnable.ONLY)
-        )
+        self.blob_handshake(name)
 
     def process_message(self, msg: IndiMessage):
         device = None
@@ -126,27 +111,7 @@ class Client:
         :param msg: INDI message to be sent
         :type msg: IndiMessage
         """
-        self.control_connection_handler.send_message(msg)
-
-    def start(self):
-        """Starts client and connects to the server.
-
-        Connects both connections (control and blob) and sends initial GetProperties message to the server.
-        """
-        self.control_connection_handler = self.control_connection.connect(
-            self.process_message
-        )
-        self.blob_connection_handler = self.blob_connection.connect(
-            self.process_message
-        )
-
-        self.control_connection_handler.send_message(
-            message.GetProperties(version=indi.__protocol_version__)
-        )
-
-    def stop(self):
-        self.control_connection_handler.close()
-        self.blob_connection_handler.close()
+        raise NotImplementedError()
 
     def onevent(
         self,
@@ -333,3 +298,56 @@ class Client:
                     callback.callback(event)
                 except:
                     logger.exception("Error in event handler")
+
+    def handshake(self, device=None, name=None, version=indi.__protocol_version__):
+        self.send_message(
+            message.GetProperties(
+                version=indi.__protocol_version__, device=device, name=name
+            )
+        )
+
+    def blob_handshake(self, device):
+        self.send_message(
+            message.EnableBLOB(device=device, value=const.BLOBEnable.NEVER)
+        )
+
+
+class Client(BaseClient):
+    def __init__(self, control_connection, blob_connection):
+        super().__init__()
+        self.control_connection = control_connection
+        self.blob_connection = blob_connection
+        self.control_connection_handler = None
+        self.blob_connection_handler = None
+
+    def send_message(self, msg: IndiMessage):
+        """Sends INDI message to server using control connection.
+
+        :param msg: INDI message to be sent
+        :type msg: IndiMessage
+        """
+        self.control_connection_handler.send_message(msg)
+
+    def blob_handshake(self, device):
+        super().blob_handshake(device)
+        self.blob_connection_handler.send_message(
+            message.EnableBLOB(device=device, value=const.BLOBEnable.ONLY)
+        )
+
+    def start(self):
+        """Starts client and connects to the server.
+
+        Connects both connections (control and blob) and sends initial GetProperties message to the server.
+        """
+        self.control_connection_handler = self.control_connection.connect(
+            self.process_message
+        )
+        self.blob_connection_handler = self.blob_connection.connect(
+            self.process_message
+        )
+
+        self.handshake()
+
+    def stop(self):
+        self.control_connection_handler.close()
+        self.blob_connection_handler.close()
