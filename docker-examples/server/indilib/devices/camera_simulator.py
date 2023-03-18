@@ -8,7 +8,7 @@ from indi.device.properties import const
 from indi.device.properties.const import DriverInterface
 from indi.device.properties import standard
 from indi.device.events import on, Write, Change
-
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class CameraSimulator(Driver):
     )
 
     @on(general.connection.connect, Change)
-    def connect(self, event):
+    async def connect(self, event):
         connected = self.general.connection.connect.bool_value
         self.exposition.enabled = connected
         self.settings.enabled = connected
@@ -65,15 +65,14 @@ class CameraSimulator(Driver):
         client.onevent(callback=clb)
 
     @on(exposition.exposure.time, Write)
-    def expose(self, event):
-        def worker():
-            value = event.new_value
-            logger.info(f"EXPOSE for {value}!!!!!", extra={"device": self})
-            self.exposition.exposure.time.value = value
-            self.exposition.exposure.state_ = const.State.BUSY
-            time.sleep(float(value))
-            self.exposition.exposure.state_ = const.State.OK
-            logger.info(f"FINISHED EXPOSE for {value}!!!!!", extra={"device": self})
-
-        w = threading.Thread(name="worker", target=worker)
-        w.start()
+    async def expose(self, event):
+        value = event.new_value
+        logger.info(f"EXPOSE for {value}!!!!!", extra={"device": self})
+        time_left = value
+        self.exposition.exposure.state_ = const.State.BUSY
+        while time_left > 0:
+            self.exposition.exposure.time.value = time_left
+            await asyncio.sleep(0.1)
+            time_left -= 0.1
+        self.exposition.exposure.state_ = const.State.OK
+        logger.info(f"FINISHED EXPOSE for {value}!!!!!", extra={"device": self})

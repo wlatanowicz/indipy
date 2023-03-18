@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import uuid
 from typing import TYPE_CHECKING, List, Union, Type, Callable
+import asyncio
+
 
 if TYPE_CHECKING:
     from indi.device.driver import Device
@@ -38,7 +40,10 @@ class EventSource:
         callbacks = self._definition.event_handlers.get(event_type, {})
 
         for uid, cb in callbacks.items():
-            cb(event)
+            if asyncio.iscoroutinefunction(cb):
+                asyncio.get_running_loop().create_task(cb(event))
+            else:
+                cb(event)
 
 
 def attach_event_handlers(obj):

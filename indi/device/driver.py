@@ -92,19 +92,3 @@ class Driver(Device, metaclass=DriverMeta):
 
         if isinstance(msg, message.news.NewVector):
             self._vectors[msg.name].from_new_message(msg)
-
-    def trigger_callback(
-        self, callback: Optional[Union[str, Callable]], sender, **kwargs
-    ):
-        if not callback:
-            return
-
-        if isinstance(callback, str):
-            callback_fun = getattr(self, callback)
-        else:
-            callback_fun = callback
-
-        try:
-            callback_fun(sender, **kwargs)
-        except Exception as e:
-            logging.exception(e)

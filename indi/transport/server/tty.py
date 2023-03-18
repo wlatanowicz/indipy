@@ -1,7 +1,6 @@
 import logging
-import socket
-import sys
-import threading
+import aiofiles
+import asyncio
 
 from indi.routing import Client
 from indi.transport import Buffer
@@ -15,23 +14,22 @@ class ConnectionHandler(Client):
         self.stdout = stdout
         self.buffer = Buffer()
         self.router = router
-        self.sender_lock = threading.Lock()
         if self.router:
             self.router.register_client(self)
 
-    def handle(self):
+    async def handle(self):
         try:
-            self.wait_for_messages()
+            await self.wait_for_messages()
         except:
             logger.exception("Error in client handler loop")
 
         logger.info("Stopping INDIpy server on TTY")
         self.close()
 
-    def wait_for_messages(self):
+    async def wait_for_messages(self):
         while True:
             logger.debug(f"Waiting for data")
-            message = self._read()
+            message = await self._read()
             if not message:
                 logger.debug(f"No data, exiting")
                 break
@@ -45,34 +43,28 @@ class ConnectionHandler(Client):
 
     def message_from_device(self, message):
         data = message.to_string().decode("latin1")
-
-        def send():
-            with self.sender_lock:
-                logger.debug("Sending data: %s", data)
-                self._write(data)
-
-        th = threading.Thread(target=send, daemon=True)
-        th.start()
+        logger.debug("Sending data: %s", data)
+        asyncio.get_running_loop().create_task(self._write(data))
 
     def close(self):
         if self.router:
             self.router.unregister_client(self)
 
-    def _read(self):
-        return self.stdin.readline()
+    async def _read(self):
+        return await self.stdin.readline()
 
-    def _write(self, data):
-        self.stdout.write(data)
-        self.stdout.flush()
+    async def _write(self, data):
+        await self.stdout.write(data)
+        await self.stdout.flush()
 
 
 class TTY:
     def __init__(self, router=None, stdin=None, stdout=None):
         self.router = router
-        self.stdin = stdin or sys.stdin
-        self.stdout = stdout or sys.stdout
+        self.stdin = stdin or aiofiles.stdin
+        self.stdout = stdout or aiofiles.stdout
 
     def start(self):
         logger.info("Starting INDIpy server on TTY")
         conn_handler = ConnectionHandler(self.router, self.stdin, self.stdout)
-        conn_handler.handle()
+        asyncio.run(conn_handler.handle())
