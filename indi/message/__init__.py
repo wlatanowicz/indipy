@@ -20,6 +20,7 @@ from .news import (
     NewVector,
 )
 from .one_light import OneLight
+from .pings import PingReply, PingRequest
 from .sets import (
     SetBLOBVector,
     SetLightVector,
@@ -27,10 +28,6 @@ from .sets import (
     SetSwitchVector,
     SetTextVector,
     SetVector,
-)
-from .pings import (
-    PingReply,
-    PingRequest,
 )
 
 

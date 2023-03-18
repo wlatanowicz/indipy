@@ -1,6 +1,7 @@
-import logging
-import aiofiles
 import asyncio
+import logging
+
+import aiofiles
 
 from indi.routing import Client
 from indi.transport import Buffer

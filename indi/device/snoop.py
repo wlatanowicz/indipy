@@ -1,7 +1,8 @@
-from indi.client.client import BaseClient
-from indi.message import IndiMessage, const
-from indi.routing.router import Router
 from typing import Optional
+
+from indi.client.client import BaseClient
+from indi.message import IndiMessage
+from indi.routing.router import Router
 
 
 class SnoopingClient(BaseClient):

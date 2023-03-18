@@ -1,16 +1,14 @@
 import logging
-from typing import Callable, Dict, Optional, Union
-import asyncio
+from typing import Dict, Optional
 
 from indi import message
 from indi.device.events import attach_event_handlers
 from indi.device.properties import Group as GroupDefinition
 from indi.device.properties.definition.vectors import Vector
 from indi.device.properties.instance.group import Group
+from indi.device.snoop import SnoopingClient
 from indi.message import IndiMessage
 from indi.routing import Device, Router
-from indi.device.snoop import SnoopingClient
-
 
 logger = logging.getLogger(__name__)
 

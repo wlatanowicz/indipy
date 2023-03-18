@@ -1,20 +1,15 @@
 from __future__ import annotations
 
+import asyncio
 import logging
-import threading
-import time
 import uuid
-from typing import Any, Callable, List, Optional, Type, Iterable
+from typing import Any, Callable, Iterable, List, Optional, Type
 
 import indi
 from indi import message
 from indi.client import events
 from indi.client.device import Device
-from indi.client.elements import Element
-from indi.client.vectors import Vector
 from indi.message import IndiMessage, const
-import asyncio
-
 
 logger = logging.getLogger(__name__)
 

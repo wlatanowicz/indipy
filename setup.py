@@ -4,7 +4,7 @@ from os import path
 
 from setuptools import find_packages, setup
 
-BUNDLES = ("websockets",)
+BUNDLES = ()
 
 # -*- Installation Requires -*-
 

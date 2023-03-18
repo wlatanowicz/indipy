@@ -1,7 +1,7 @@
 import logging
 import asyncio
 
-from indi.device import Driver, non_blocking, properties
+from indi.device import Driver, properties
 from indi.device.pool import default_pool
 from indi.message import const
 from indi.device.properties.const import DriverInterface

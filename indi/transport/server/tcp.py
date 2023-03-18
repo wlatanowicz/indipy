@@ -1,6 +1,5 @@
-import logging
 import asyncio
-
+import logging
 
 from indi.routing import Client
 from indi.transport import Buffer

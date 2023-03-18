@@ -4,7 +4,6 @@ import threading
 
 from indi.transport import Buffer
 
-
 logger = logging.getLogger(__name__)
 
 

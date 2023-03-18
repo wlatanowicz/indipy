@@ -1,7 +1,5 @@
-import xml.etree.ElementTree as ET
-
 from indi.message import checks, const
-from indi.message.base import IndiMessage, IndiMessagePart
+from indi.message.base import IndiMessagePart
 
 
 class DefIndiMessagePart(IndiMessagePart):

@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 
 from indi.message import IndiMessage
 
-
 logger = logging.getLogger(__name__)
 
 

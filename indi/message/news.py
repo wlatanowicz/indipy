@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Type, Union
 
 from indi.message import checks
 from indi.message.base import IndiMessage

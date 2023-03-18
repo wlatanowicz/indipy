@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import uuid
-from typing import TYPE_CHECKING, List, Union, Type, Callable
 import asyncio
-
+import uuid
+from typing import TYPE_CHECKING, Callable, List, Type, Union
 
 if TYPE_CHECKING:
-    from indi.device.driver import Device
     from indi.device.properties.instance.elements import Element
     from indi.device.properties.instance.vectors import Vector
 
