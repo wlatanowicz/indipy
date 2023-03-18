@@ -7,6 +7,8 @@ from indi.device.events import EventSource
 from indi.device.properties.instance.vectors import Vector
 from indi.message import checks, const, def_parts, one_parts
 
+logger = logging.getLogger(__name__)
+
 
 class Element(EventSource):
     def_message_class: Union[
@@ -59,8 +61,8 @@ class Element(EventSource):
 
     @value.setter
     def value(self, value):
-        logging.debug(
-            f"Element: setting value of element {self._definition.name} to {value}"
+        logger.debug(
+            "Element: setting value of element %s to %s", self._definition.name, value
         )
         prev_value = self._value
         self.check_value_type(value)

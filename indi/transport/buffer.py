@@ -4,6 +4,9 @@ import xml.etree.ElementTree as ET
 from indi.message import IndiMessage
 
 
+logger = logging.getLogger(__name__)
+
+
 class Buffer:
     def __init__(self):
         self.data = ""
@@ -32,19 +35,22 @@ class Buffer:
                 partial = self.data[0:end]
 
                 try:
-                    xml = ET.fromstring(partial)
+                    ET.fromstring(partial)
+                    is_correct_xml = True
+                except ET.ParseError:
+                    is_correct_xml = False
+
+                if is_correct_xml:
                     self.data = self.data[end:]
                     end = 0
                     message = None
                     try:
                         message = IndiMessage.from_string(partial)
-                    except Exception as ex:
-                        logging.warning("Buffer: Contents is not a valid message")
+                    except Exception:
+                        logger.warning("Buffer: Contents is not a valid message")
 
                     if message:
                         try:
                             callback(message)
-                        except:
-                            logging.exception("Error procesing message")
-                except ET.ParseError:
-                    pass
+                        except Exception:
+                            logger.exception("Error procesing message")

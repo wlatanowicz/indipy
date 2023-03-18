@@ -1,5 +1,6 @@
 import logging
 from typing import Callable, Dict, Optional, Union
+import asyncio
 
 from indi import message
 from indi.device.events import attach_event_handlers
@@ -9,6 +10,9 @@ from indi.device.properties.instance.group import Group
 from indi.message import IndiMessage
 from indi.routing import Device, Router
 from indi.device.snoop import SnoopingClient
+
+
+logger = logging.getLogger(__name__)
 
 
 class DriverMeta(type):

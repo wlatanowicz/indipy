@@ -5,6 +5,9 @@ import threading
 from indi.transport import Buffer
 
 
+logger = logging.getLogger(__name__)
+
+
 class ConnectionHandler:
     def __init__(self, client_socket, callback):
         self.buffer = Buffer()
@@ -14,12 +17,12 @@ class ConnectionHandler:
 
     def wait_for_messages(self):
         while True:
-            logging.debug(f"TCP: waiting for data")
+            logger.debug("TCP: waiting for data")
             message = self.client_socket.recv(1024)
             if not message:
-                logging.debug(f"TCP: no data, breaking")
+                logger.debug("TCP: no data, breaking")
                 break
-            logging.debug(f"TCP: got data: {message}")
+            logger.debug("TCP: got data: %s", message)
             self.buffer.append(message.decode("latin1"))
             self.buffer.process(self.message_from_server)
 
@@ -30,7 +33,7 @@ class ConnectionHandler:
     def send_message(self, message):
         data = message.to_string()
         with self.sender_lock:
-            logging.debug(f"TCP: sending data: {data}")
+            logger.debug("TCP: sending data: %s", data)
             self.client_socket.sendall(data)
 
     def close(self):
