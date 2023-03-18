@@ -338,16 +338,23 @@ class Client(BaseClient):
             message.EnableBLOB(device=device, value=const.BLOBEnable.ONLY)
         )
 
-    def start(self):
+    async def start(self):
         """Starts client and connects to the server.
 
         Connects both connections (control and blob) and sends initial GetProperties message to the server.
         """
-        self.control_connection_handler = self.control_connection.connect(
+        self.control_connection_handler = await self.control_connection.connect(
             self.process_message
         )
-        self.blob_connection_handler = self.blob_connection.connect(
+        self.blob_connection_handler = await self.blob_connection.connect(
             self.process_message
+        )
+
+        asyncio.get_running_loop().create_task(
+            self.control_connection_handler.wait_for_messages()
+        )
+        asyncio.get_running_loop().create_task(
+            self.blob_connection_handler.wait_for_messages()
         )
 
         self.handshake()

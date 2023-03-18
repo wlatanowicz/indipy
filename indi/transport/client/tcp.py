@@ -1,6 +1,5 @@
+import asyncio
 import logging
-import socket
-import threading
 
 from indi.transport import Buffer
 
@@ -8,16 +7,16 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler:
-    def __init__(self, client_socket, callback):
+    def __init__(self, reader, writer, callback):
         self.buffer = Buffer()
-        self.client_socket = client_socket
+        self.reader, self.writer = reader, writer
         self.callback = callback
-        self.sender_lock = threading.Lock()
+        self.sender_lock = asyncio.Lock()
 
-    def wait_for_messages(self):
+    async def wait_for_messages(self):
         while True:
             logger.debug("TCP: waiting for data")
-            message = self.client_socket.recv(1024)
+            message = await self.reader.read(1024)
             if not message:
                 logger.debug("TCP: no data, breaking")
                 break
@@ -31,13 +30,16 @@ class ConnectionHandler:
 
     def send_message(self, message):
         data = message.to_string()
-        with self.sender_lock:
+        asyncio.get_running_loop().create_task(self.send(data))
+
+    async def send(self, data):
+        async with self.sender_lock:
             logger.debug("TCP: sending data: %s", data)
-            self.client_socket.sendall(data)
+            self.writer.write(data)
+            await self.writer.drain()
 
     def close(self):
-        if self.client_socket:
-            self.client_socket.close()
+        self.writer.close()
 
 
 class TCP:
@@ -45,15 +47,7 @@ class TCP:
         self.address = address
         self.port = port
 
-    def connect(self, callback):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.address, self.port))
-        handler = ConnectionHandler(sock, callback)
-
-        handler_thread = threading.Thread(
-            target=handler.wait_for_messages,
-            daemon=True,
-        )
-        handler_thread.start()
-
+    async def connect(self, callback):
+        reader, writer = await asyncio.open_connection(self.address, self.port)
+        handler = ConnectionHandler(reader, writer, callback)
         return handler

@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import logging
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from indi import message
 from indi.device.events import attach_event_handlers
 from indi.device.properties import Group as GroupDefinition
 from indi.device.properties.definition.vectors import Vector
 from indi.device.properties.instance.group import Group
-from indi.device.snoop import SnoopingClient
 from indi.message import IndiMessage
 from indi.routing import Device, Router
+
+if TYPE_CHECKING:
+    from indi.device.snoop import SnoopingClient
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +51,8 @@ class Driver(Device, metaclass=DriverMeta):
 
     @property
     def snooping_client(self) -> SnoopingClient:
+        from indi.device.snoop import SnoopingClient
+
         if self._snooping_client is None:
             self._snooping_client = SnoopingClient(self._router)
             self._router.register_client(self._snooping_client)
