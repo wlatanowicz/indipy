@@ -1,5 +1,5 @@
 import logging
-import time
+import asyncio
 
 from indi.device import Driver, non_blocking, properties
 from indi.device.pool import default_pool
@@ -15,7 +15,7 @@ max_position = 5000
 
 @default_pool.register
 class FocuserSimulator(Driver):
-    name = "Focuser Simulator"
+    name = "Python Focuser Simulator"
 
     general = properties.Group(
         "GENERAL",
@@ -50,8 +50,7 @@ class FocuserSimulator(Driver):
     )
 
     @on(general.connection.connect, Write)
-    @non_blocking
-    def connect(self, event):
+    async def connect(self, event):
         value = event.new_value
         connected = value == const.SwitchState.ON
         self.general.connection.state_ = const.State.BUSY
@@ -71,24 +70,22 @@ class FocuserSimulator(Driver):
 
 
     @on(position.position.position, Write)
-    @non_blocking
-    def reposition(self, event):
+    async def reposition(self, event):
         value = event.new_value
-        self._move(value)
+        await self._move(value)
 
     @on(position.rel_position.position, Write)
-    @non_blocking
-    def step(self, event):
+    async def step(self, event):
         value = event.new_value
         self.position.rel_position.position.state_ = const.State.BUSY
         current_position = self.position.position.position.value
         direction = 1 if self.position.motion.outward.bool_value else -1
         new_value = current_position + direction * value
-        self._move(new_value)
+        await self._move(new_value)
         self.position.rel_position.position.state_ = const.State.OK
 
 
-    def _move(self, target):
+    async def _move(self, target):
         self.position.position.state_ = const.State.BUSY
         start_position = self.position.position.position.value
         step_size = 20
@@ -97,7 +94,7 @@ class FocuserSimulator(Driver):
         while (
             abs(float(self.position.position.position.value) - float(target)) > 0.01
         ):
-            time.sleep(1)
+            await asyncio.sleep(1)
             self.position.position.position.value += step_size * direction
 
         self.position.position.state_ = const.State.OK

@@ -6,6 +6,8 @@ from devices import *
 from indi.device.pool import default_pool
 from indi.routing import Router
 from indi.transport.server import TCP as TCPServer
+import asyncio
+
 
 router = Router()
 
@@ -42,4 +44,4 @@ config.dictConfig({
 default_pool.init(router)
 
 server = TCPServer(router=router)
-server.start()
+asyncio.run(server.start())

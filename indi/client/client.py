@@ -257,6 +257,7 @@ class BaseClient:
                 lock.set()
 
         if polling_enabled:
+
             async def poll():
                 kwargs = {}
                 if device:
