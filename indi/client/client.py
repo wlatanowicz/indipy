@@ -13,6 +13,8 @@ from indi.client.device import Device
 from indi.client.elements import Element
 from indi.client.vectors import Vector
 from indi.message import IndiMessage, const
+import asyncio
+
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +197,7 @@ class BaseClient:
             cb.polling_enabled = False
             self.callbacks.remove(cb)
 
-    def waitforevent(
+    async def waitforevent(
         self,
         device: str = None,
         vector: str = None,
@@ -204,7 +206,7 @@ class BaseClient:
         expect: Any = None,
         initial: Any = None,
         check: Callable = None,
-        timeout: float = -1,
+        timeout: Optional[float] = None,
         polling_enabled: bool = True,
         polling_delay: float = 1.0,
         polling_interval: float = 1.0,
@@ -221,8 +223,11 @@ class BaseClient:
             )
         ), "Exactly one of `expect`, `initial`, `check` has to be passed"
 
-        lock = threading.Lock()
-        res_event = {}
+        lock = asyncio.Event()
+        res_event = {
+            "event": None,
+            "timeout": False,
+        }
 
         def cb(event: events.BaseEvent):
             release = False
@@ -247,13 +252,12 @@ class BaseClient:
                     if event.new_state != initial:
                         release = True
 
-            if release and lock.locked():
+            if release:
                 res_event["event"] = event
-                lock.release()
+                lock.set()
 
         if polling_enabled:
-
-            def poll():
+            async def poll():
                 kwargs = {}
                 if device:
                     kwargs["device"] = device
@@ -262,15 +266,19 @@ class BaseClient:
 
                 msg = message.GetProperties(version=indi.__protocol_version__, **kwargs)
 
-                time.sleep(polling_delay)
+                await asyncio.sleep(polling_delay)
                 while lock.locked():
                     self.send_message(msg)
-                    time.sleep(polling_interval)
+                    await asyncio.sleep(polling_interval)
 
-            t = threading.Thread(target=poll)
-            t.start()
+            asyncio.get_running_loop().create_task(poll())
 
-        lock.acquire()
+        async def timeout_check():
+            await asyncio.sleep(timeout)
+            if lock.locked():
+                res_event["timeout"] = True
+                lock.set()
+
         uid = self.onevent(
             device=device,
             vector=vector,
@@ -279,14 +287,14 @@ class BaseClient:
             callback=cb,
         )
 
-        acquired = lock.acquire(timeout=timeout)
+        if timeout is not None and timeout > 0:
+            asyncio.get_running_loop().create_task(timeout_check())
+
+        await lock.wait()
 
         self.rmonevent(uuid=uid)
 
-        if lock.locked():
-            lock.release()
-
-        if not acquired:
+        if not res_event["timeout"]:
             raise Exception("Timeout occurred")
 
         return res_event["event"]
