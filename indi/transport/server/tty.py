@@ -65,7 +65,7 @@ class TTY:
         self.stdin = stdin or aiofiles.stdin
         self.stdout = stdout or aiofiles.stdout
 
-    def start(self):
+    async def start(self):
         logger.info("Starting INDIpy server on TTY")
         conn_handler = ConnectionHandler(self.router, self.stdin, self.stdout)
-        asyncio.run(conn_handler.handle())
+        await conn_handler.handle()

@@ -15,14 +15,13 @@ logger = logging.getLogger(__name__)
 
 @default_pool.register
 class CameraSimulator(Driver):
-
     name = "CAMERA_SIMULATOR"
 
     general = properties.Group(
         "GENERAL",
         vectors=dict(
             connection=standard.common.Connection(),
-            driver_info = standard.common.DriverInfo(interface=(DriverInterface.CCD,)),
+            driver_info=standard.common.DriverInfo(interface=(DriverInterface.CCD,)),
         ),
     )
 
@@ -47,9 +46,7 @@ class CameraSimulator(Driver):
     exposition = properties.Group(
         "EXPOSITION",
         enabled=False,
-        vectors=dict(
-            exposure=standard.ccd.Exposure()
-        ),
+        vectors=dict(exposure=standard.ccd.Exposure()),
     )
 
     @on(general.connection.connect, Change)

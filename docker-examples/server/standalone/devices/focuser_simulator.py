@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 max_position = 5000
 
+
 @default_pool.register
 class FocuserSimulator(Driver):
     name = "Python Focuser Simulator"
@@ -21,15 +22,15 @@ class FocuserSimulator(Driver):
         "GENERAL",
         vectors=dict(
             connection=standard.common.Connection(),
-            driver_info = standard.common.DriverInfo(interface=(DriverInterface.FOCUSER,)),
+            driver_info=standard.common.DriverInfo(
+                interface=(DriverInterface.FOCUSER,)
+            ),
             info=properties.TextVector(
                 "INFO",
                 enabled=False,
                 perm=const.Permissions.READ_ONLY,
                 elements=dict(
-                    manufacturer=properties.Text(
-                        "MANUFACTURER", default="INDIpy"
-                    ),
+                    manufacturer=properties.Text("MANUFACTURER", default="INDIpy"),
                     camera_model=properties.Text(
                         "FOCUSER_MODEL", default="FocuserSimulator"
                     ),
@@ -68,7 +69,6 @@ class FocuserSimulator(Driver):
         self.position.enabled = connected
         self.general.info.enabled = connected
 
-
     @on(position.position.position, Write)
     async def reposition(self, event):
         value = event.new_value
@@ -84,16 +84,13 @@ class FocuserSimulator(Driver):
         await self._move(new_value)
         self.position.rel_position.position.state_ = const.State.OK
 
-
     async def _move(self, target):
         self.position.position.state_ = const.State.BUSY
         start_position = self.position.position.position.value
         step_size = 20
         direction = 1 if target > start_position else -1
 
-        while (
-            abs(float(self.position.position.position.value) - float(target)) > 0.01
-        ):
+        while abs(float(self.position.position.position.value) - float(target)) > 0.01:
             await asyncio.sleep(1)
             self.position.position.position.value += step_size * direction
 
