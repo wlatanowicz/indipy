@@ -1,5 +1,3 @@
-from typing import Optional
-
 from indi.device.events import EventSourceDefinition
 
 
