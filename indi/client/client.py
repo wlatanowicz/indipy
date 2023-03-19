@@ -263,7 +263,7 @@ class BaseClient:
                 msg = message.GetProperties(version=indi.__protocol_version__, **kwargs)
 
                 await asyncio.sleep(polling_delay)
-                while lock.locked():
+                while not lock.is_set():
                     self.send_message(msg)
                     await asyncio.sleep(polling_interval)
 
@@ -271,7 +271,7 @@ class BaseClient:
 
         async def timeout_check():
             await asyncio.sleep(timeout)
-            if lock.locked():
+            if not lock.is_set():
                 res_event["timeout"] = True
                 lock.set()
 
@@ -290,7 +290,7 @@ class BaseClient:
 
         self.rmonevent(uuid=uid)
 
-        if not res_event["timeout"]:
+        if res_event["timeout"]:
             raise Exception("Timeout occurred")
 
         return res_event["event"]
