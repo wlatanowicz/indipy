@@ -1,7 +1,16 @@
-from typing import Type, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type, Union, cast
 
 from indi import message
+from indi.device.properties.instance.elements import Element, Switch
 from indi.message import checks, const
+
+if TYPE_CHECKING:
+    from indi.device.driver import Driver
+    from indi.device.properties.definition.vectors import Vector as VectorDefinition
+    from indi.device.properties.instance.elements import Switch
+    from indi.device.properties.instance.group import Group
 
 
 class Vector:
@@ -20,15 +29,19 @@ class Vector:
         Type[message.NewTextVector],
     ]
 
-    def __init__(self, group, definition):
+    def __init__(self, group: Group, definition: VectorDefinition) -> None:
         self._state = definition.state
         self._enabled = definition.enabled
         self._group = group
         self._definition = definition
-        self._elements = {k: v.instance(self) for k, v in definition.elements.items()}
-        self._elements_by_name = {v.name: v for k, v in self._elements.items()}
+        self._elements: Dict[str, Element] = {
+            k: v.instance(self) for k, v in definition.elements.items()
+        }
+        self._elements_by_name: Dict[str, Element] = {
+            v.name: v for k, v in self._elements.items()
+        }
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str):
         element = self._elements.get(item)
         if element:
             return element
@@ -36,37 +49,37 @@ class Vector:
         return self.__getattribute__(item)
 
     @property
-    def device(self):
+    def device(self) -> Driver:
         return self._group.device
 
     @property
-    def group(self):
+    def group(self) -> Group:
         return self._group
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._definition.name
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled and self.group.enabled
 
     @enabled.setter
-    def enabled(self, value):
+    def enabled(self, value: bool):
         self._enabled = value
         self.device.send_message(self.to_def_message())
         self.device.send_message(self.to_set_message())
 
     @property
-    def state_(self):
+    def state_(self) -> const.StateType:
         return self._state
 
     @state_.setter
-    def state_(self, value):
+    def state_(self, value: const.StateType):
         self._state = checks.dictionary(value, const.State)
         self.device.send_message(self.to_set_message())
 
-    def to_def_message(self):
+    def to_def_message(self) -> Union[message.DefVector, message.DelProperty]:
         if not self.enabled:
             return message.DelProperty(
                 device=self.device.name,
@@ -74,7 +87,9 @@ class Vector:
                 timestamp=message.now(),
             )
 
-        elements = [e.to_def_message() for k, e in self._elements.items() if e.enabled]
+        elements = tuple(
+            e.to_def_message() for k, e in self._elements.items() if e.enabled
+        )
         return self.def_message_class(
             device=self.device.name,
             name=self._definition.name,
@@ -87,11 +102,13 @@ class Vector:
             children=elements,
         )
 
-    def to_set_message(self):
+    def to_set_message(self) -> Optional[message.SetVector]:
         if not self.enabled:
             return None
 
-        elements = [e.to_set_message() for k, e in self._elements.items() if e.enabled]
+        elements = tuple(
+            e.to_set_message() for k, e in self._elements.items() if e.enabled
+        )
         return self.set_message_class(
             device=self.device.name,
             name=self._definition.name,
@@ -101,7 +118,7 @@ class Vector:
             children=elements,
         )
 
-    def from_new_message(self, msg):
+    def from_new_message(self, msg: message.NewVector):
         for child in msg.children:
             self._elements_by_name[child.name].set_value_from_message(child)
 
@@ -139,20 +156,18 @@ class SwitchVector(Vector):
         self.selected_values = [value]
 
     @property
-    def selected_values(self):
-        res = []
-        for k, el in self._elements.items():
-            if el.bool_value:
-                res.append(el.name)
-        return res
+    def selected_values(self) -> Tuple[str, ...]:
+        elements = cast(Dict[str, Switch], self._elements)
+        return tuple(el.name for el in elements.values() if el.bool_value)
 
     @selected_values.setter
     def selected_values(self, values):
         for v in values:
             if v not in self._elements_by_name:
-                raise Exception()
+                raise Exception(f"Vector {self.name} does not have element {v}")
 
-        for k, el in self._elements.items():
+        elements = cast(Dict[str, Switch], self._elements)
+        for k, el in elements:
             new_value = el.name in values
             if el.bool_value != new_value:
                 el.bool_value = new_value
@@ -168,7 +183,7 @@ class SwitchVector(Vector):
         for k, el in self._elements.items():
             el.reset_bool_value(el.name in values)
 
-    def apply_rule(self, sender, new_value):
+    def apply_rule(self, sender: Switch, new_value):
         if new_value == const.SwitchState.ON:
             if self._definition.rule in (
                 const.SwitchRule.AT_MOST_ONE,
@@ -193,7 +208,7 @@ class SwitchVector(Vector):
 
         return new_value
 
-    def to_def_message(self):
+    def to_def_message(self) -> Union[message.DefVector, message.DelProperty]:
         if not self.enabled:
             return message.DelProperty(
                 device=self.device.name,

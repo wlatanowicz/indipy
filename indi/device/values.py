@@ -4,7 +4,7 @@ import base64
 import hashlib
 import math
 import re
-from typing import Any
+from typing import Any, Optional
 
 
 class BLOB:
@@ -58,6 +58,8 @@ def str_to_num(s: str, fmt: str) -> Any[float, int]:
         }
 
         num_match = re.match(regexps[fraction_length], s)
+        if not num_match:
+            raise ValueError("Cannot convert string to number")
         num_match_groups = num_match.groups()
         wholes = num_match_groups[0]
         minutes = num_match_groups[1]
@@ -71,7 +73,7 @@ def str_to_num(s: str, fmt: str) -> Any[float, int]:
     return int(s)
 
 
-def num_to_str(n: Any[float, int], fmt: str) -> str:
+def num_to_str(n: Optional[float], fmt: str) -> Optional[str]:
     if n is None:
         return None
 
@@ -102,5 +104,4 @@ def num_to_str(n: Any[float, int], fmt: str) -> str:
         if fraction_length == 9:
             return f"{w}:{m:02d}:{s:05.2f}"
 
-    else:
-        return fmt % n
+    return fmt % n

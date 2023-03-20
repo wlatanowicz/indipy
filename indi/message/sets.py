@@ -1,8 +1,20 @@
-from typing import Type, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
 from indi.message import checks, const
 from indi.message.base import IndiMessage
-from indi.message.one_parts import OneBLOB, OneLight, OneNumber, OneSwitch, OneText
+from indi.message.one_parts import (
+    IndiMessagePart,
+    OneBLOB,
+    OneLight,
+    OneNumber,
+    OneSwitch,
+    OneText,
+)
+
+if TYPE_CHECKING:
+    from indi.message import TimestampType
 
 
 class SetVector(IndiMessage):
@@ -13,14 +25,14 @@ class SetVector(IndiMessage):
 
     def __init__(
         self,
-        device,
-        name,
-        state,
-        timeout=None,
-        timestamp=None,
-        message=None,
-        children=None,
-        **junk
+        device: str,
+        name: str,
+        state: const.StateType,
+        timeout: Optional[float] = None,
+        timestamp: Optional[TimestampType] = None,
+        message: Optional[str] = None,
+        children: Optional[Tuple[IndiMessagePart, ...]] = None,
+        **junk,
     ):
         super().__init__(device)
         self.name = name

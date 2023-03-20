@@ -4,7 +4,7 @@ from indi.message.base import IndiMessage
 class PingReply(IndiMessage):
     from_client = True
 
-    def __init__(self, uid, **junk):
+    def __init__(self, uid: str, **junk):
         super().__init__()
         self.uid = uid
 
@@ -12,6 +12,6 @@ class PingReply(IndiMessage):
 class PingRequest(IndiMessage):
     from_device = True
 
-    def __init__(self, uid, **junk):
+    def __init__(self, uid: str, **junk):
         super().__init__()
         self.uid = uid

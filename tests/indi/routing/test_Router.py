@@ -1,11 +1,10 @@
-import pytest
-
 from unittest import mock
 from unittest.mock import patch
 
+import pytest
+
 from indi import message
 from indi.routing import Device, Router
-
 
 messages = [
     ("SOME_DEVICE", ((True, True), (False, False))),
@@ -13,11 +12,15 @@ messages = [
 ]
 
 
-@pytest.mark.parametrize('message_device, device_specs', messages)
+@pytest.mark.parametrize("message_device, device_specs", messages)
 def test_message_from_client(message_device, device_specs):
     devices = [
-        {"mock": mock.Mock(), "accepts": accepts, "processes": processes,}
-        for accepts, processes  in device_specs
+        {
+            "mock": mock.Mock(),
+            "accepts": accepts,
+            "processes": processes,
+        }
+        for accepts, processes in device_specs
     ]
 
     msg = message.GetProperties(version="2.0", device=message_device)

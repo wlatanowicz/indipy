@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import logging
-from typing import Type, Union
+from typing import TYPE_CHECKING, Tuple, Type, Union
 
 from indi.device import events, values
 from indi.device.events import EventSource
-from indi.device.properties.instance.vectors import Vector
 from indi.message import checks, const, def_parts, one_parts
+
+if TYPE_CHECKING:
+    from indi.device.driver import Device
+    from indi.device.properties.instance.vectors import Vector
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +30,7 @@ class Element(EventSource):
         Type[one_parts.OneBLOB],
         Type[one_parts.OneText],
     ]
-    allowed_value_types = (None.__class__,)
+    allowed_value_types: Tuple[Type, ...] = (None.__class__,)
 
     def __init__(self, vector: Vector, definition):
         self._vector = vector
@@ -33,23 +39,23 @@ class Element(EventSource):
         self._enabled = definition.enabled
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._definition.name
 
     @property
-    def device(self):
+    def device(self) -> Device:
         return self._vector.device
 
     @property
-    def vector(self):
+    def vector(self) -> Vector:
         return self._vector
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @enabled.setter
-    def enabled(self, value):
+    def enabled(self, value: bool):
         self._enabled = value
 
     @property

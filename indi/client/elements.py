@@ -1,12 +1,14 @@
+from typing import Optional, Type
+
 from indi.client.events import ValueUpdate
 from indi.device import values
 from indi.message import def_parts, one_parts
 
 
 class Element:
-    def_message_class = None
-    set_message_class = None
-    new_message_class = None
+    def_message_class: Optional[Type[def_parts.DefIndiMessagePart]] = None
+    set_message_class: Optional[Type[one_parts.IndiMessagePart]] = None
+    new_message_class: Optional[Type[one_parts.IndiMessagePart]] = None
 
     @classmethod
     def from_message(cls, vector, msg):
@@ -29,16 +31,16 @@ class Element:
     def value(self):
         return self._value
 
+    @value.setter
+    def value(self, value):
+        self._new_value = value
+
     @property
     def has_new_value(self) -> bool:
         return self._new_value is not None
 
     def reset_new_value(self):
         self._new_value = None
-
-    @value.setter
-    def value(self, value):
-        self._new_value = value
 
     def process_message(self, msg):
         if isinstance(msg, self.set_message_class):

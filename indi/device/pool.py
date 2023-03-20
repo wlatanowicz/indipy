@@ -10,7 +10,7 @@ class DevicePool:
     In most cases you want to use preinitialized `default_pool`.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.device_classes: List[type] = []
         self.devices: Dict[str, Driver] = {}
 

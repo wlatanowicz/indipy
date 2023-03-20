@@ -2,11 +2,12 @@ from typing import Any, Optional, Type, Union
 
 from indi.device.events import EventSourceDefinition
 from indi.device.properties.instance import elements as instance_elements
+from indi.device.properties.instance.vectors import Vector
 from indi.message import const
 
 
 class Element(EventSourceDefinition):
-    instance_class = Union[
+    instance_class: Union[
         Type[instance_elements.BLOB],
         Type[instance_elements.Light],
         Type[instance_elements.Number],
@@ -19,7 +20,7 @@ class Element(EventSourceDefinition):
         self,
         name: str,
         label: Optional[str] = None,
-        default=None,
+        default: Any = None,
         enabled: bool = True,
     ):
         super().__init__()
@@ -28,7 +29,7 @@ class Element(EventSourceDefinition):
         self.default = self.default_value if default is None else default
         self.enabled = enabled
 
-    def instance(self, vector):
+    def instance(self, vector: Vector):
         return self.instance_class(vector, self)
 
 
@@ -36,7 +37,15 @@ class Number(Element):
     instance_class = instance_elements.Number
     default_value = 0.0
 
-    def __init__(self, *args, format="%f", min=None, max=None, step=0, **kwargs):
+    def __init__(
+        self,
+        *args,
+        format="%f",
+        min: Optional[float] = None,
+        max: Optional[float] = None,
+        step: float = 0,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.format = format
         self.min = min

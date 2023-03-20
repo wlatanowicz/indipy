@@ -5,6 +5,7 @@ services:
       context: .
       args:
         INDIPY_BRANCH: master
+        PYTHON_VERSION: 3.8
     ports:
       - 7624:7624
     command:

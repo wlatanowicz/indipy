@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from indi.message.const import State, SwitchState
 
@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 
 class BaseEvent:
     def __init__(
-        self, device: Device = None, vector: Vector = None, element: Element = None
+        self,
+        device: Optional[Device] = None,
+        vector: Optional[Vector] = None,
+        element: Optional[Element] = None,
     ):
         self.device = device
         self.vector = vector

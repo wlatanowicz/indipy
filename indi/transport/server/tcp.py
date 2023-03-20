@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import List
 
 from indi.routing import Client
 from indi.transport import Buffer
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler(Client):
-    connections = []
+    connections: List["ConnectionHandler"] = []
 
     def __init__(self, reader, writer, router):
         self.buffer = Buffer()

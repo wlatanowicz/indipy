@@ -6,13 +6,13 @@ from indi.routing.router import Router
 
 
 class SnoopingClient(BaseClient):
-    def __init__(self, router):
+    def __init__(self, router: Optional[Router]) -> None:
         super().__init__()
-        self.router: Optional[Router] = router
+        self.router = router
 
     def send_message(self, msg: IndiMessage):
         if msg and self.router:
             self.router.process_message(msg, self)
 
-    def message_from_device(self, message):
+    def message_from_device(self, message: IndiMessage):
         self.process_message(message)

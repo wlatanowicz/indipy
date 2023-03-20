@@ -1,4 +1,5 @@
 import datetime
+from typing import NewType
 
 from .base import IndiMessage, Message
 from .defs import (
@@ -30,6 +31,8 @@ from .sets import (
     SetVector,
 )
 
+TimestampType = NewType("TimestampType", str)
 
-def now():
-    return datetime.datetime.utcnow().isoformat()
+
+def now() -> TimestampType:
+    return TimestampType(datetime.datetime.utcnow().isoformat())

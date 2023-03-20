@@ -1,4 +1,4 @@
-from typing import List, Type, Union
+from typing import Tuple, Type, Union
 
 from indi import message
 from indi.client import elements
@@ -57,8 +57,8 @@ class Vector:
     def get_element(self, name):
         return self.elements.get(name)
 
-    def list_elements(self) -> List[str]:
-        return tuple(self.elements.keys())
+    def list_elements(self) -> Tuple[str, ...]:
+        return tuple(str(key) for key in self.elements.keys())
 
     def process_message(self, msg):
         if isinstance(msg, self.set_message_class):
