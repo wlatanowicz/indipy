@@ -30,7 +30,7 @@ Examples above assume that device drivers are located in `devices` module. Let's
 ```
 import logging
 
-from indi.device import Driver, non_blocking, properties
+from indi.device import Driver, properties
 from indi.device.pool import default_pool
 from indi.device.events import on, Change
 

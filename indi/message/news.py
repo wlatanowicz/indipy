@@ -1,8 +1,19 @@
-from typing import Optional, Type, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
 
 from indi.message import checks
 from indi.message.base import IndiMessage
-from indi.message.one_parts import OneBLOB, OneNumber, OneSwitch, OneText
+from indi.message.one_parts import (
+    IndiMessagePart,
+    OneBLOB,
+    OneNumber,
+    OneSwitch,
+    OneText,
+)
+
+if TYPE_CHECKING:
+    from indi.message import TimestampType
 
 
 class NewVector(IndiMessage):
@@ -11,7 +22,14 @@ class NewVector(IndiMessage):
     ]
     from_client = True
 
-    def __init__(self, device, name, timestamp=None, children=None, **junk):
+    def __init__(
+        self,
+        device: str,
+        name: str,
+        timestamp: Optional[TimestampType] = None,
+        children: Optional[Tuple[IndiMessagePart, ...]] = None,
+        **junk,
+    ):
         super().__init__(device)
         self.name = name
         self.timestamp = timestamp

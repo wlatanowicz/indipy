@@ -1,57 +1,59 @@
+import asyncio
 import logging
-import socket
-import threading
+from typing import Callable
 
+from indi.message import IndiMessage
 from indi.transport import Buffer
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler:
-    def __init__(self, client_socket, callback):
+    def __init__(
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter,
+        callback: Callable[[IndiMessage], None],
+    ):
         self.buffer = Buffer()
-        self.client_socket = client_socket
+        self.reader, self.writer = reader, writer
         self.callback = callback
-        self.sender_lock = threading.Lock()
+        self.sender_lock = asyncio.Lock()
 
-    def wait_for_messages(self):
+    async def wait_for_messages(self):
         while True:
-            logging.debug(f"TCP: waiting for data")
-            message = self.client_socket.recv(1024)
+            logger.debug("TCP: waiting for data")
+            message = await self.reader.read(1024)
             if not message:
-                logging.debug(f"TCP: no data, breaking")
+                logger.debug("TCP: no data, breaking")
                 break
-            logging.debug(f"TCP: got data: {message}")
+            logger.debug("TCP: got data: %s", message)
             self.buffer.append(message.decode("latin1"))
             self.buffer.process(self.message_from_server)
 
-    def message_from_server(self, message):
-        if self.callback:
-            self.callback(message)
+    def message_from_server(self, message: IndiMessage):
+        self.callback(message)
 
-    def send_message(self, message):
+    def send_message(self, message: IndiMessage):
         data = message.to_string()
-        with self.sender_lock:
-            logging.debug(f"TCP: sending data: {data}")
-            self.client_socket.sendall(data)
+        asyncio.get_running_loop().create_task(self.send(data))
+
+    async def send(self, data: bytes):
+        async with self.sender_lock:
+            logger.debug("TCP: sending data: %s", data)
+            self.writer.write(data)
+            await self.writer.drain()
 
     def close(self):
-        if self.client_socket:
-            self.client_socket.close()
+        self.writer.close()
 
 
 class TCP:
-    def __init__(self, address="127.0.0.1", port=7624):
+    def __init__(self, address: str = "127.0.0.1", port: int = 7624):
         self.address = address
         self.port = port
 
-    def connect(self, callback):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((self.address, self.port))
-        handler = ConnectionHandler(sock, callback)
-
-        handler_thread = threading.Thread(
-            target=handler.wait_for_messages,
-            daemon=True,
-        )
-        handler_thread.start()
-
+    async def connect(self, callback: Callable[[IndiMessage], None]):
+        reader, writer = await asyncio.open_connection(self.address, self.port)
+        handler = ConnectionHandler(reader, writer, callback)
         return handler

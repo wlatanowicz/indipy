@@ -1,4 +1,10 @@
+from __future__ import annotations
+
 import xml.etree.cElementTree as ET
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+
+if TYPE_CHECKING:
+    from indi.message import TimestampType
 
 
 class IndiMessage:
@@ -13,16 +19,16 @@ class IndiMessage:
         return cls.__name__[:1].lower() + cls.__name__[1:]
 
     @classmethod
-    def __all_subclasses__(cls):
+    def __all_subclasses__(cls) -> Tuple[Type[IndiMessage], ...]:
         subclasses = []
         for subclass in cls.__subclasses__():
             subclasses.append(subclass)
             for nested_subclass in subclass.__all_subclasses__():
                 subclasses.append(nested_subclass)
-        return subclasses
+        return tuple(subclasses)
 
     @classmethod
-    def from_xml(cls, xml):
+    def from_xml(cls, xml: ET.Element) -> IndiMessage:
         tag = xml.tag
         message_class = None
 
@@ -33,13 +39,12 @@ class IndiMessage:
         if not message_class:
             raise Exception(f"Invalid message: {tag}")
 
-        kwargs = xml.attrib
+        kwargs: Dict[str, Any] = xml.attrib
 
-        children = []
-        for child in xml:
-            children.append(IndiMessagePart.from_xml(child))
-
-        if len(children) > 0:
+        children: Tuple[ET.Element, ...] = tuple(
+            IndiMessagePart.from_xml(child) for child in xml
+        )
+        if children:
             kwargs["children"] = children
 
         if xml.text:
@@ -48,7 +53,7 @@ class IndiMessage:
         return message_class(**kwargs)
 
     @classmethod
-    def from_string(cls, string):
+    def from_string(cls, string: str) -> IndiMessage:
         xml = ET.fromstring(string)
         return cls.from_xml(xml)
 
@@ -107,7 +112,13 @@ class IndiMessage:
 class Message(IndiMessage):
     from_device = True
 
-    def __init__(self, device=None, timestamp=None, message=None, **junk):
+    def __init__(
+        self,
+        device: Optional[str] = None,
+        timestamp: Optional[TimestampType] = None,
+        message: Optional[str] = None,
+        **junk,
+    ):
         super().__init__(device)
         self.timestamp = timestamp
         self.message = message

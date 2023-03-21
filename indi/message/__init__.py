@@ -1,4 +1,5 @@
 import datetime
+from typing import NewType
 
 from .base import IndiMessage, Message
 from .defs import (
@@ -20,6 +21,7 @@ from .news import (
     NewVector,
 )
 from .one_light import OneLight
+from .pings import PingReply, PingRequest
 from .sets import (
     SetBLOBVector,
     SetLightVector,
@@ -28,11 +30,9 @@ from .sets import (
     SetTextVector,
     SetVector,
 )
-from .pings import (
-    PingReply,
-    PingRequest,
-)
+
+TimestampType = NewType("TimestampType", str)
 
 
-def now():
-    return datetime.datetime.utcnow().isoformat()
+def now() -> TimestampType:
+    return TimestampType(datetime.datetime.utcnow().isoformat())

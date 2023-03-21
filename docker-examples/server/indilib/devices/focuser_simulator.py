@@ -1,7 +1,7 @@
 import logging
-import time
+import asyncio
 
-from indi.device import Driver, non_blocking, properties
+from indi.device import Driver, properties
 from indi.device.pool import default_pool
 from indi.message import const
 from indi.device.properties.const import DriverInterface
@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 max_position = 5000
 
+
 @default_pool.register
 class FocuserSimulator(Driver):
     name = "Python Focuser Simulator"
@@ -21,15 +22,15 @@ class FocuserSimulator(Driver):
         "GENERAL",
         vectors=dict(
             connection=standard.common.Connection(),
-            driver_info = standard.common.DriverInfo(interface=(DriverInterface.FOCUSER,)),
+            driver_info=standard.common.DriverInfo(
+                interface=(DriverInterface.FOCUSER,)
+            ),
             info=properties.TextVector(
                 "INFO",
                 enabled=False,
                 perm=const.Permissions.READ_ONLY,
                 elements=dict(
-                    manufacturer=properties.Text(
-                        "MANUFACTURER", default="INDIpy"
-                    ),
+                    manufacturer=properties.Text("MANUFACTURER", default="INDIpy"),
                     camera_model=properties.Text(
                         "FOCUSER_MODEL", default="FocuserSimulator"
                     ),
@@ -50,8 +51,7 @@ class FocuserSimulator(Driver):
     )
 
     @on(general.connection.connect, Write)
-    @non_blocking
-    def connect(self, event):
+    async def connect(self, event):
         value = event.new_value
         connected = value == const.SwitchState.ON
         self.general.connection.state_ = const.State.BUSY
@@ -69,35 +69,29 @@ class FocuserSimulator(Driver):
         self.position.enabled = connected
         self.general.info.enabled = connected
 
-
     @on(position.position.position, Write)
-    @non_blocking
-    def reposition(self, event):
+    async def reposition(self, event):
         value = event.new_value
-        self._move(value)
+        await self._move(value)
 
     @on(position.rel_position.position, Write)
-    @non_blocking
-    def step(self, event):
+    async def step(self, event):
         value = event.new_value
         self.position.rel_position.position.state_ = const.State.BUSY
         current_position = self.position.position.position.value
         direction = 1 if self.position.motion.outward.bool_value else -1
         new_value = current_position + direction * value
-        self._move(new_value)
+        await self._move(new_value)
         self.position.rel_position.position.state_ = const.State.OK
 
-
-    def _move(self, target):
+    async def _move(self, target):
         self.position.position.state_ = const.State.BUSY
         start_position = self.position.position.position.value
         step_size = 20
         direction = 1 if target > start_position else -1
 
-        while (
-            abs(float(self.position.position.position.value) - float(target)) > 0.01
-        ):
-            time.sleep(1)
+        while abs(float(self.position.position.position.value) - float(target)) > 0.01:
+            await asyncio.sleep(1)
             self.position.position.position.value += step_size * direction
 
         self.position.position.state_ = const.State.OK

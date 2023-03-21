@@ -1,11 +1,9 @@
-import xml.etree.ElementTree as ET
-
 from indi.message import checks, const
-from indi.message.base import IndiMessage, IndiMessagePart
+from indi.message.base import IndiMessagePart
 
 
 class OneBLOB(IndiMessagePart):
-    def __init__(self, name, size, format, value, **junk):
+    def __init__(self, name: str, size: float, format: str, value, **junk):
         super().__init__(name=name, value=value)
         self.size = size
         self.format = format

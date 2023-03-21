@@ -1,26 +1,39 @@
-from typing import Type
+from typing import Dict, Optional, Tuple, Type, Union
 
 from indi.device.events import EventSourceDefinition
-from indi.device.properties.const import Permissions, State, SwitchRule
-from indi.device.properties.definition.elements import BLOB, Light, Number, Switch, Text
-from indi.device.properties.instance import elements as instance_elements
+from indi.device.properties.const import (
+    Permissions,
+    PermissionsType,
+    State,
+    StateType,
+    SwitchRule,
+    SwitchRuleType,
+)
+from indi.device.properties.definition.elements import (
+    BLOB,
+    Element,
+    Light,
+    Number,
+    Switch,
+    Text,
+)
 from indi.device.properties.instance import vectors as instance_vectors
 from indi.message import const
 
 
 class Vector(EventSourceDefinition):
-    element_class = Type[instance_elements.Element]
+    element_class: Type[Element]
     instance_class: Type[instance_vectors.Vector]
 
     def __init__(
         self,
-        name,
-        label=None,
-        state=State.OK,
-        perm=Permissions.READ_WRITE,
-        timeout=0,
-        enabled=True,
-        elements=None,
+        name: str,
+        label: Optional[str] = None,
+        state: StateType = State.OK,
+        perm: PermissionsType = Permissions.READ_WRITE,
+        timeout: float = 0,
+        enabled: bool = True,
+        elements: Optional[Dict[str, Element]] = None,
     ):
         super().__init__()
         self.name = name
@@ -37,7 +50,11 @@ class Vector(EventSourceDefinition):
             if self.__class__.element_class and not isinstance(
                 element, self.__class__.element_class
             ):
-                raise Exception("")
+                raise Exception(
+                    f"Element '{k}' of vector {self.name} of type {self.__class__.__name__} "
+                    f"is expected to be of type {self.__class__.element_class.__name__}, "
+                    f"{element.__class__.__name__} given"
+                )
 
         self.elements = elements
 
@@ -68,7 +85,13 @@ class SwitchVector(Vector):
 
     RULES = SwitchRule
 
-    def __init__(self, *args, rule=SwitchRule.ONE_OF_MANY, default_on=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        rule: SwitchRuleType = SwitchRule.ONE_OF_MANY,
+        default_on: Optional[Union[str, Tuple[str, ...]]] = None,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.rule = rule
         if default_on is not None:

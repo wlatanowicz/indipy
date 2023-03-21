@@ -1,20 +1,19 @@
-from typing import Optional
+from typing import Dict, Optional
 
 from indi.device.events import EventSourceDefinition
+from indi.device.properties.definition.vectors import Vector
 
 
 class Group(EventSourceDefinition):
-    def __init__(self, name: str, enabled=True, vectors=None):
+    def __init__(
+        self, name: str, enabled=True, vectors: Optional[Dict[str, Vector]] = None
+    ):
         super().__init__()
         self.name = name
-        self.vectors = vectors
-        self.property_name = None
+        self.vectors: Dict[str, Vector] = vectors or {}
         self.enabled = enabled
 
-    def __get__(self, instance, objtype=None):
-        return instance.get_group(self.property_name)
-
-    def __getattr__(self, item):
+    def __getattr__(self, item: str):
         vector = self.vectors.get(item)
         if vector:
             return vector

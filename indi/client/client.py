@@ -1,71 +1,75 @@
 from __future__ import annotations
 
+import asyncio
 import logging
-import threading
-import time
 import uuid
-from typing import Any, Callable, List, Optional, Type, Iterable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type
 
 import indi
 from indi import message
 from indi.client import events
 from indi.client.device import Device
-from indi.client.elements import Element
-from indi.client.vectors import Vector
 from indi.message import IndiMessage, const
 
 logger = logging.getLogger(__name__)
 
 
-class BaseClient:
-    class CallbackConfig:
-        def __init__(
-            self,
-            device: Optional[str],
-            vector: Optional[str],
-            element: Optional[str],
-            event_type: Type[events.Event],
-            callback: Callable,
-            uuid: uuid.UUID,
-        ):
-            self.device = device
-            self.vector = vector
-            self.element = element
-            self.event_type = event_type
-            self.callback = callback
-            self.uuid = uuid
+class _CallbackConfig:
+    def __init__(
+        self,
+        device: Optional[str],
+        vector: Optional[str],
+        element: Optional[str],
+        event_type: Type[events.BaseEvent],
+        callback: Callable,
+        uuid: uuid.UUID,
+    ):
+        self.device = device
+        self.vector = vector
+        self.element = element
+        self.event_type = event_type
+        self.callback = callback
+        self.uuid = uuid
 
-        def accepts_event(self, event: events.Event) -> bool:
-            """Checks if event should be processed by callbacked associated with this configuration.
+    def accepts_event(self, event: events.BaseEvent) -> bool:
+        """Checks if event should be processed by callbacked associated with this configuration.
 
-            :param event: An event
-            :type event: events.Event
-            :return: True if event should be processed
-            :rtype: bool
-            """
-            return (
-                self.device
-                in (
-                    None,
-                    event.device.name if event.device else None,
-                )
-                and self.vector
-                in (
-                    None,
-                    event.vector.name if event.vector else None,
-                )
-                and self.element
-                in (
-                    None,
-                    event.element.name if event.element else None,
-                )
-                and isinstance(event, self.event_type)
+        :param event: An event
+        :type event: events.BaseEvent
+        :return: True if event should be processed
+        :rtype: bool
+        """
+        return (
+            self.device
+            in (
+                None,
+                event.device.name if event.device else None,
             )
+            and self.vector
+            in (
+                None,
+                event.vector.name if event.vector else None,
+            )
+            and self.element
+            in (
+                None,
+                event.element.name if event.element else None,
+            )
+            and isinstance(event, self.event_type)
+        )
 
-    def __init__(self):
+
+class _EventWaitResult:
+    def __init__(self) -> None:
+        self.event: Optional[events.BaseEvent] = None
+        self.timeout = False
+
+
+class BaseClient:
+    def __init__(self) -> None:
         """Constructor for INDI client."""
-        self.devices = {}
-        self.callbacks: List[self.CallbackConfig] = []
+        self.devices: Dict[str, Device] = {}
+        self.callbacks: List[_CallbackConfig] = []
 
     def __getitem__(self, key) -> Device:
         return self.devices[key]
@@ -73,7 +77,7 @@ class BaseClient:
     def __contains__(self, key) -> bool:
         return key in self.devices
 
-    def get_device(self, name: str) -> Device:
+    def get_device(self, name: str) -> Optional[Device]:
         return self.devices.get(name)
 
     def list_devices(self) -> Iterable[str]:
@@ -117,11 +121,11 @@ class BaseClient:
         self,
         *,
         callback: Callable,
-        device: str = None,
-        vector: str = None,
-        element: str = None,
+        device: Optional[str] = None,
+        vector: Optional[str] = None,
+        element: Optional[str] = None,
         event_type: Type[events.BaseEvent] = events.BaseEvent,
-    ) -> uuid:
+    ) -> uuid.UUID:
         """Attaches event callback.
 
         :param callback: Callback
@@ -138,7 +142,7 @@ class BaseClient:
         :rtype: uuid
         """
         uid = uuid.uuid4()
-        callback_config = self.CallbackConfig(
+        callback_config = _CallbackConfig(
             device=device,
             vector=vector,
             element=element,
@@ -152,12 +156,12 @@ class BaseClient:
 
     def rmonevent(
         self,
-        uuid: uuid = None,
-        device: str = None,
-        vector: str = None,
-        element: str = None,
-        event_type: Type[events.BaseEvent] = None,
-        callback: Callable = None,
+        uuid: Optional[uuid.UUID] = None,
+        device: Optional[str] = None,
+        vector: Optional[str] = None,
+        element: Optional[str] = None,
+        event_type: Optional[Type[events.BaseEvent]] = None,
+        callback: Optional[Callable] = None,
     ):
         to_rm = list()
         for cb in self.callbacks:
@@ -192,19 +196,18 @@ class BaseClient:
                 to_rm.append(cb)
 
         for cb in to_rm:
-            cb.polling_enabled = False
             self.callbacks.remove(cb)
 
-    def waitforevent(
+    async def waitforevent(
         self,
-        device: str = None,
-        vector: str = None,
-        element: str = None,
+        device: Optional[str] = None,
+        vector: Optional[str] = None,
+        element: Optional[str] = None,
         event_type: Type[events.BaseEvent] = events.BaseEvent,
         expect: Any = None,
         initial: Any = None,
-        check: Callable = None,
-        timeout: float = -1,
+        check: Optional[Callable] = None,
+        timeout: Optional[Optional[float]] = None,
         polling_enabled: bool = True,
         polling_delay: float = 1.0,
         polling_interval: float = 1.0,
@@ -221,8 +224,8 @@ class BaseClient:
             )
         ), "Exactly one of `expect`, `initial`, `check` has to be passed"
 
-        lock = threading.Lock()
-        res_event = {}
+        lock = asyncio.Event()
+        result = _EventWaitResult()
 
         def cb(event: events.BaseEvent):
             release = False
@@ -247,13 +250,13 @@ class BaseClient:
                     if event.new_state != initial:
                         release = True
 
-            if release and lock.locked():
-                res_event["event"] = event
-                lock.release()
+            if release:
+                result.event = event
+                lock.set()
 
         if polling_enabled:
 
-            def poll():
+            async def poll():
                 kwargs = {}
                 if device:
                     kwargs["device"] = device
@@ -262,15 +265,19 @@ class BaseClient:
 
                 msg = message.GetProperties(version=indi.__protocol_version__, **kwargs)
 
-                time.sleep(polling_delay)
-                while lock.locked():
+                await asyncio.sleep(polling_delay)
+                while not lock.is_set():
                     self.send_message(msg)
-                    time.sleep(polling_interval)
+                    await asyncio.sleep(polling_interval)
 
-            t = threading.Thread(target=poll)
-            t.start()
+            asyncio.get_running_loop().create_task(poll())
 
-        lock.acquire()
+        async def timeout_check():
+            await asyncio.sleep(timeout)
+            if not lock.is_set():
+                result.timeout = True
+                lock.set()
+
         uid = self.onevent(
             device=device,
             vector=vector,
@@ -279,17 +286,17 @@ class BaseClient:
             callback=cb,
         )
 
-        acquired = lock.acquire(timeout=timeout)
+        if timeout is not None and timeout > 0:
+            asyncio.get_running_loop().create_task(timeout_check())
+
+        await lock.wait()
 
         self.rmonevent(uuid=uid)
 
-        if lock.locked():
-            lock.release()
-
-        if not acquired:
+        if result.timeout:
             raise Exception("Timeout occurred")
 
-        return res_event["event"]
+        return result.event
 
     def trigger_event(self, event: events.BaseEvent):
         for callback in self.callbacks:
@@ -301,9 +308,7 @@ class BaseClient:
 
     def handshake(self, device=None, name=None, version=indi.__protocol_version__):
         self.send_message(
-            message.GetProperties(
-                version=indi.__protocol_version__, device=device, name=name
-            )
+            message.GetProperties(version=version, device=device, name=name)
         )
 
     def blob_handshake(self, device):
@@ -334,16 +339,23 @@ class Client(BaseClient):
             message.EnableBLOB(device=device, value=const.BLOBEnable.ONLY)
         )
 
-    def start(self):
+    async def start(self):
         """Starts client and connects to the server.
 
         Connects both connections (control and blob) and sends initial GetProperties message to the server.
         """
-        self.control_connection_handler = self.control_connection.connect(
+        self.control_connection_handler = await self.control_connection.connect(
             self.process_message
         )
-        self.blob_connection_handler = self.blob_connection.connect(
+        self.blob_connection_handler = await self.blob_connection.connect(
             self.process_message
+        )
+
+        asyncio.get_running_loop().create_task(
+            self.control_connection_handler.wait_for_messages()
+        )
+        asyncio.get_running_loop().create_task(
+            self.blob_connection_handler.wait_for_messages()
         )
 
         self.handshake()

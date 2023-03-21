@@ -6,10 +6,15 @@ from devices import *
 from indi.device.pool import default_pool
 from indi.routing import Router
 from indi.transport.server import TCP as TCPServer
+import asyncio
+
 
 router = Router()
 
-config.dictConfig({
+
+def configure_logging(router):
+    config.dictConfig(
+        {
             "version": 1,
             "disable_existing_loggers": False,
             "formatters": {
@@ -33,13 +38,20 @@ config.dictConfig({
             "loggers": {
                 "": {
                     "level": "DEBUG",
-                    "handlers": ["console", "indi",],
+                    "handlers": [
+                        "console",
+                        "indi",
+                    ],
                 },
             },
-        })
+        }
+    )
 
 
 default_pool.init(router)
 
 server = TCPServer(router=router)
-server.start()
+
+if __name__ == "__main__":
+    configure_logging(router)
+    asyncio.run(server.start())
