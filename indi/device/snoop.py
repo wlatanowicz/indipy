@@ -2,10 +2,11 @@ from typing import Optional
 
 from indi.client.client import BaseClient
 from indi.message import IndiMessage
+from indi.routing.client import Client as RoutingClient
 from indi.routing.router import Router
 
 
-class SnoopingClient(BaseClient):
+class SnoopingClient(BaseClient, RoutingClient):
     def __init__(self, router: Optional[Router]) -> None:
         super().__init__()
         self.router = router

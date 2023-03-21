@@ -2,7 +2,8 @@ import asyncio
 import logging
 from typing import List
 
-from indi.routing import Client
+from indi.message import IndiMessage
+from indi.routing import Client, Router
 from indi.transport import Buffer
 
 logger = logging.getLogger(__name__)
@@ -11,7 +12,9 @@ logger = logging.getLogger(__name__)
 class ConnectionHandler(Client):
     connections: List["ConnectionHandler"] = []
 
-    def __init__(self, reader, writer, router):
+    def __init__(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter, router: Router
+    ):
         self.buffer = Buffer()
         self.reader, self.writer = reader, writer
         self.router = router
@@ -20,7 +23,7 @@ class ConnectionHandler(Client):
             self.router.register_client(self)
 
     @classmethod
-    def handler(cls, router):
+    def handler(cls, router: Router):
         async def handler_func(reader, writer):
             conn = cls(reader, writer, router)
             cls.connections.append(conn)
@@ -41,21 +44,21 @@ class ConnectionHandler(Client):
             if not message:
                 logger.debug(f"TCP: no data, breaking")
                 break
-            logger.debug(f"TCP: got data: {message}")
+            logger.debug("TCP: got data: %s", message)
             self.buffer.append(message.decode("latin1"))
             self.buffer.process(self.message_from_client)
 
-    def message_from_client(self, message):
+    def message_from_client(self, message: IndiMessage):
         if self.router:
             self.router.process_message(message, sender=self)
 
-    def message_from_device(self, message):
+    def message_from_device(self, message: IndiMessage):
         data = message.to_string()
         asyncio.get_running_loop().create_task(self.send(data))
 
-    async def send(self, data):
+    async def send(self, data: bytes):
         async with self.sender_lock:
-            logger.debug(f"TCP: sending data: {data}")
+            logger.debug("TCP: sending data: %s", data)
             self.writer.write(data)
             await self.writer.drain()
 
@@ -66,13 +69,14 @@ class ConnectionHandler(Client):
 
 
 class TCP:
-    def __init__(self, address="0.0.0.0", port=7624, max_connections=5, router=None):
+    def __init__(self, router: Router, address="0.0.0.0", port=7624):
         self.address = address
         self.port = port
-        self.max_connections = max_connections
         self.router = router
 
-    async def client_connected(self, reader, writer):
+    async def client_connected(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ):
         handler = ConnectionHandler.handler(self.router)
         await handler(reader, writer)
 

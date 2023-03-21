@@ -1,5 +1,6 @@
 import logging
 import xml.etree.ElementTree as ET
+from typing import Callable
 
 from indi.message import IndiMessage
 
@@ -7,12 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class Buffer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.data = ""
-
         self.allowed_tags = [m.tag_name() for m in IndiMessage.__all_subclasses__()]
 
-    def append(self, data):
+    def append(self, data: str):
         self.data += data
 
     def _cleanup_buffer(self):
@@ -23,7 +23,7 @@ class Buffer:
         if start >= 0:
             self.data = self.data[start:]
 
-    def process(self, callback):
+    def process(self, callback: Callable[[IndiMessage], None]):
         self._cleanup_buffer()
         end = 0
         while len(self.data) > 0 and end >= 0:

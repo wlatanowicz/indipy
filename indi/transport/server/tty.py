@@ -1,16 +1,24 @@
 import asyncio
 import logging
+from typing import Optional
 
 import aiofiles
+from aiofiles.threadpool.text import AsyncTextIndirectIOWrapper
 
-from indi.routing import Client
+from indi.message import IndiMessage
+from indi.routing import Client, Router
 from indi.transport import Buffer
 
 logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler(Client):
-    def __init__(self, router, stdin, stdout):
+    def __init__(
+        self,
+        router: Router,
+        stdin: AsyncTextIndirectIOWrapper,
+        stdout: AsyncTextIndirectIOWrapper,
+    ) -> None:
         self.stdin = stdin
         self.stdout = stdout
         self.buffer = Buffer()
@@ -38,32 +46,35 @@ class ConnectionHandler(Client):
             self.buffer.append(message)
             self.buffer.process(self.message_from_client)
 
-    def message_from_client(self, message):
-        if self.router:
-            self.router.process_message(message, sender=self)
+    def message_from_client(self, message: IndiMessage):
+        self.router.process_message(message, sender=self)
 
-    def message_from_device(self, message):
+    def message_from_device(self, message: IndiMessage):
         data = message.to_string().decode("latin1")
         logger.debug("Sending data: %s", data)
         asyncio.get_running_loop().create_task(self._write(data))
 
     def close(self):
-        if self.router:
-            self.router.unregister_client(self)
+        self.router.unregister_client(self)
 
-    async def _read(self):
+    async def _read(self) -> str:
         return await self.stdin.readline()
 
-    async def _write(self, data):
+    async def _write(self, data: str):
         await self.stdout.write(data)
         await self.stdout.flush()
 
 
 class TTY:
-    def __init__(self, router=None, stdin=None, stdout=None):
+    def __init__(
+        self,
+        router: Router,
+        stdin: Optional[AsyncTextIndirectIOWrapper] = None,
+        stdout: Optional[AsyncTextIndirectIOWrapper] = None,
+    ) -> None:
         self.router = router
-        self.stdin = stdin or aiofiles.stdin
-        self.stdout = stdout or aiofiles.stdout
+        self.stdin: AsyncTextIndirectIOWrapper = stdin or aiofiles.stdin
+        self.stdout: AsyncTextIndirectIOWrapper = stdout or aiofiles.stdout
 
     async def start(self):
         logger.info("Starting INDIpy server on TTY")
