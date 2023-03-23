@@ -302,7 +302,10 @@ class BaseClient:
         for callback in self.callbacks:
             if callback.accepts_event(event):
                 try:
-                    callback.callback(event)
+                    if asyncio.iscoroutinefunction(callback.callback):
+                        asyncio.get_running_loop().create_task(callback.callback(event))
+                    else:
+                        callback.callback(event)
                 except:
                     logger.exception("Error in event handler")
 

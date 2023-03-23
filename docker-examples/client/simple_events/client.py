@@ -44,7 +44,7 @@ async def main_loop():
     control_connection = TCP(host, port)
     blob_connection = TCP(host, port)
 
-    def client_callback(event):
+    async def client_callback(event):
         print(event)
 
     client = Client(control_connection, blob_connection)
