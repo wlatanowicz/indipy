@@ -112,7 +112,7 @@ def test_device_process_new_text_vector_message():
     assert dev.main.text.txt.value == "ipsum"
 
 
-def test_device_process_new_text_vector_message():
+def test_device_process_new_blob_vector_message():
     msg = message.NewBLOBVector(
         device="DEVICE",
         name="BLOB",
