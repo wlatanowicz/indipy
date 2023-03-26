@@ -16,40 +16,79 @@ class Buffer:
         self.data += data
 
     def _cleanup_buffer(self):
-        start = len(self.data) - 1
-        for tag in self.allowed_tags:
-            start = min(start, self.data.find("<" + tag))
+        start = None
 
-        if start >= 0:
-            self.data = self.data[start:]
+        # find first occurrence of any known xml tag:
+        for tag in self.allowed_tags:
+            lookup = "<" + tag
+            found_pos = self.data.find(lookup)
+            if found_pos >= 0:
+                start = min(start, found_pos) if start is not None else found_pos
+
+            if start == 0:
+                break
+
+        if start is not None:
+            if start > 0:
+                self.data = self.data[start:]
+            return
+
+        # if no known tags found
+        # search for the last xml tag opening
+        # just in case it's the part of valid message
+        # and the rest will arrive soon
+        last_tag_pos = self.data.rfind("<")
+        if last_tag_pos >= 0:
+            start = last_tag_pos
+
+        if start is not None:
+            if start > 0:
+                self.data = self.data[start:]
+            return
+
+        # neither known tag nor xml opening found in the buffer
+        # we can safely assume everything is junk and discard it
+        self.data = ""
+
+    def _cleanup_beginning(self):
+        self.data = self.data[1:]
+        self._cleanup_buffer()
+
+    def _find_message_in_buffer(self):
+        end = 0
+        while end < len(self.data) - 1:
+            end = self.data.find(">", end)
+            if end < 0:
+                return None, None
+
+            end += 1
+
+            partial = self.data[:end]
+
+            try:
+                ET.fromstring(partial)
+                is_correct_xml = True
+            except ET.ParseError:
+                is_correct_xml = False
+
+            if is_correct_xml:
+                try:
+                    message = IndiMessage.from_string(partial)
+                    return message, end
+                except Exception:
+                    logger.warning("Buffer: Contents is not a valid message")
+        return None, None
 
     def process(self, callback: Callable[[IndiMessage], None]):
         self._cleanup_buffer()
-        end = 0
-        while len(self.data) > 0 and end >= 0:
-            end = self.data.find(">", end)
+        while self.data:
+            message, end = self._find_message_in_buffer()
+            if not message:
+                if len(self.data) > 1024:
+                    self._cleanup_beginning()
+                    continue
+                break
 
-            if end > 0:
-                end += 1
-                partial = self.data[0:end]
-
-                try:
-                    ET.fromstring(partial)
-                    is_correct_xml = True
-                except ET.ParseError:
-                    is_correct_xml = False
-
-                if is_correct_xml:
-                    self.data = self.data[end:]
-                    end = 0
-                    message = None
-                    try:
-                        message = IndiMessage.from_string(partial)
-                    except Exception:
-                        logger.warning("Buffer: Contents is not a valid message")
-
-                    if message:
-                        try:
-                            callback(message)
-                        except Exception:
-                            logger.exception("Error procesing message")
+            self.data = self.data[end:]
+            self._cleanup_buffer()
+            callback(message)

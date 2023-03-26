@@ -1,3 +1,4 @@
+import string
 from itertools import chain, combinations
 from random import choice, randint, random
 
@@ -16,7 +17,12 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
-noise_messages = ["<hbshjshjbsbjh />", "<asdF><aaaa/></asdF>"]
+noise_messages = [
+    "<hbshjshjbsbjh />",
+    "<asdF><aaaa/></asdF>",
+    '<getProperties version="1.0">',
+    "<asdf>",
+]
 
 raw_messages = [
     '<getProperties version="1.0" />',
@@ -35,6 +41,23 @@ indi_messages = [
         state=const.State.ALERT,
         children=[one_parts.OneText(name="EXPOSE_TIME", value="2.0")],
     ),
+]
+
+manual_test_cases = [
+    [
+        (
+            "junk",
+            "junk2",
+        ),
+        (),
+    ],
+    [
+        (
+            "junk",
+            raw_messages[0],
+        ),
+        (indi_messages[0],),
+    ],
 ]
 
 
@@ -63,12 +86,18 @@ def random_test_case(size, with_noise=False):
     )
 
 
+def random_string(length):
+    chars = string.ascii_letters + string.digits
+    return "".join(choice(chars) for i in range(length))
+
+
 def random_test_cases(count, size, with_noise=False):
     for _ in range(count):
-        yield random_test_case(size, with_noise=with_noise)
-
-
-manual_test_cases = []
+        input_strings, output_messages = random_test_case(size, with_noise=with_noise)
+        if with_noise:
+            noise_to_append = random_string(1024)
+            input_strings = input_strings + (noise_to_append,)
+        yield input_strings, output_messages
 
 
 @pytest.mark.parametrize(
@@ -124,6 +153,7 @@ def test_buffer_all_at_once(input_strings, expected_output_messages):
     assert tuple(expected_output_messages) == tuple(output_messages)
 
 
+# @pytest.mark.skip()
 @pytest.mark.parametrize(
     "input_strings,expected_output_messages",
     manual_test_cases
