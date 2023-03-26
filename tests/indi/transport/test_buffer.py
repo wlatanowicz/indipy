@@ -114,6 +114,7 @@ def test_buffer_individual_messages(input_strings, expected_output_messages):
     output_messages = []
 
     buffer = Buffer()
+    buffer.max_buffer_size_before_frontal_cleanup = 128
 
     def callback(msg):
         output_messages.append(msg)
@@ -140,6 +141,7 @@ def test_buffer_all_at_once(input_strings, expected_output_messages):
     output_messages = []
 
     buffer = Buffer()
+    buffer.max_buffer_size_before_frontal_cleanup = 128
 
     def callback(msg):
         output_messages.append(msg)
@@ -168,6 +170,7 @@ def test_buffer_random_length_reads(input_strings, expected_output_messages):
     output_messages = []
 
     buffer = Buffer()
+    buffer.max_buffer_size_before_frontal_cleanup = 128
 
     def callback(msg):
         output_messages.append(msg)

@@ -1,6 +1,7 @@
 from indi.message.base import IndiMessage
 
 
+@IndiMessage.register_message
 class OneLight(IndiMessage):
     from_device = True
 

@@ -11,6 +11,8 @@ class IndiMessage:
     from_device = False
     from_client = False
 
+    _message_classes: List[Type[IndiMessage]] = []
+
     def __init__(self, device=None, **junk):
         self.device = device
 
@@ -19,20 +21,20 @@ class IndiMessage:
         return cls.__name__[:1].lower() + cls.__name__[1:]
 
     @classmethod
-    def __all_subclasses__(cls) -> Tuple[Type[IndiMessage], ...]:
-        subclasses = []
-        for subclass in cls.__subclasses__():
-            subclasses.append(subclass)
-            for nested_subclass in subclass.__all_subclasses__():
-                subclasses.append(nested_subclass)
-        return tuple(subclasses)
+    def register_message(cls, message_class):
+        cls._message_classes.append(message_class)
+        return message_class
+
+    @classmethod
+    def all_message_classes(cls):
+        return cls._message_classes
 
     @classmethod
     def from_xml(cls, xml: ET.Element) -> IndiMessage:
         tag = xml.tag
         message_class = None
 
-        for subclass in cls.__all_subclasses__():
+        for subclass in cls.all_message_classes():
             if subclass.tag_name() == tag:
                 message_class = subclass
 

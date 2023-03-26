@@ -1,6 +1,7 @@
 from indi.message.base import IndiMessage
 
 
+@IndiMessage.register_message
 class PingReply(IndiMessage):
     from_client = True
 
@@ -9,6 +10,7 @@ class PingReply(IndiMessage):
         self.uid = uid
 
 
+@IndiMessage.register_message
 class PingRequest(IndiMessage):
     from_device = True
 

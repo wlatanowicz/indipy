@@ -4,6 +4,7 @@ from indi.message import checks, const
 from indi.message.base import IndiMessage
 
 
+@IndiMessage.register_message
 class EnableBLOB(IndiMessage):
     from_client = True
 

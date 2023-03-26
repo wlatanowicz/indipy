@@ -43,21 +43,26 @@ class SetVector(IndiMessage):
         self.children = checks.children(children, self.child_class)
 
 
+@IndiMessage.register_message
 class SetBLOBVector(SetVector):
     child_class = OneBLOB
 
 
+@IndiMessage.register_message
 class SetLightVector(SetVector):
     child_class = OneLight
 
 
+@IndiMessage.register_message
 class SetNumberVector(SetVector):
     child_class = OneNumber
 
 
+@IndiMessage.register_message
 class SetSwitchVector(SetVector):
     child_class = OneSwitch
 
 
+@IndiMessage.register_message
 class SetTextVector(SetVector):
     child_class = OneText
