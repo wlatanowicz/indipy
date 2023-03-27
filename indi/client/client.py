@@ -351,7 +351,7 @@ class Client(BaseClient):
             self.process_message
         )
         self.blob_connection_handler = await self.blob_connection.connect(
-            self.process_message
+            self.process_message, for_blobs=True
         )
 
         asyncio.get_running_loop().create_task(

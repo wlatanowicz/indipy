@@ -1,7 +1,7 @@
 import logging
 import xml.etree.ElementTree as ET
 from io import StringIO
-from typing import Callable
+from typing import Callable, Optional
 
 from indi.message import IndiMessage
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Buffer:
     def __init__(self) -> None:
-        self.max_buffer_size_before_frontal_cleanup = 2048
+        self.max_buffer_size_before_frontal_cleanup: Optional[int] = 2048
         self.buffer = StringIO()
         self.allowed_tags = [m.tag_name() for m in IndiMessage.all_message_classes()]
 
@@ -101,7 +101,7 @@ class Buffer:
         while self.data_len:
             message, end = self._find_message_in_buffer()
 
-            if not message:
+            if not message and self.max_buffer_size_before_frontal_cleanup is not None:
                 if self.data_len > self.max_buffer_size_before_frontal_cleanup:
                     self._cleanup_beginning()
                     continue
