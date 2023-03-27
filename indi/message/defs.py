@@ -58,18 +58,22 @@ class DefWritableVector(DefVector):
         self.timeout = timeout
 
 
+@IndiMessage.register_message
 class DefBLOBVector(DefWritableVector):
     children_class = DefBLOB
 
 
+@IndiMessage.register_message
 class DefLightVector(DefVector):
     children_class = DefLight
 
 
+@IndiMessage.register_message
 class DefNumberVector(DefWritableVector):
     children_class = DefNumber
 
 
+@IndiMessage.register_message
 class DefSwitchVector(DefWritableVector):
     children_class = DefSwitch
 
@@ -78,5 +82,6 @@ class DefSwitchVector(DefWritableVector):
         self.rule = checks.dictionary(rule, const.SwitchRule)
 
 
+@IndiMessage.register_message
 class DefTextVector(DefWritableVector):
     children_class = DefText

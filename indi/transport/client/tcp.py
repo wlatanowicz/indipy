@@ -14,8 +14,12 @@ class ConnectionHandler:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
         callback: Callable[[IndiMessage], None],
+        for_blobs=False,
     ):
         self.buffer = Buffer()
+        if for_blobs:
+            self.buffer.max_buffer_size_before_frontal_cleanup = None
+
         self.reader, self.writer = reader, writer
         self.callback = callback
         self.sender_lock = asyncio.Lock()
@@ -53,7 +57,7 @@ class TCP:
         self.address = address
         self.port = port
 
-    async def connect(self, callback: Callable[[IndiMessage], None]):
+    async def connect(self, callback: Callable[[IndiMessage], None], for_blobs=False):
         reader, writer = await asyncio.open_connection(self.address, self.port)
-        handler = ConnectionHandler(reader, writer, callback)
+        handler = ConnectionHandler(reader, writer, callback, for_blobs=for_blobs)
         return handler

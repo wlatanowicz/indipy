@@ -36,17 +36,21 @@ class NewVector(IndiMessage):
         self.children = checks.children(children, self.children_class)
 
 
+@IndiMessage.register_message
 class NewBLOBVector(NewVector):
     children_class = OneBLOB
 
 
+@IndiMessage.register_message
 class NewNumberVector(NewVector):
     children_class = OneNumber
 
 
+@IndiMessage.register_message
 class NewSwitchVector(NewVector):
     children_class = OneSwitch
 
 
+@IndiMessage.register_message
 class NewTextVector(NewVector):
     children_class = OneText

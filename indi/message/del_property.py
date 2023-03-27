@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from indi.message import TimestampType
 
 
+@IndiMessage.register_message
 class DelProperty(IndiMessage):
     from_device = True
 

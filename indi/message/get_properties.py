@@ -3,6 +3,7 @@ from typing import Optional
 from indi.message.base import IndiMessage
 
 
+@IndiMessage.register_message
 class GetProperties(IndiMessage):
     from_device = True
     from_client = True

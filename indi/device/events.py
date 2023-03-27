@@ -136,13 +136,34 @@ class BaseEvent:
         self.vector = vector
         self.element = element
         self.prevent_default = False
-        self.propagate = True
+
+    def __eq__(self, __value: object) -> bool:
+        return (
+            isinstance(__value, self.__class__)
+            and self.__class__ == __value.__class__
+            and self.vector == __value.vector
+            and self.element == __value.element
+            and self.prevent_default == __value.prevent_default
+        )
 
 
 class Write(BaseEvent):
     """Event raised after receiving new value from client.
 
     Can be used to write new value to physical device.
+
+    Event is raised after a message with new value is received.
+    It is not raised after new value is assigned in code.
+    To raise this event in code you should use element's
+    `set_value` method.
+
+    After the write logic is done you can set `event.prevent_default`
+    to True in event handler's body to skip setting of element's internal
+    state if you want to update internal state after the device confirms
+    the change of state (in a separate callback).
+
+    If you don't change `event.prevent_default` (default is False), the state
+    get's updated according to the new value and `Change` event is raised.
     """
 
     def __init__(self, element: Element, new_value) -> None:
@@ -151,11 +172,22 @@ class Write(BaseEvent):
         )
         self.new_value = new_value
 
+    def __eq__(self, __value: object) -> bool:
+        return (
+            super().__eq__(__value)
+            and isinstance(__value, self.__class__)
+            and self.new_value == __value.new_value
+        )
+
 
 class Read(BaseEvent):
     """Event raised before sending value to client.
 
     Can be used to read value from physical device.
+
+    After the read logic is complete, use `reset_value()` on the element to
+    synchronize it's internal state with device's state.
+    Don't assign value directly nor use `set_value()` - this will cause infinite recursion.
     """
 
     def __init__(self, element: Element) -> None:
@@ -165,7 +197,14 @@ class Read(BaseEvent):
 
 
 class Change(BaseEvent):
-    """Event raised on value change."""
+    """Event raised on value change.
+
+    This event is raised after the internal value of element state changes.
+    It's raised on both: changes caused by incoming messages and assigns of new values in code.
+
+    It is recommended to use `Read` and `Write` events to communicate with
+    physical device.
+    """
 
     def __init__(self, element: Element, old_value, new_value) -> None:
         super().__init__(
@@ -173,3 +212,11 @@ class Change(BaseEvent):
         )
         self.new_value = new_value
         self.old_value = old_value
+
+    def __eq__(self, __value: object) -> bool:
+        return (
+            super().__eq__(__value)
+            and isinstance(__value, self.__class__)
+            and self.new_value == __value.new_value
+            and self.old_value == __value.old_value
+        )
