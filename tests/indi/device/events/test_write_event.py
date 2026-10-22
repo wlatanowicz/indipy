@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import Mock
 
 from indi import message
@@ -70,3 +71,87 @@ def test_device_write_event_prevent_default():
 
     assert dev.main.text.txt.value == "lorem"
     assert dev.main.text.txt.value != new_value
+
+
+def _new_text(value: str) -> message.NewTextVector:
+    return message.NewTextVector(
+        device="DEVICE",
+        name="TEXT",
+        children=(one_parts.OneText(name="TXT", value=value),),
+    )
+
+
+def _device_with_coroutine_handler(side_effect):
+    class Device(Driver):
+        name = "DEVICE"
+
+        def __init__(self):
+            super().__init__()
+            self.side_effect = side_effect
+
+        main = properties.Group(
+            "MAIN",
+            vectors={
+                "text": properties.TextVector(
+                    "TEXT",
+                    elements={
+                        "txt": properties.Text("TXT", default="lorem"),
+                    },
+                ),
+            },
+        )
+
+        @on(main.text.txt, Write)
+        async def on_write(self, event):
+            await self.side_effect(event)
+
+    return Device()
+
+
+def test_coroutine_write_handler_prevent_default():
+    asyncio.run(_coroutine_write_handler_prevent_default())
+
+
+async def _coroutine_write_handler_prevent_default():
+    new_value = "ipsum"
+    released = asyncio.Event()
+
+    async def side_effect(event):
+        event.prevent_default = True
+        await released.wait()
+
+    dev = _device_with_coroutine_handler(side_effect)
+    assert dev.main.text.txt.value == "lorem"
+
+    dev.message_from_client(_new_text(new_value))
+    await asyncio.sleep(0)
+
+    assert not released.is_set()
+    assert dev.main.text.txt.value == "lorem"
+
+    released.set()
+    await asyncio.sleep(0)
+
+
+def test_coroutine_write_handler_publishes_before_handler_finishes():
+    asyncio.run(_coroutine_write_handler_publishes_before_handler_finishes())
+
+
+async def _coroutine_write_handler_publishes_before_handler_finishes():
+    new_value = "ipsum"
+    released = asyncio.Event()
+
+    async def side_effect(event):
+        await released.wait()
+
+    dev = _device_with_coroutine_handler(side_effect)
+    assert dev.main.text.txt.value == "lorem"
+
+    dev.message_from_client(_new_text(new_value))
+    await asyncio.sleep(0)
+
+    assert not released.is_set()
+    assert dev.main.text.txt.value == new_value
+
+    released.set()
+    await asyncio.sleep(0)

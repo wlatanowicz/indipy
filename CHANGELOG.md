@@ -8,6 +8,7 @@
 
 ### Fixes
 
+* Honor `prevent_default` on coroutine `Write` handlers. The client value is published only after each coroutine handler reaches its first await, and the read loop keeps running while the handler waits.
 * Ignore client `new*Vector` messages for an unknown property or element, and keep the TTY and TCP read loops running when one client message fails.
 * Serialize TTY writes so each INDI message is sent whole and in order.
 * Drop a well-formed XML element that is not a valid INDI message instead of leaving it in the read buffer.

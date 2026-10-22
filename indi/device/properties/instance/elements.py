@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import TYPE_CHECKING
 
@@ -77,10 +78,18 @@ class Element(EventSource):
             self.raise_event(e)
 
     def set_value(self, value):
-        e = events.Write(element=self, new_value=value)
-        self.raise_event(e)
+        event = events.Write(element=self, new_value=value)
+        scheduled = self.raise_event(event)
+        if scheduled:
+            # Coroutine handlers are queued ahead of this callback, so each
+            # one runs until its first await before the client value is published.
+            asyncio.get_running_loop().call_soon(self._commit_client_value, event, value)
+            return
+        if not event.prevent_default:
+            self.value = value
 
-        if not e.prevent_default:
+    def _commit_client_value(self, event: events.Write, value) -> None:
+        if not event.prevent_default:
             self.value = value
 
     def set_value_from_message(self, msg):

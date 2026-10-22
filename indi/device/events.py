@@ -44,15 +44,17 @@ class EventSourceProtocol(Protocol):
 class EventSource:
     """Mixin used in all event sources (Device, Vector, Element))"""
 
-    def raise_event(self: EventSourceProtocol, event: BaseEvent):
+    def raise_event(self: EventSourceProtocol, event: BaseEvent) -> list[asyncio.Task[None]]:
         event_type = event.__class__
         callbacks = self._definition.event_handlers.get(event_type, {})
+        scheduled: list[asyncio.Task[None]] = []
 
         for _uid, cb in callbacks.items():
             if asyncio.iscoroutinefunction(cb):
-                asyncio.get_running_loop().create_task(cb(event))
+                scheduled.append(asyncio.get_running_loop().create_task(cb(event)))
             else:
                 cb(event)
+        return scheduled
 
 
 def attach_event_handlers(obj: Driver):
@@ -150,13 +152,17 @@ class Write(BaseEvent):
     To raise this event in code you should use element's
     `set_value` method.
 
-    After the write logic is done you can set `event.prevent_default`
-    to True in event handler's body to skip setting of element's internal
-    state if you want to update internal state after the device confirms
-    the change of state (in a separate callback).
+    Set `event.prevent_default` to True to skip the element's internal
+    state update. Use that when the device confirms the change later
+    and a separate callback assigns the value.
 
-    If you don't change `event.prevent_default` (default is False), the state
-    get's updated according to the new value and `Change` event is raised.
+    A normal function must set the flag before it returns. A coroutine
+    must set it before its first await. Code after that await cannot
+    cancel publication of this client value, and it does not block the
+    server read loop.
+
+    If `event.prevent_default` stays False, the state is updated to the
+    new value and a `Change` event is raised.
     """
 
     def __init__(self, element: Element, new_value) -> None:
