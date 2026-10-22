@@ -35,7 +35,8 @@ TimestampType = NewType("TimestampType", str)
 
 
 def now() -> TimestampType:
-    return TimestampType(datetime.datetime.utcnow().isoformat())
+    moment = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
+    return TimestampType(moment.isoformat())
 
 
 __all__ = [
