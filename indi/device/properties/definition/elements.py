@@ -38,12 +38,18 @@ class Number(Element):
     default_value = 0.0
 
     def __init__(
-        self, *args, format="%f", min: float | None = None, max: float | None = None, step: float = 0, **kwargs
+        self,
+        *args,
+        format: str = "%f",
+        min: float | None = 0.0,
+        max: float | None = 0.0,
+        step: float = 0,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.format = format
-        self.min = min
-        self.max = max
+        self.min = 0.0 if min is None else min
+        self.max = 0.0 if max is None else max
         self.step = step
 
 
