@@ -77,10 +77,19 @@ class Element(EventSource):
             self.raise_event(e)
 
     def set_value(self, value):
-        e = events.Write(element=self, new_value=value)
-        self.raise_event(e)
+        event = events.Write(element=self, new_value=value)
+        scheduled = self.raise_event(event)
+        if scheduled or self.vector.has_pending_client_commit():
+            # Coroutine steps are queued ahead of the commit. A later write on
+            # this vector, including one with only synchronous handlers, waits
+            # behind it so client order is preserved.
+            self.vector.defer_client_commit(lambda: self._commit_client_value(event, value))
+            return
+        if not event.prevent_default:
+            self.value = value
 
-        if not e.prevent_default:
+    def _commit_client_value(self, event: events.Write, value) -> None:
+        if not event.prevent_default:
             self.value = value
 
     def set_value_from_message(self, msg):
