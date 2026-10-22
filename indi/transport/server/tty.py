@@ -22,6 +22,7 @@ class ConnectionHandler(Client):
         self.stdout = stdout
         self.buffer = Buffer()
         self.router = router
+        self.sender_lock = asyncio.Lock()
         if self.router:
             self.router.register_client(self)
 
@@ -60,8 +61,9 @@ class ConnectionHandler(Client):
         return await self.stdin.readline()
 
     async def _write(self, data: str):
-        await self.stdout.write(data)
-        await self.stdout.flush()
+        async with self.sender_lock:
+            await self.stdout.write(data)
+            await self.stdout.flush()
 
 
 class TTY:
