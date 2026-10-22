@@ -56,6 +56,10 @@ Add tests under `tests/indi/...` as pytest functions. Use an inline dummy `Drive
 
 User-visible changes get a note in `CHANGELOG.md` under the current version, using the existing headings: Features, Breaking changes, Fixes.
 
+## GitHub issues
+
+When the task comes from a GitHub issue, fetch first, then create a fresh branch from `origin/master`. After the work is finished, open a pull request.
+
 ## Leave alone unless asked
 
 - Do not rewrite `QUICKSTART.md` to fix typos or examples.
