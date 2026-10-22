@@ -94,6 +94,7 @@ class Buffer:
                     return message, end
                 except Exception:
                     logger.warning("Buffer: Contents is not a valid message")
+                    return None, end
         return None, None
 
     def process(self, callback: Callable[[IndiMessage], None]):
@@ -101,12 +102,16 @@ class Buffer:
         while self.data_len:
             message, end = self._find_message_in_buffer()
 
-            if not message and self.max_buffer_size_before_frontal_cleanup is not None:
-                if self.data_len > self.max_buffer_size_before_frontal_cleanup:
+            if end is None:
+                if (
+                    self.max_buffer_size_before_frontal_cleanup is not None
+                    and self.data_len > self.max_buffer_size_before_frontal_cleanup
+                ):
                     self._cleanup_beginning()
                     continue
                 break
 
             self.data = self.data[end:]
             self._cleanup_buffer()
-            callback(message)
+            if message is not None:
+                callback(message)

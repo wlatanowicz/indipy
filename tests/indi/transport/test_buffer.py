@@ -175,3 +175,36 @@ def test_buffer_random_length_reads(input_strings, expected_output_messages):
 
     assert len(expected_output_messages) == len(output_messages)
     assert tuple(expected_output_messages) == tuple(output_messages)
+
+
+def test_buffer_drops_invalid_element_and_delivers_following_message():
+    output_messages = []
+    buffer = Buffer()
+
+    invalid = (
+        '<setNumberVector device="cam" name="FOO" state="Ok"><oneNumber name="X">nope</oneNumber></setNumberVector>'
+    )
+    valid = '<getProperties version="1.0" />'
+    buffer.append(invalid + valid)
+
+    buffer.process(output_messages.append)
+
+    assert output_messages == [message.GetProperties(version="1.0")]
+    assert not buffer.data.startswith("<setNumberVector")
+
+
+def test_buffer_keeps_partial_element_until_it_is_complete():
+    output_messages = []
+    buffer = Buffer()
+    partial = '<getProperties version="1.0"'
+    buffer.append(partial)
+
+    buffer.process(output_messages.append)
+
+    assert output_messages == []
+    assert buffer.data == partial
+
+    buffer.append(" />")
+    buffer.process(output_messages.append)
+
+    assert output_messages == [message.GetProperties(version="1.0")]
