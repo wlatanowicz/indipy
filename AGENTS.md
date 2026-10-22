@@ -8,7 +8,7 @@ INDIpy is a Python implementation of the INDI protocol (Instrument Neutral Distr
 
 - Import name: `indi`. PyPI name: `indipy`.
 - Protocol version: `1.7` (`indi/__init__.py`, `__protocol_version__`).
-- Package version: `indi/VERSION` (currently `0.4-dev`). `.github/workflows/release.yml` overwrites that file from the git tag on publish. Do not bump it by hand.
+- Package version: `indi/VERSION` (currently `0.4-dev`). `pyproject.toml` reads that file as the dynamic version, and `indi/__init__.py` reads it into `__version__`. `.github/workflows/release.yml` overwrites the file from the git tag before building. A leading `v` on the tag is stripped. Do not bump it by hand.
 - Since 0.4 the runtime is asyncio only. Server and client entrypoints are coroutines and are started with `asyncio.run()`.
 
 ## Layout
@@ -25,19 +25,17 @@ Property shape is group → vector → element. Definitions live in `indi/device
 
 ## Commands
 
-CI in `.github/workflows/tests.yml` is the source of truth. The project manifest is `setup.py` plus `requirements/`. Keep that layout.
+CI in `.github/workflows/tests.yml` is the source of truth. The project manifest is `pyproject.toml`. Commit `uv.lock`. `uv sync` and `uv run` install and run tests, ruff, and mypy.
 
 ```bash
-pip install -r requirements/tests.txt
-pip install -r requirements/types.txt
-pip install -r requirements/lint.txt
-python -m black --check indi
-python -m isort --profile black indi
-python -m mypy indi
-python -m pytest tests
+uv sync
+uv run ruff check indi tests
+uv run ruff format --check indi tests
+uv run mypy indi
+uv run pytest tests
 ```
 
-Pins in `requirements/lint.txt`: `black==22.3.0`, `isort==5.11.5`, `mypy==1.1.1`. Black, isort, and mypy cover `indi/` only. `python_requires` and CI still include Python 3.7. `tox.ini` installs a non-existent extra `.[d]`; do not treat tox as the check command.
+`requires-python` is `>=3.11`. Ruff is pinned at `ruff==0.9.9` and checks `indi/` and `tests/`. mypy checks `indi/` only.
 
 ## Invariants
 
@@ -50,7 +48,7 @@ Keep these unless the task explicitly changes them:
 - Driver property shape: definition versus instance, group → vector → element, switch rules in `indi/message/const.py`.
 - Async entrypoints. Event callbacks may be functions or coroutines. Coroutines are scheduled with `asyncio.get_running_loop().create_task`.
 - Public driver and client API. 0.4 already removed threads; do not add another breaking change in passing.
-- Packaging: `find_packages` excludes `tests*` and `docker-examples`. `MANIFEST.in` ships `indi/VERSION` and `requirements/*.txt`.
+- Packaging: `pyproject.toml` includes `indi*` and excludes `tests*` and `docker-examples*`. The version is dynamic from `indi/VERSION`. `MANIFEST.in` ships `indi/VERSION`.
 
 ## Tests and changelog
 
@@ -61,6 +59,5 @@ User-visible changes get a note in `CHANGELOG.md` under the current version, usi
 ## Leave alone unless asked
 
 - Do not rewrite `QUICKSTART.md` to fix typos or examples.
-- Do not migrate packaging to `pyproject.toml` or uv.
 - Do not bump `indi/VERSION`.
-- Do not restyle or reformat modules outside the change. Formatters apply to `indi/` only, with the pinned tool versions above.
+- Do not restyle or reformat modules outside the change. Ruff checks `indi/` and `tests/`.

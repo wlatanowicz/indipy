@@ -1,10 +1,8 @@
-from typing import Optional
-
 from indi.device import Driver, properties
 from indi.device.events import Change, on
 from indi.device.properties import standard
 from indi.message import GetProperties, IndiMessage
-from indi.transport.client.tcp import TCP as TCPClient
+from indi.transport.client.tcp import TCP
 
 
 class Proxy(Driver):
@@ -14,19 +12,19 @@ class Proxy(Driver):
     All devices from remote server become visible in INDIpy.
     """
 
-    address: Optional[str] = None
+    address: str | None = None
     port = 7624
 
     general = properties.Group(
         "GENERAL",
-        vectors=dict(
-            connection=standard.common.Connection(),
-        ),
+        vectors={
+            "connection": standard.common.Connection(),
+        },
     )
 
     def __init__(self, *args, **kwargs):
         self._connection = None
-        self._client = TCPClient(self.address, self.port)
+        self._client = TCP(self.address, self.port)
         super().__init__(*args, **kwargs)
 
     def message_from_client(self, message: IndiMessage):
@@ -40,7 +38,7 @@ class Proxy(Driver):
         if self._router:
             self._router.process_message(message, self)
 
-    def accepts(self, device: Optional[str]):
+    def accepts(self, device: str | None):
         return True
 
     @on(general.connection.connect, Change)

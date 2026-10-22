@@ -1,5 +1,3 @@
-from typing import Tuple, Type, Union
-
 from indi import message
 from indi.client import elements
 from indi.client.events import StateUpdate
@@ -7,21 +5,21 @@ from indi.message import checks
 
 
 class Vector:
-    def_message_class: Type[message.DefVector]
-    set_message_class: Union[
-        Type[message.SetBLOBVector],
-        Type[message.SetLightVector],
-        Type[message.SetNumberVector],
-        Type[message.SetSwitchVector],
-        Type[message.SetTextVector],
-    ]
-    new_message_class: Union[
-        Type[message.NewBLOBVector],
-        Type[message.NewNumberVector],
-        Type[message.NewSwitchVector],
-        Type[message.NewTextVector],
-    ]
-    children_class: Type[elements.Element]
+    def_message_class: type[message.DefVector]
+    set_message_class: (
+        type[message.SetBLOBVector]
+        | type[message.SetLightVector]
+        | type[message.SetNumberVector]
+        | type[message.SetSwitchVector]
+        | type[message.SetTextVector]
+    )
+    new_message_class: (
+        type[message.NewBLOBVector]
+        | type[message.NewNumberVector]
+        | type[message.NewSwitchVector]
+        | type[message.NewTextVector]
+    )
+    children_class: type[elements.Element]
 
     def __init__(self, device, msg: message.DefVector):
         self.group = msg.group
@@ -57,8 +55,8 @@ class Vector:
     def get_element(self, name):
         return self.elements.get(name)
 
-    def list_elements(self) -> Tuple[str, ...]:
-        return tuple(str(key) for key in self.elements.keys())
+    def list_elements(self) -> tuple[str, ...]:
+        return tuple(str(key) for key in self.elements)
 
     def process_message(self, msg):
         if isinstance(msg, self.set_message_class):
@@ -76,7 +74,7 @@ class Vector:
 
     def submit(self):
         ch = []
-        for k, el in self.elements.items():
+        for _k, el in self.elements.items():
             if el.has_new_value:
                 ch.append(el.to_new_message())
                 el.reset_new_value()

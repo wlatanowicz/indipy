@@ -17,10 +17,10 @@ def Connection(
     return properties.SwitchVector(
         name="CONNECTION",
         default_on=default,
-        elements=dict(
-            connect=properties.Switch(name="CONNECT"),
-            disconnect=properties.Switch(name="DISCONNECT"),
-        ),
+        elements={
+            "connect": properties.Switch(name="CONNECT"),
+            "disconnect": properties.Switch(name="DISCONNECT"),
+        },
     )
 
 
@@ -34,14 +34,8 @@ def DriverInfo(name=None, exec=None, version=None, interface=None):
     elements = {
         "name": properties.TextVector.element_class(name="DRIVER_NAME", default=name),
         "exec": properties.TextVector.element_class(name="DRIVER_EXEC", default=exec),
-        "version": properties.TextVector.element_class(
-            name="DRIVER_VERSION", default=version
-        ),
-        "interface": properties.TextVector.element_class(
-            name="DRIVER_INTERFACE", default=interface
-        ),
+        "version": properties.TextVector.element_class(name="DRIVER_VERSION", default=version),
+        "interface": properties.TextVector.element_class(name="DRIVER_INTERFACE", default=interface),
     }
 
-    return properties.TextVector(
-        "DRIVER_INFO", elements=elements, perm=const.Permissions.READ_ONLY
-    )
+    return properties.TextVector("DRIVER_INFO", elements=elements, perm=const.Permissions.READ_ONLY)

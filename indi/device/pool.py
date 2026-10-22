@@ -1,5 +1,3 @@
-from typing import Dict, List, Type
-
 from indi.device import Driver
 from indi.routing import Router
 
@@ -11,10 +9,10 @@ class DevicePool:
     """
 
     def __init__(self) -> None:
-        self.device_classes: List[type] = []
-        self.devices: Dict[str, Driver] = {}
+        self.device_classes: list[type] = []
+        self.devices: dict[str, Driver] = {}
 
-    def register(self, device_class: Type[Driver]) -> Type[Driver]:
+    def register(self, device_class: type[Driver]) -> type[Driver]:
         """Register device
 
         Register device driver class in device pool.

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING
 
 from indi.message import checks, const
 from indi.message.base import IndiMessage
@@ -19,20 +19,18 @@ if TYPE_CHECKING:
 
 class DefVector(IndiMessage):
     from_device = True
-    children_class: Union[
-        Type[DefBLOB], Type[DefLight], Type[DefNumber], Type[DefSwitch], Type[DefText]
-    ]
+    children_class: type[DefBLOB] | type[DefLight] | type[DefNumber] | type[DefSwitch] | type[DefText]
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         device: str,
         name: str,
         state: const.StateType,
-        label: Optional[str] = None,
-        group: Optional[str] = None,
-        timestamp: Optional[TimestampType] = None,
-        message: Optional[str] = None,
-        children: Optional[Tuple[DefIndiMessagePart, ...]] = None,
+        label: str | None = None,
+        group: str | None = None,
+        timestamp: TimestampType | None = None,
+        message: str | None = None,
+        children: tuple[DefIndiMessagePart, ...] | None = None,
         **junk,
     ):
         super().__init__(device)
@@ -50,7 +48,7 @@ class DefWritableVector(DefVector):
         self,
         *args,
         perm: const.PermissionsType,
-        timeout: Optional[TimestampType] = None,
+        timeout: TimestampType | None = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)

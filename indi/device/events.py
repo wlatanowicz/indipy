@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Type, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from typing_extensions import Protocol
@@ -18,14 +19,10 @@ EventCallbackType = Callable[["BaseEvent"], None]
 
 class EventSourceDefinition:
     def __init__(self) -> None:
-        self.event_handlers: Dict[
-            Type[BaseEvent], Dict[uuid.UUID, EventCallbackType]
-        ] = {}
+        self.event_handlers: dict[type[BaseEvent], dict[uuid.UUID, EventCallbackType]] = {}
         super().__init__()
 
-    def attach_event_handler(
-        self, event_type: Type[BaseEvent], callback: EventCallbackType
-    ) -> uuid.UUID:
+    def attach_event_handler(self, event_type: type[BaseEvent], callback: EventCallbackType) -> uuid.UUID:
         if event_type not in self.event_handlers:
             self.event_handlers[event_type] = {}
 
@@ -41,8 +38,7 @@ class EventSourceDefinition:
 
 class EventSourceProtocol(Protocol):
     @property
-    def _definition(self) -> EventSourceDefinition:
-        ...
+    def _definition(self) -> EventSourceDefinition: ...
 
 
 class EventSource:
@@ -52,7 +48,7 @@ class EventSource:
         event_type = event.__class__
         callbacks = self._definition.event_handlers.get(event_type, {})
 
-        for uid, cb in callbacks.items():
+        for _uid, cb in callbacks.items():
             if asyncio.iscoroutinefunction(cb):
                 asyncio.get_running_loop().create_task(cb(event))
             else:
@@ -69,11 +65,7 @@ def attach_event_handlers(obj: Driver):
     :param obj: Instance of device definition
     :type obj: object
     """
-    for f in [
-        getattr(obj, fn)
-        for fn in dir(obj)
-        if hasattr(obj, fn) and callable(getattr(obj, fn))
-    ]:
+    for f in [getattr(obj, fn) for fn in dir(obj) if hasattr(obj, fn) and callable(getattr(obj, fn))]:
         if hasattr(f, "event_handler_attachments"):
             attachments = f.event_handler_attachments
             assert isinstance(attachments, list)
@@ -84,14 +76,20 @@ def attach_event_handlers(obj: Driver):
 
 
 class EventHandlerAttachment:
-    def __init__(self, src: EventSourceDefinition, event_type: Type[BaseEvent]) -> None:
+    def __init__(self, src: EventSourceDefinition, event_type: type[BaseEvent]) -> None:
         self.src = src
         self.event_type = event_type
 
 
+class _EventHandler(Protocol):
+    event_handler_attachments: list[EventHandlerAttachment]
+
+    def __call__(self, event: BaseEvent) -> None: ...
+
+
 def on(
-    src: Union[EventSourceDefinition, List[EventSourceDefinition]],
-    event_type: Type[BaseEvent],
+    src: EventSourceDefinition | list[EventSourceDefinition],
+    event_type: type[BaseEvent],
 ):
     """Decorator with arguments used to mark instance methods as events handlers.
 
@@ -104,19 +102,14 @@ def on(
     """
 
     def wrapper(fn: EventCallbackType):
-        if not hasattr(fn, "event_handler_attachments"):
-            event_handler_attachments: List[EventHandlerAttachment] = []
-            setattr(fn, "event_handler_attachments", event_handler_attachments)
+        handler = cast(_EventHandler, fn)
+        if not hasattr(handler, "event_handler_attachments"):
+            handler.event_handler_attachments = []
 
-        if isinstance(src, list):
-            sources = src
-        else:
-            sources = [src]
+        sources = src if isinstance(src, list) else [src]
 
         for s in sources:
-            getattr(fn, "event_handler_attachments").append(
-                EventHandlerAttachment(s, event_type)
-            )
+            handler.event_handler_attachments.append(EventHandlerAttachment(s, event_type))
 
         return fn
 
@@ -128,9 +121,9 @@ class BaseEvent:
 
     def __init__(
         self,
-        device: Optional[Driver] = None,
-        vector: Optional[Vector] = None,
-        element: Optional[Element] = None,
+        device: Driver | None = None,
+        vector: Vector | None = None,
+        element: Element | None = None,
     ) -> None:
         self.device = device
         self.vector = vector
@@ -167,17 +160,11 @@ class Write(BaseEvent):
     """
 
     def __init__(self, element: Element, new_value) -> None:
-        super().__init__(
-            element=element, vector=element.vector, device=element.vector.device
-        )
+        super().__init__(element=element, vector=element.vector, device=element.vector.device)
         self.new_value = new_value
 
     def __eq__(self, __value: object) -> bool:
-        return (
-            super().__eq__(__value)
-            and isinstance(__value, self.__class__)
-            and self.new_value == __value.new_value
-        )
+        return super().__eq__(__value) and isinstance(__value, self.__class__) and self.new_value == __value.new_value
 
 
 class Read(BaseEvent):
@@ -191,9 +178,7 @@ class Read(BaseEvent):
     """
 
     def __init__(self, element: Element) -> None:
-        super().__init__(
-            element=element, vector=element.vector, device=element.vector.device
-        )
+        super().__init__(element=element, vector=element.vector, device=element.vector.device)
 
 
 class Change(BaseEvent):
@@ -207,9 +192,7 @@ class Change(BaseEvent):
     """
 
     def __init__(self, element: Element, old_value, new_value) -> None:
-        super().__init__(
-            element=element, vector=element.vector, device=element.vector.device
-        )
+        super().__init__(element=element, vector=element.vector, device=element.vector.device)
         self.new_value = new_value
         self.old_value = old_value
 

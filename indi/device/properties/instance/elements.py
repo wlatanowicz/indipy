@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Tuple, Type, Union
+from typing import TYPE_CHECKING
 
 from indi.device import events, values
 from indi.device.events import EventSource
@@ -16,21 +16,21 @@ logger = logging.getLogger(__name__)
 
 
 class Element(EventSource):
-    def_message_class: Union[
-        Type[def_parts.DefSwitch],
-        Type[def_parts.DefNumber],
-        Type[def_parts.DefLight],
-        Type[def_parts.DefBLOB],
-        Type[def_parts.DefText],
-    ]
-    set_message_class: Union[
-        Type[one_parts.OneSwitch],
-        Type[one_parts.OneNumber],
-        Type[one_parts.OneLight],
-        Type[one_parts.OneBLOB],
-        Type[one_parts.OneText],
-    ]
-    allowed_value_types: Tuple[Type, ...] = (None.__class__,)
+    def_message_class: (
+        type[def_parts.DefSwitch]
+        | type[def_parts.DefNumber]
+        | type[def_parts.DefLight]
+        | type[def_parts.DefBLOB]
+        | type[def_parts.DefText]
+    )
+    set_message_class: (
+        type[one_parts.OneSwitch]
+        | type[one_parts.OneNumber]
+        | type[one_parts.OneLight]
+        | type[one_parts.OneBLOB]
+        | type[one_parts.OneText]
+    )
+    allowed_value_types: tuple[type, ...] = (None.__class__,)
 
     def __init__(self, vector: Vector, definition):
         self._vector = vector
@@ -66,9 +66,7 @@ class Element(EventSource):
 
     @value.setter
     def value(self, value):
-        logger.debug(
-            "Element: setting value of element %s to %s", self._definition.name, value
-        )
+        logger.debug("Element: setting value of element %s to %s", self._definition.name, value)
         prev_value = self._value
         self.check_value_type(value)
         self._value = self.check_value(value)
@@ -95,9 +93,9 @@ class Element(EventSource):
         return value
 
     def check_value_type(self, value):
-        assert isinstance(
-            value, self.allowed_value_types
-        ), f"Value of {self.name} should be of type {self.allowed_value_types}"
+        assert isinstance(value, self.allowed_value_types), (
+            f"Value of {self.name} should be of type {self.allowed_value_types}"
+        )
 
     def to_def_message(self):
         return self.def_message_class(
@@ -113,10 +111,7 @@ class Element(EventSource):
 class Number(Element):
     def_message_class = def_parts.DefNumber
     set_message_class = one_parts.OneNumber
-    allowed_value_types = (
-        int,
-        float,
-    ) + Element.allowed_value_types
+    allowed_value_types = (int, float, *Element.allowed_value_types)
 
     def to_def_message(self):
         return self.def_message_class(
@@ -142,13 +137,13 @@ class Number(Element):
 class Text(Element):
     def_message_class = def_parts.DefText
     set_message_class = one_parts.OneText
-    allowed_value_types = (str,) + Element.allowed_value_types
+    allowed_value_types = (str, *Element.allowed_value_types)
 
 
 class Switch(Element):
     def_message_class = def_parts.DefSwitch
     set_message_class = one_parts.OneSwitch
-    allowed_value_types = (str,) + Element.allowed_value_types
+    allowed_value_types = (str, *Element.allowed_value_types)
 
     def check_value(self, value):
         value = checks.dictionary(value, const.SwitchState)
@@ -169,7 +164,7 @@ class Switch(Element):
 class Light(Element):
     def_message_class = def_parts.DefLight
     set_message_class = one_parts.OneLight
-    allowed_value_types = (str,) + Element.allowed_value_types
+    allowed_value_types = (str, *Element.allowed_value_types)
 
     def check_value(self, value):
         return checks.dictionary(value, const.State)
@@ -178,13 +173,11 @@ class Light(Element):
 class BLOB(Element):
     def_message_class = def_parts.DefBLOB
     set_message_class = one_parts.OneBLOB
-    allowed_value_types = (values.BLOB,) + Element.allowed_value_types
+    allowed_value_types = (values.BLOB, *Element.allowed_value_types)
 
     def to_set_message(self):
         if self.value is None:
-            return self.set_message_class(
-                name=self._definition.name, value=None, format=None, size=None
-            )
+            return self.set_message_class(name=self._definition.name, value=None, format=None, size=None)
         return self.set_message_class(
             name=self._definition.name,
             value=self.value.binary_base64,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from indi.message.const import State, SwitchState
 
@@ -13,9 +13,9 @@ if TYPE_CHECKING:
 class BaseEvent:
     def __init__(
         self,
-        device: Optional[Device] = None,
-        vector: Optional[Vector] = None,
-        element: Optional[Element] = None,
+        device: Device | None = None,
+        vector: Vector | None = None,
+        element: Element | None = None,
     ):
         self.device = device
         self.vector = vector
@@ -42,9 +42,7 @@ class DefinitionUpdate(BaseEvent):
 
 class ValueUpdate(BaseEvent):
     def __init__(self, element: Element, old_value, new_value):
-        super().__init__(
-            device=element.vector.device, vector=element.vector, element=element
-        )
+        super().__init__(device=element.vector.device, vector=element.vector, element=element)
         self.old_value = old_value
         self.new_value = new_value
 
@@ -93,7 +91,4 @@ class StateUpdate(BaseEvent):
             State.BUSY: "🟡",
             State.ALERT: "🔴",
         }
-        return (
-            super().__str__()
-            + f" {state_icons[self.old_state]} → {state_icons[self.new_state]}"
-        )
+        return super().__str__() + f" {state_icons[self.old_state]} → {state_icons[self.new_state]}"

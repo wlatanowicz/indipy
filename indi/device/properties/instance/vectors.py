@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type, Union, cast
+from typing import TYPE_CHECKING, cast
 
 from indi import message
 from indi.device.properties.instance.elements import Element, Switch
@@ -14,32 +14,28 @@ if TYPE_CHECKING:
 
 
 class Vector:
-    def_message_class: Type[message.DefVector]
-    set_message_class: Union[
-        Type[message.SetBLOBVector],
-        Type[message.SetLightVector],
-        Type[message.SetNumberVector],
-        Type[message.SetSwitchVector],
-        Type[message.SetTextVector],
-    ]
-    new_message_class: Union[
-        Type[message.NewBLOBVector],
-        Type[message.NewNumberVector],
-        Type[message.NewSwitchVector],
-        Type[message.NewTextVector],
-    ]
+    def_message_class: type[message.DefVector]
+    set_message_class: (
+        type[message.SetBLOBVector]
+        | type[message.SetLightVector]
+        | type[message.SetNumberVector]
+        | type[message.SetSwitchVector]
+        | type[message.SetTextVector]
+    )
+    new_message_class: (
+        type[message.NewBLOBVector]
+        | type[message.NewNumberVector]
+        | type[message.NewSwitchVector]
+        | type[message.NewTextVector]
+    )
 
     def __init__(self, group: Group, definition: VectorDefinition) -> None:
         self._state = definition.state
         self._enabled = definition.enabled
         self._group = group
         self._definition = definition
-        self._elements: Dict[str, Element] = {
-            k: v.instance(self) for k, v in definition.elements.items()
-        }
-        self._elements_by_name: Dict[str, Element] = {
-            v.name: v for k, v in self._elements.items()
-        }
+        self._elements: dict[str, Element] = {k: v.instance(self) for k, v in definition.elements.items()}
+        self._elements_by_name: dict[str, Element] = {v.name: v for k, v in self._elements.items()}
 
     def __getattr__(self, item: str):
         element = self._elements.get(item)
@@ -79,7 +75,7 @@ class Vector:
         self._state = checks.dictionary(value, const.State)
         self.device.send_message(self.to_set_message())
 
-    def to_def_message(self) -> Union[message.DefVector, message.DelProperty]:
+    def to_def_message(self) -> message.DefVector | message.DelProperty:
         if not self.enabled:
             return message.DelProperty(
                 device=self.device.name,
@@ -87,9 +83,7 @@ class Vector:
                 timestamp=message.now(),
             )
 
-        elements = tuple(
-            e.to_def_message() for k, e in self._elements.items() if e.enabled
-        )
+        elements = tuple(e.to_def_message() for k, e in self._elements.items() if e.enabled)
         return self.def_message_class(
             device=self.device.name,
             name=self._definition.name,
@@ -102,13 +96,11 @@ class Vector:
             children=elements,
         )
 
-    def to_set_message(self) -> Optional[message.SetVector]:
+    def to_set_message(self) -> message.SetVector | None:
         if not self.enabled:
             return None
 
-        elements = tuple(
-            e.to_set_message() for k, e in self._elements.items() if e.enabled
-        )
+        elements = tuple(e.to_set_message() for k, e in self._elements.items() if e.enabled)
         return self.set_message_class(
             device=self.device.name,
             name=self._definition.name,
@@ -156,8 +148,8 @@ class SwitchVector(Vector):
         self.selected_values = [value]
 
     @property
-    def selected_values(self) -> Tuple[str, ...]:
-        elements = cast(Dict[str, Switch], self._elements)
+    def selected_values(self) -> tuple[str, ...]:
+        elements = cast(dict[str, Switch], self._elements)
         return tuple(el.name for el in elements.values() if el.bool_value)
 
     @selected_values.setter
@@ -166,8 +158,8 @@ class SwitchVector(Vector):
             if v not in self._elements_by_name:
                 raise Exception(f"Vector {self.name} does not have element {v}")
 
-        elements = cast(Dict[str, Switch], self._elements)
-        for k, el in elements:
+        elements = cast(dict[str, Switch], self._elements)
+        for _k, el in elements:
             new_value = el.name in values
             if el.bool_value != new_value:
                 el.bool_value = new_value
@@ -180,7 +172,7 @@ class SwitchVector(Vector):
             if v not in self._elements_by_name:
                 raise Exception()
 
-        for k, el in self._elements.items():
+        for _k, el in self._elements.items():
             el.reset_bool_value(el.name in values)
 
     def apply_rule(self, sender: Switch, new_value):
@@ -189,26 +181,17 @@ class SwitchVector(Vector):
                 const.SwitchRule.AT_MOST_ONE,
                 const.SwitchRule.ONE_OF_MANY,
             ):
-                for k, el in self._elements.items():
+                for _k, el in self._elements.items():
                     if el != sender and el._value == const.SwitchState.ON:
                         el._value = const.SwitchState.OFF
-        else:
-            if self._definition.rule in (const.SwitchRule.ONE_OF_MANY,):
-                if (
-                    len(
-                        [
-                            el
-                            for k, el in self._elements.items()
-                            if el != sender and el._value == const.SwitchState.ON
-                        ]
-                    )
-                    <= 0
-                ):
-                    new_value = const.SwitchState.ON
+        elif self._definition.rule in (const.SwitchRule.ONE_OF_MANY,) and (
+            len([el for k, el in self._elements.items() if el != sender and el._value == const.SwitchState.ON]) <= 0
+        ):
+            new_value = const.SwitchState.ON
 
         return new_value
 
-    def to_def_message(self) -> Union[message.DefVector, message.DelProperty]:
+    def to_def_message(self) -> message.DefVector | message.DelProperty:
         if not self.enabled:
             return message.DelProperty(
                 device=self.device.name,

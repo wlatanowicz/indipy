@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Breaking changes
+
+* Packaging now uses `pyproject.toml` and uv. `requires-python` is `>=3.11`. black and isort are replaced by ruff.
+
 ## 0.4.0
 
 Goodbye threads. Welcome async.

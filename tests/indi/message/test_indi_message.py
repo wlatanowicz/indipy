@@ -30,9 +30,7 @@ messages = [
         ),
     ),
     (
-        b'<newTextVector device="CAMERA" name="EXPOSE">'
-        b'<oneText name="EXPOSE_TIME">2.0</oneText>'
-        b"</newTextVector>",
+        b'<newTextVector device="CAMERA" name="EXPOSE"><oneText name="EXPOSE_TIME">2.0</oneText></newTextVector>',
         message.NewTextVector(
             device="CAMERA",
             name="EXPOSE",
@@ -54,14 +52,13 @@ messages = [
 ]
 
 
-@pytest.mark.parametrize("in_xml, in_msg", messages)
+@pytest.mark.parametrize(("in_xml", "in_msg"), messages)
 def test_from_string(in_xml, in_msg):
     msg = message.IndiMessage.from_string(in_xml)
-    # self.assertDictEqual(in_msg.__dict__, msg.__dict__)
     assert in_msg == msg
 
 
-@pytest.mark.parametrize("in_xml, in_msg", messages)
+@pytest.mark.parametrize(("in_xml", "in_msg"), messages)
 def test_to_string(in_xml, in_msg):
     xml = in_msg.to_string()
     expected = xml_header + in_xml + b"\n"

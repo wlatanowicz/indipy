@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING
 
 from indi.message import checks
 from indi.message.base import IndiMessage
@@ -17,17 +17,15 @@ if TYPE_CHECKING:
 
 
 class NewVector(IndiMessage):
-    children_class: Union[
-        Type[OneBLOB], Type[OneNumber], Type[OneSwitch], Type[OneText]
-    ]
+    children_class: type[OneBLOB] | type[OneNumber] | type[OneSwitch] | type[OneText]
     from_client = True
 
     def __init__(
         self,
         device: str,
         name: str,
-        timestamp: Optional[TimestampType] = None,
-        children: Optional[Tuple[IndiMessagePart, ...]] = None,
+        timestamp: TimestampType | None = None,
+        children: tuple[IndiMessagePart, ...] | None = None,
         **junk,
     ):
         super().__init__(device)

@@ -1,5 +1,3 @@
-from typing import Dict, Optional, Tuple, Type, Union
-
 from indi.device.events import EventSourceDefinition
 from indi.device.properties.const import (
     Permissions,
@@ -22,18 +20,18 @@ from indi.message import const
 
 
 class Vector(EventSourceDefinition):
-    element_class: Type[Element]
-    instance_class: Type[instance_vectors.Vector]
+    element_class: type[Element]
+    instance_class: type[instance_vectors.Vector]
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
-        label: Optional[str] = None,
+        label: str | None = None,
         state: StateType = State.OK,
         perm: PermissionsType = Permissions.READ_WRITE,
         timeout: float = 0,
         enabled: bool = True,
-        elements: Optional[Dict[str, Element]] = None,
+        elements: dict[str, Element] | None = None,
     ):
         super().__init__()
         self.name = name
@@ -47,9 +45,7 @@ class Vector(EventSourceDefinition):
             raise Exception("No vector elements declared")
 
         for k, element in elements.items():
-            if self.__class__.element_class and not isinstance(
-                element, self.__class__.element_class
-            ):
+            if self.__class__.element_class and not isinstance(element, self.__class__.element_class):
                 raise Exception(
                     f"Element '{k}' of vector {self.name} of type {self.__class__.__name__} "
                     f"is expected to be of type {self.__class__.element_class.__name__}, "
@@ -89,14 +85,14 @@ class SwitchVector(Vector):
         self,
         *args,
         rule: SwitchRuleType = SwitchRule.ONE_OF_MANY,
-        default_on: Optional[Union[str, Tuple[str, ...]]] = None,
+        default_on: str | tuple[str, ...] | None = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.rule = rule
         if default_on is not None:
             default_on = (default_on,) if isinstance(default_on, str) else default_on
-            for k, el in self.elements.items():
+            for _k, el in self.elements.items():
                 if el.name in default_on:
                     el.default = const.SwitchState.ON
 

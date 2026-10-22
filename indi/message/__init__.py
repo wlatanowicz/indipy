@@ -36,3 +36,34 @@ TimestampType = NewType("TimestampType", str)
 
 def now() -> TimestampType:
     return TimestampType(datetime.datetime.utcnow().isoformat())
+
+
+__all__ = [
+    "DefBLOBVector",
+    "DefLightVector",
+    "DefNumberVector",
+    "DefSwitchVector",
+    "DefTextVector",
+    "DefVector",
+    "DelProperty",
+    "EnableBLOB",
+    "GetProperties",
+    "IndiMessage",
+    "Message",
+    "NewBLOBVector",
+    "NewNumberVector",
+    "NewSwitchVector",
+    "NewTextVector",
+    "NewVector",
+    "OneLight",
+    "PingReply",
+    "PingRequest",
+    "SetBLOBVector",
+    "SetLightVector",
+    "SetNumberVector",
+    "SetSwitchVector",
+    "SetTextVector",
+    "SetVector",
+    "TimestampType",
+    "now",
+]

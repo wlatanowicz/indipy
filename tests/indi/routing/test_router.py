@@ -1,10 +1,9 @@
 from unittest import mock
-from unittest.mock import patch
 
 import pytest
 
 from indi import message
-from indi.routing import Device, Router
+from indi.routing import Router
 
 messages = [
     ("SOME_DEVICE", ((True, True), (False, False))),
@@ -12,7 +11,7 @@ messages = [
 ]
 
 
-@pytest.mark.parametrize("message_device, device_specs", messages)
+@pytest.mark.parametrize(("message_device", "device_specs"), messages)
 def test_message_from_client(message_device, device_specs):
     devices = [
         {

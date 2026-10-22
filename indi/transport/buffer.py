@@ -1,7 +1,7 @@
 import logging
 import xml.etree.ElementTree as ET
+from collections.abc import Callable
 from io import StringIO
-from typing import Callable, Optional
 
 from indi.message import IndiMessage
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Buffer:
     def __init__(self) -> None:
-        self.max_buffer_size_before_frontal_cleanup: Optional[int] = 2048
+        self.max_buffer_size_before_frontal_cleanup: int | None = 2048
         self.buffer = StringIO()
         self.allowed_tags = [m.tag_name() for m in IndiMessage.all_message_classes()]
 
