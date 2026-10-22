@@ -10,6 +10,7 @@
 
 * Serialize TTY writes so each INDI message is sent whole and in order.
 * Drop a well-formed XML element that is not a valid INDI message instead of leaving it in the read buffer.
+* Forward device traffic for every enableBLOB policy. Never drops setBLOBVector and still sends defBLOBVector. Also sends every message. Only sends defBLOBVector and setBLOBVector.
 
 ## 0.4.0
 
