@@ -26,8 +26,8 @@ class YieldingStdout:
         self.events.append(("write-end", data))
 
     async def flush(self) -> None:
-        self.events.append("flush")
         await asyncio.sleep(0)
+        self.events.append("flush")
 
 
 def test_overlapping_tty_writes_stay_whole_and_in_order():
