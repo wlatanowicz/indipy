@@ -8,6 +8,7 @@
 
 ### Fixes
 
+* Ignore client `new*Vector` messages for an unknown property or element, and keep the TTY and TCP read loops running when one client message fails.
 * Serialize TTY writes so each INDI message is sent whole and in order.
 * Drop a well-formed XML element that is not a valid INDI message instead of leaving it in the read buffer.
 * Forward device traffic for every enableBLOB policy. Never drops setBLOBVector and still sends defBLOBVector. Also sends every message. Only sends defBLOBVector and setBLOBVector.

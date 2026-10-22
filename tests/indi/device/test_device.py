@@ -80,6 +80,49 @@ def test_device_process_new_number_vector_message():
     assert dev.main.number.num.value == 200
 
 
+def test_device_ignores_new_number_vector_for_unknown_property():
+    missing = message.NewNumberVector(
+        device="DEVICE",
+        name="MISSING",
+        children=(one_parts.OneNumber(name="NUM", value=50),),
+    )
+    valid = message.NewNumberVector(
+        device="DEVICE",
+        name="NUMBER",
+        children=(one_parts.OneNumber(name="NUM", value=200),),
+    )
+
+    dev = DummyDevice()
+
+    dev.message_from_client(missing)
+
+    assert dev.main.number.num.value == 100
+    assert dev.main.number.snum.value == 100
+
+    dev.message_from_client(valid)
+
+    assert dev.main.number.num.value == 200
+    assert dev.main.number.snum.value == 100
+
+
+def test_device_ignores_unknown_element_in_new_number_vector():
+    msg = message.NewNumberVector(
+        device="DEVICE",
+        name="NUMBER",
+        children=(
+            one_parts.OneNumber(name="MISSING", value=50),
+            one_parts.OneNumber(name="NUM", value=200),
+        ),
+    )
+
+    dev = DummyDevice()
+
+    dev.message_from_client(msg)
+
+    assert dev.main.number.num.value == 200
+    assert dev.main.number.snum.value == 100
+
+
 def test_device_process_new_number_vector_message_sexagesimal():
     msg = message.NewNumberVector(
         device="DEVICE",

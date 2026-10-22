@@ -47,8 +47,12 @@ class ConnectionHandler(Client):
             self.buffer.process(self.message_from_client)
 
     def message_from_client(self, message: IndiMessage):
-        if self.router:
+        if not self.router:
+            return
+        try:
             self.router.process_message(message, sender=self)
+        except Exception:
+            logger.exception("Error handling client message")
 
     def message_from_device(self, message: IndiMessage):
         data = message.to_string()
