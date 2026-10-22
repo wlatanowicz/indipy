@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, cast
 
 from indi import message
@@ -11,6 +12,8 @@ if TYPE_CHECKING:
     from indi.device.properties.definition.vectors import Vector as VectorDefinition
     from indi.device.properties.instance.elements import Switch
     from indi.device.properties.instance.group import Group
+
+logger = logging.getLogger(__name__)
 
 
 class Vector:
@@ -112,7 +115,11 @@ class Vector:
 
     def from_new_message(self, msg: message.NewVector):
         for child in msg.children:
-            self._elements_by_name[child.name].set_value_from_message(child)
+            element = self._elements_by_name.get(child.name)
+            if element is None:
+                logger.warning("Vector: ignoring unknown element %s in property %s", child.name, self.name)
+                continue
+            element.set_value_from_message(child)
 
 
 class NumberVector(Vector):

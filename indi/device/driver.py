@@ -100,4 +100,7 @@ class Driver(Device, metaclass=DriverMeta):
                 self.send_message(v.to_def_message())
 
         if isinstance(msg, message.news.NewVector):
+            if msg.name not in self._vectors:
+                logger.warning("Driver: ignoring new vector for unknown property %s on %s", msg.name, self.name)
+                return
             self._vectors[msg.name].from_new_message(msg)

@@ -1,7 +1,7 @@
 import asyncio
 from unittest.mock import Mock
 
-from indi.message import DelProperty
+from indi.message import DelProperty, IndiMessage
 from indi.routing import Router
 from indi.transport.server.tty import ConnectionHandler
 
@@ -61,3 +61,44 @@ async def _send_two_messages():
         ("write-end", second_text),
         "flush",
     ]
+
+
+class _ScriptedStdin:
+    def __init__(self, lines: list[str]) -> None:
+        self._lines = list(lines)
+
+    async def readline(self) -> str:
+        if not self._lines:
+            return ""
+        return self._lines.pop(0)
+
+
+class _RaisingRouter:
+    def __init__(self) -> None:
+        self.names: list[str | None] = []
+
+    def register_client(self, client: object) -> None:
+        pass
+
+    def process_message(self, message: IndiMessage, sender: object = None) -> None:
+        self.names.append(message.name)
+        if message.name == "BAD":
+            raise RuntimeError("bad message")
+
+
+def test_tty_read_loop_continues_after_handler_error():
+    asyncio.run(_tty_survives_bad_message())
+
+
+async def _tty_survives_bad_message():
+    router = _RaisingRouter()
+    chunk = (
+        '<getProperties version="1.0" device="Camera" name="BAD" />'
+        '<getProperties version="1.0" device="Camera" name="GOOD" />\n'
+    )
+    stdin = _ScriptedStdin([chunk])
+    handler = ConnectionHandler(router, stdin=stdin, stdout=Mock())
+
+    await handler.wait_for_messages()
+
+    assert router.names == ["BAD", "GOOD"]
