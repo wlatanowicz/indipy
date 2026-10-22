@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import xml.etree.cElementTree as ET
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+import xml.etree.ElementTree as ET
+from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
     from indi.message import TimestampType
@@ -11,7 +11,7 @@ class IndiMessage:
     from_device = False
     from_client = False
 
-    _message_classes: List[Type[IndiMessage]] = []
+    _message_classes: ClassVar[list[type[IndiMessage]]] = []
 
     def __init__(self, device=None, **junk):
         self.device = device
@@ -41,11 +41,9 @@ class IndiMessage:
         if not message_class:
             raise Exception(f"Invalid message: {tag}")
 
-        kwargs: Dict[str, Any] = xml.attrib
+        kwargs: dict[str, Any] = xml.attrib
 
-        children: Tuple[ET.Element, ...] = tuple(
-            IndiMessagePart.from_xml(child) for child in xml
-        )
+        children: tuple[ET.Element, ...] = tuple(IndiMessagePart.from_xml(child) for child in xml)
         if children:
             kwargs["children"] = children
 
@@ -116,9 +114,9 @@ class Message(IndiMessage):
 
     def __init__(
         self,
-        device: Optional[str] = None,
-        timestamp: Optional[TimestampType] = None,
-        message: Optional[str] = None,
+        device: str | None = None,
+        timestamp: TimestampType | None = None,
+        message: str | None = None,
         **junk,
     ):
         super().__init__(device)
@@ -167,11 +165,7 @@ class IndiMessagePart:
         return message_class(**kwargs)
 
     def to_xml(self, parent):
-        kwargs = {
-            k: str(v)
-            for k, v in self.__dict__.items()
-            if v is not None and k not in ("value",)
-        }
+        kwargs = {k: str(v) for k, v in self.__dict__.items() if v is not None and k not in ("value",)}
 
         element = ET.SubElement(parent, self.__class__.tag_name(), **kwargs)
         if self.value is not None:
@@ -180,11 +174,7 @@ class IndiMessagePart:
         return element
 
     def to_dict(self):
-        res = {
-            k: str(v)
-            for k, v in sorted(self.__dict__.items())
-            if v is not None and k not in ("value",)
-        }
+        res = {k: str(v) for k, v in sorted(self.__dict__.items()) if v is not None and k not in ("value",)}
 
         if getattr(self, "value", None) is not None:
             res["_value"] = str(self.value)

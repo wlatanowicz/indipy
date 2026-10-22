@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple
+from typing import TYPE_CHECKING
 
 from indi import message
 from indi.client.events import DefinitionUpdate
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Device:
     def __init__(self, client: BaseClient, name: str):
-        self.vectors: Dict[str, Vector] = {}
+        self.vectors: dict[str, Vector] = {}
         self.client = client
         self.name = name
 
@@ -22,11 +22,11 @@ class Device:
     def __contains__(self, key) -> bool:
         return key in self.vectors
 
-    def get_vector(self, name) -> Optional[Vector]:
+    def get_vector(self, name) -> Vector | None:
         return self.vectors.get(name)
 
-    def list_vectors(self) -> Tuple[str, ...]:
-        return tuple(str(key) for key in self.vectors.keys())
+    def list_vectors(self) -> tuple[str, ...]:
+        return tuple(str(key) for key in self.vectors)
 
     def set_vector(self, name: str, vector: Vector):
         self.vectors[name] = vector

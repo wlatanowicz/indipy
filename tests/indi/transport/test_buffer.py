@@ -28,7 +28,7 @@ raw_messages = [
     '<getProperties version="1.0" />',
     '<getProperties version="1.0" device="Camera" />',
     '<getProperties version="1.0" device="Camera" name="EXPOSURE" />',
-    '<setTextVector device="CAMERA" name="EXPOSE" state="Alert"><oneText name="EXPOSE_TIME">2.0</oneText></setTextVector>',
+    '<setTextVector device="CAMERA" name="EXPOSE" state="Alert"><oneText name="EXPOSE_TIME">2.0</oneText></setTextVector>',  # noqa: E501
 ]
 
 indi_messages = [
@@ -96,19 +96,15 @@ def random_test_cases(count, size, with_noise=False):
         input_strings, output_messages = random_test_case(size, with_noise=with_noise)
         if with_noise:
             noise_to_append = random_string(1024)
-            input_strings = input_strings + (noise_to_append,)
+            input_strings = (*input_strings, noise_to_append)
         yield input_strings, output_messages
 
 
 @pytest.mark.parametrize(
-    "input_strings,expected_output_messages",
+    ("input_strings", "expected_output_messages"),
     manual_test_cases
     + list(random_test_cases(NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE))
-    + list(
-        random_test_cases(
-            NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE, with_noise=True
-        )
-    ),
+    + list(random_test_cases(NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE, with_noise=True)),
 )
 def test_buffer_individual_messages(input_strings, expected_output_messages):
     output_messages = []
@@ -128,14 +124,10 @@ def test_buffer_individual_messages(input_strings, expected_output_messages):
 
 
 @pytest.mark.parametrize(
-    "input_strings,expected_output_messages",
+    ("input_strings", "expected_output_messages"),
     manual_test_cases
     + list(random_test_cases(NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE))
-    + list(
-        random_test_cases(
-            NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE, with_noise=True
-        )
-    ),
+    + list(random_test_cases(NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE, with_noise=True)),
 )
 def test_buffer_all_at_once(input_strings, expected_output_messages):
     output_messages = []
@@ -157,14 +149,10 @@ def test_buffer_all_at_once(input_strings, expected_output_messages):
 
 # @pytest.mark.skip()
 @pytest.mark.parametrize(
-    "input_strings,expected_output_messages",
+    ("input_strings", "expected_output_messages"),
     manual_test_cases
     + list(random_test_cases(NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE))
-    + list(
-        random_test_cases(
-            NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE, with_noise=True
-        )
-    ),
+    + list(random_test_cases(NUM_RANDOM_TEST_CASES, NUM_MESSAGES_IN_RANDOM_TEST_CASE, with_noise=True)),
 )
 def test_buffer_random_length_reads(input_strings, expected_output_messages):
     output_messages = []

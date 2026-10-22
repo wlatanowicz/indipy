@@ -1,7 +1,7 @@
-from os import path
+from pathlib import Path
 
-with open(path.join(path.dirname(__file__), "VERSION")) as f:
-    __version__ = f.read().strip()
+with (Path(__file__).parent / "VERSION").open() as version_file:
+    __version__ = version_file.read().strip()
 
 __protocol_version__ = "1.7"
 

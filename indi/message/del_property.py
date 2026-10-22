@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from indi.message.base import IndiMessage
 
@@ -15,9 +15,9 @@ class DelProperty(IndiMessage):
     def __init__(
         self,
         device: str,
-        name: Optional[str] = None,
-        timestamp: Optional[TimestampType] = None,
-        message: Optional[str] = None,
+        name: str | None = None,
+        timestamp: TimestampType | None = None,
+        message: str | None = None,
         **junk,
     ):
         super().__init__(device)

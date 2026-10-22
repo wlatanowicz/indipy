@@ -2,7 +2,7 @@ from indi.device import properties
 from indi.device.properties import const
 
 
-def Exposure(
+def Exposure(  # noqa: PLR0913
     label=None,
     default=0,
     min=0,
@@ -15,11 +15,7 @@ def Exposure(
 ):
     return properties.NumberVector(
         name="CCD_EXPOSURE",
-        elements=dict(
-            time=properties.Number(
-                name="CCD_EXPOSURE_VALUE", default=default, min=min, max=max, step=step
-            )
-        ),
+        elements={"time": properties.Number(name="CCD_EXPOSURE_VALUE", default=default, min=min, max=max, step=step)},
     )
 
 
@@ -35,9 +31,9 @@ def UploadMode(
         name="UPLOAD_MODE",
         default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
-        elements=dict(
-            client=properties.Switch(name="UPLOAD_CLIENT"),
-            local=properties.Switch(name="UPLOAD_LOCAL"),
-            both=properties.Switch(name="UPLOAD_BOTH"),
-        ),
+        elements={
+            "client": properties.Switch(name="UPLOAD_CLIENT"),
+            "local": properties.Switch(name="UPLOAD_LOCAL"),
+            "both": properties.Switch(name="UPLOAD_BOTH"),
+        },
     )

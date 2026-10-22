@@ -1,11 +1,9 @@
-from typing import Optional
-
 from indi.message import checks, const
 from indi.message.base import IndiMessagePart
 
 
 class DefIndiMessagePart(IndiMessagePart):
-    def __init__(self, name: str, value=None, label: Optional[str] = None, **junk):
+    def __init__(self, name: str, value=None, label: str | None = None, **junk):
         super().__init__(name=name, value=value)
         self.label = label
 
@@ -20,16 +18,8 @@ class DefLight(DefIndiMessagePart):
 
 
 class DefNumber(DefIndiMessagePart):
-    def __init__(
-        self,
-        name: str,
-        format,
-        min: float,
-        max: float,
-        step: float,
-        value=None,
-        label: Optional[str] = None,
-        **junk
+    def __init__(  # noqa: PLR0913
+        self, name: str, format, min: float, max: float, step: float, value=None, label: str | None = None, **junk
     ):
         super().__init__(name=name, value=value, label=label)
         self.format = format

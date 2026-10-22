@@ -1,14 +1,12 @@
-from typing import Optional, Type
-
 from indi.client.events import ValueUpdate
 from indi.device import values
 from indi.message import def_parts, one_parts
 
 
 class Element:
-    def_message_class: Optional[Type[def_parts.DefIndiMessagePart]] = None
-    set_message_class: Optional[Type[one_parts.IndiMessagePart]] = None
-    new_message_class: Optional[Type[one_parts.IndiMessagePart]] = None
+    def_message_class: type[def_parts.DefIndiMessagePart] | None = None
+    set_message_class: type[one_parts.IndiMessagePart] | None = None
+    new_message_class: type[one_parts.IndiMessagePart] | None = None
 
     @classmethod
     def from_message(cls, vector, msg):
@@ -88,8 +86,6 @@ class BLOB(Element):
 
     def set_value_from_message(self, msg):
         blob_value = values.BLOB.from_base64(msg.value, msg.format)
-        assert (
-            int(msg.size) == blob_value.size
-        ), f"Blob size differs: {msg.size} declared vs {blob_value.size} measured"
+        assert int(msg.size) == blob_value.size, f"Blob size differs: {msg.size} declared vs {blob_value.size} measured"
 
         self._value = blob_value

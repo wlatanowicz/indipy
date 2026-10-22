@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import List
+from typing import ClassVar
 
 from indi.message import IndiMessage
 from indi.routing import Client, Router
@@ -10,11 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionHandler(Client):
-    connections: List["ConnectionHandler"] = []
+    connections: ClassVar[list["ConnectionHandler"]] = []
 
-    def __init__(
-        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter, router: Router
-    ):
+    def __init__(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter, router: Router):
         self.buffer = Buffer()
         self.reader, self.writer = reader, writer
         self.router = router
@@ -29,7 +27,7 @@ class ConnectionHandler(Client):
             cls.connections.append(conn)
             try:
                 await conn.wait_for_messages()
-            except:
+            except Exception:
                 logger.exception("Error in client handler loop")
 
             conn.close()
@@ -39,10 +37,10 @@ class ConnectionHandler(Client):
 
     async def wait_for_messages(self):
         while True:
-            logger.debug(f"TCP: waiting for data")
+            logger.debug("TCP: waiting for data")
             message = await self.reader.read(1024)
             if not message:
-                logger.debug(f"TCP: no data, breaking")
+                logger.debug("TCP: no data, breaking")
                 break
             logger.debug("TCP: got data: %s", message)
             self.buffer.append(message.decode("latin1"))
@@ -74,17 +72,13 @@ class TCP:
         self.port = port
         self.router = router
 
-    async def client_connected(
-        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
+    async def client_connected(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         handler = ConnectionHandler.handler(self.router)
         await handler(reader, writer)
 
     async def start(self):
         logger.info("Starting async TCP INDI server on %s:%s", self.address, self.port)
-        server = await asyncio.start_server(
-            self.client_connected, self.address, self.port
-        )
+        server = await asyncio.start_server(self.client_connected, self.address, self.port)
 
         try:
             async with server:

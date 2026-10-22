@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from typing import Optional
 
 import aiofiles
 from aiofiles.threadpool.text import AsyncTextIndirectIOWrapper
@@ -29,7 +28,7 @@ class ConnectionHandler(Client):
     async def handle(self):
         try:
             await self.wait_for_messages()
-        except:
+        except Exception:
             logger.exception("Error in client handler loop")
 
         logger.info("Stopping INDIpy server on TTY")
@@ -37,10 +36,10 @@ class ConnectionHandler(Client):
 
     async def wait_for_messages(self):
         while True:
-            logger.debug(f"Waiting for data")
+            logger.debug("Waiting for data")
             message = await self._read()
             if not message:
-                logger.debug(f"No data, exiting")
+                logger.debug("No data, exiting")
                 break
             logger.debug("Received data: %s", message)
             self.buffer.append(message)
@@ -69,8 +68,8 @@ class TTY:
     def __init__(
         self,
         router: Router,
-        stdin: Optional[AsyncTextIndirectIOWrapper] = None,
-        stdout: Optional[AsyncTextIndirectIOWrapper] = None,
+        stdin: AsyncTextIndirectIOWrapper | None = None,
+        stdout: AsyncTextIndirectIOWrapper | None = None,
     ) -> None:
         self.router = router
         self.stdin: AsyncTextIndirectIOWrapper = stdin or aiofiles.stdin

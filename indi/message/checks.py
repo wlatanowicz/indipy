@@ -16,9 +16,7 @@ def children(value, child_class):
 
 def dictionary(value, dictionary_class):
     if value not in dictionary_class.__dict__.values():
-        raise ValueError(
-            'Invalid value: "%s" not found in %s', value, dictionary_class.__name__
-        )
+        raise ValueError('Invalid value: "%s" not found in %s', value, dictionary_class.__name__)
     return value
 
 
@@ -36,7 +34,7 @@ def number(value):
     if value is None:
         return None
 
-    if not any([re.match(r, str(value)) for r in regexps]):
+    if not any(re.match(r, str(value)) for r in regexps):
         raise ValueError("Invalid value for number: %s", value)
 
     return value

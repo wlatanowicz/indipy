@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, Union, cast
+from typing import TypeAlias
 
 from indi.message import EnableBLOB, IndiMessage, NewBLOBVector, const
 from indi.routing import Client, Device
@@ -7,7 +7,7 @@ from indi.routing import Client, Device
 logger = logging.getLogger(__name__)
 
 
-SenderType = Optional[Union[Client, Device]]
+SenderType: TypeAlias = Client | Device | None
 
 
 class Router:
@@ -21,11 +21,9 @@ class Router:
     DEFAULT_BLOB_POLICY = const.BLOBEnable.NEVER
 
     def __init__(self) -> None:
-        self.clients: List[Client] = []
-        self.devices: List[Device] = []
-        self.blob_routing: Dict[
-            SenderType, Dict[Optional[str], const.BLOBEnableType]
-        ] = {}
+        self.clients: list[Client] = []
+        self.devices: list[Device] = []
+        self.blob_routing: dict[SenderType, dict[str | None, const.BLOBEnableType]] = {}
 
     @classmethod
     def instance(cls):
@@ -56,16 +54,14 @@ class Router:
                 self.process_enable_blob(message, sender)
 
             for device in self.devices:
-                if not device == sender and device.accepts(message.device):
+                if device != sender and device.accepts(message.device):
                     device.message_from_client(message)
 
         if message.from_device:
             for client in self.clients:
-                if not client == sender:
-                    device_name = getattr(message, "device")
-                    client_blob_policy = self.blob_routing.get(client, {}).get(
-                        device_name, self.DEFAULT_BLOB_POLICY
-                    )
+                if client != sender:
+                    device_name = message.device
+                    client_blob_policy = self.blob_routing.get(client, {}).get(device_name, self.DEFAULT_BLOB_POLICY)
                     if (
                         is_blob
                         and client_blob_policy

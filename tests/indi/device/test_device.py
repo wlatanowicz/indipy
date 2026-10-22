@@ -10,37 +10,37 @@ class DummyDevice(Driver):
 
     main = properties.Group(
         "MAIN",
-        vectors=dict(
-            switch=properties.SwitchVector(
+        vectors={
+            "switch": properties.SwitchVector(
                 "SWITCH",
                 rule=properties.SwitchVector.RULES.ONE_OF_MANY,
                 default_on="FIRST",
-                elements=dict(
-                    first=properties.Switch("FIRST"),
-                    second=properties.Switch("SECOND"),
-                    third=properties.Switch("THIRD"),
-                ),
+                elements={
+                    "first": properties.Switch("FIRST"),
+                    "second": properties.Switch("SECOND"),
+                    "third": properties.Switch("THIRD"),
+                },
             ),
-            number=properties.NumberVector(
+            "number": properties.NumberVector(
                 "NUMBER",
-                elements=dict(
-                    num=properties.Number("NUM", default=100),
-                    snum=properties.Number("SNUM", default=100, format="%.3m"),
-                ),
+                elements={
+                    "num": properties.Number("NUM", default=100),
+                    "snum": properties.Number("SNUM", default=100, format="%.3m"),
+                },
             ),
-            text=properties.TextVector(
+            "text": properties.TextVector(
                 "TEXT",
-                elements=dict(
-                    txt=properties.Text("TXT", default="lorem"),
-                ),
+                elements={
+                    "txt": properties.Text("TXT", default="lorem"),
+                },
             ),
-            blob=properties.BLOBVector(
+            "blob": properties.BLOBVector(
                 "BLOB",
-                elements=dict(
-                    blb=properties.BLOB("BLB"),
-                ),
+                elements={
+                    "blb": properties.BLOB("BLB"),
+                },
             ),
-        ),
+        },
     )
 
 
@@ -116,11 +116,7 @@ def test_device_process_new_blob_vector_message():
     msg = message.NewBLOBVector(
         device="DEVICE",
         name="BLOB",
-        children=(
-            one_parts.OneBLOB(
-                name="BLB", value="TG9yZW0gaXBzdW0=", format=".txt", size=11
-            ),
-        ),
+        children=(one_parts.OneBLOB(name="BLB", value="TG9yZW0gaXBzdW0=", format=".txt", size=11),),
     )
 
     dev = DummyDevice()
@@ -165,11 +161,7 @@ def test_device_sends_set_blob_vector_message():
         device="DEVICE",
         name="BLOB",
         state=const.State.OK,
-        children=(
-            one_parts.OneBLOB(
-                name="BLB", value="TG9yZW0gaXBzdW0=", size=11, format=".txt"
-            ),
-        ),
+        children=(one_parts.OneBLOB(name="BLB", value="TG9yZW0gaXBzdW0=", size=11, format=".txt"),),
     )
 
     router_mock.process_message.assert_called_once()

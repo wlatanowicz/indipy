@@ -1,4 +1,4 @@
-from typing import Any, Optional, Type, Union
+from typing import Any
 
 from indi.device.events import EventSourceDefinition
 from indi.device.properties.instance import elements as instance_elements
@@ -7,19 +7,19 @@ from indi.message import const
 
 
 class Element(EventSourceDefinition):
-    instance_class: Union[
-        Type[instance_elements.BLOB],
-        Type[instance_elements.Light],
-        Type[instance_elements.Number],
-        Type[instance_elements.Switch],
-        Type[instance_elements.Text],
-    ]
+    instance_class: (
+        type[instance_elements.BLOB]
+        | type[instance_elements.Light]
+        | type[instance_elements.Number]
+        | type[instance_elements.Switch]
+        | type[instance_elements.Text]
+    )
     default_value: Any
 
     def __init__(
         self,
         name: str,
-        label: Optional[str] = None,
+        label: str | None = None,
         default: Any = None,
         enabled: bool = True,
     ):
@@ -38,13 +38,7 @@ class Number(Element):
     default_value = 0.0
 
     def __init__(
-        self,
-        *args,
-        format="%f",
-        min: Optional[float] = None,
-        max: Optional[float] = None,
-        step: float = 0,
-        **kwargs
+        self, *args, format="%f", min: float | None = None, max: float | None = None, step: float = 0, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.format = format

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Callable
+from collections.abc import Callable
 
 from indi.message import IndiMessage
 from indi.transport import Buffer
@@ -59,5 +59,4 @@ class TCP:
 
     async def connect(self, callback: Callable[[IndiMessage], None], for_blobs=False):
         reader, writer = await asyncio.open_connection(self.address, self.port)
-        handler = ConnectionHandler(reader, writer, callback, for_blobs=for_blobs)
-        return handler
+        return ConnectionHandler(reader, writer, callback, for_blobs=for_blobs)

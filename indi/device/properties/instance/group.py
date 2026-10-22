@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from indi.device.properties.definition.group import Group as GroupDefinition
 from indi.device.properties.instance.vectors import Vector
@@ -13,9 +13,7 @@ class Group:
     def __init__(self, device: Driver, definition: GroupDefinition) -> None:
         self._device = device
         self._definition: GroupDefinition = definition
-        self._vectors: Dict[str, Vector] = {
-            k: v.instance(self) for k, v in definition.vectors.items()
-        }
+        self._vectors: dict[str, Vector] = {k: v.instance(self) for k, v in definition.vectors.items()}
         self._enabled = definition.enabled
 
     def __getattr__(self, item):
@@ -34,7 +32,7 @@ class Group:
         return self._definition.name
 
     @property
-    def vectors(self) -> Dict[str, Vector]:
+    def vectors(self) -> dict[str, Vector]:
         return self._vectors
 
     @property
@@ -44,7 +42,7 @@ class Group:
     @enabled.setter
     def enabled(self, value: bool):
         self._enabled = value
-        for k, v in self._vectors.items():
+        for _k, v in self._vectors.items():
             self.device.send_message(v.to_def_message())
             self.device.send_message(v.to_set_message())
 

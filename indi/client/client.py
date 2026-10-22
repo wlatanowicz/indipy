@@ -3,7 +3,8 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type
+from collections.abc import Callable, Iterable
+from typing import Any
 
 import indi
 from indi import message
@@ -17,10 +18,10 @@ logger = logging.getLogger(__name__)
 class _CallbackConfig:
     def __init__(
         self,
-        device: Optional[str],
-        vector: Optional[str],
-        element: Optional[str],
-        event_type: Type[events.BaseEvent],
+        device: str | None,
+        vector: str | None,
+        element: str | None,
+        event_type: type[events.BaseEvent],
         callback: Callable,
         uuid: uuid.UUID,
     ):
@@ -61,15 +62,15 @@ class _CallbackConfig:
 
 class _EventWaitResult:
     def __init__(self) -> None:
-        self.event: Optional[events.BaseEvent] = None
+        self.event: events.BaseEvent | None = None
         self.timeout = False
 
 
 class BaseClient:
     def __init__(self) -> None:
         """Constructor for INDI client."""
-        self.devices: Dict[str, Device] = {}
-        self.callbacks: List[_CallbackConfig] = []
+        self.devices: dict[str, Device] = {}
+        self.callbacks: list[_CallbackConfig] = []
 
     def __getitem__(self, key) -> Device:
         return self.devices[key]
@@ -77,7 +78,7 @@ class BaseClient:
     def __contains__(self, key) -> bool:
         return key in self.devices
 
-    def get_device(self, name: str) -> Optional[Device]:
+    def get_device(self, name: str) -> Device | None:
         return self.devices.get(name)
 
     def list_devices(self) -> Iterable[str]:
@@ -121,10 +122,10 @@ class BaseClient:
         self,
         *,
         callback: Callable,
-        device: Optional[str] = None,
-        vector: Optional[str] = None,
-        element: Optional[str] = None,
-        event_type: Type[events.BaseEvent] = events.BaseEvent,
+        device: str | None = None,
+        vector: str | None = None,
+        element: str | None = None,
+        event_type: type[events.BaseEvent] = events.BaseEvent,
     ) -> uuid.UUID:
         """Attaches event callback.
 
@@ -156,14 +157,14 @@ class BaseClient:
 
     def rmonevent(
         self,
-        uuid: Optional[uuid.UUID] = None,
-        device: Optional[str] = None,
-        vector: Optional[str] = None,
-        element: Optional[str] = None,
-        event_type: Optional[Type[events.BaseEvent]] = None,
-        callback: Optional[Callable] = None,
+        uuid: uuid.UUID | None = None,
+        device: str | None = None,
+        vector: str | None = None,
+        element: str | None = None,
+        event_type: type[events.BaseEvent] | None = None,
+        callback: Callable | None = None,
     ):
-        to_rm = list()
+        to_rm = []
         for cb in self.callbacks:
             if (
                 uuid
@@ -198,30 +199,33 @@ class BaseClient:
         for cb in to_rm:
             self.callbacks.remove(cb)
 
-    async def waitforevent(
+    async def waitforevent(  # noqa: C901, PLR0913
         self,
-        device: Optional[str] = None,
-        vector: Optional[str] = None,
-        element: Optional[str] = None,
-        event_type: Type[events.BaseEvent] = events.BaseEvent,
+        device: str | None = None,
+        vector: str | None = None,
+        element: str | None = None,
+        event_type: type[events.BaseEvent] = events.BaseEvent,
         expect: Any = None,
         initial: Any = None,
-        check: Optional[Callable] = None,
-        timeout: Optional[Optional[float]] = None,
+        check: Callable | None = None,
+        timeout: float | None | None = None,
         polling_enabled: bool = True,
         polling_delay: float = 1.0,
         polling_interval: float = 1.0,
     ):
-        assert 1 == sum(
-            1
-            for _ in filter(
-                None.__ne__,
-                (
-                    expect,
-                    initial,
-                    check,
-                ),
+        assert (
+            sum(
+                1
+                for _ in filter(
+                    None.__ne__,
+                    (
+                        expect,
+                        initial,
+                        check,
+                    ),
+                )
             )
+            == 1
         ), "Exactly one of `expect`, `initial`, `check` has to be passed"
 
         lock = asyncio.Event()
@@ -230,25 +234,20 @@ class BaseClient:
         def cb(event: events.BaseEvent):
             release = False
 
-            if check is not None:
-                if check(event):
-                    release = True
+            if check is not None and check(event):
+                release = True
 
             if expect is not None:
-                if isinstance(event, events.ValueUpdate):
-                    if event.new_value == expect:
-                        release = True
-                if isinstance(event, events.StateUpdate):
-                    if event.new_state == expect:
-                        release = True
+                if isinstance(event, events.ValueUpdate) and event.new_value == expect:
+                    release = True
+                if isinstance(event, events.StateUpdate) and event.new_state == expect:
+                    release = True
 
             if initial is not None:
-                if isinstance(event, events.ValueUpdate):
-                    if event.new_value != initial:
-                        release = True
-                if isinstance(event, events.StateUpdate):
-                    if event.new_state != initial:
-                        release = True
+                if isinstance(event, events.ValueUpdate) and event.new_value != initial:
+                    release = True
+                if isinstance(event, events.StateUpdate) and event.new_state != initial:
+                    release = True
 
             if release:
                 result.event = event
@@ -306,18 +305,14 @@ class BaseClient:
                         asyncio.get_running_loop().create_task(callback.callback(event))
                     else:
                         callback.callback(event)
-                except:
+                except Exception:
                     logger.exception("Error in event handler")
 
     def handshake(self, device=None, name=None, version=indi.__protocol_version__):
-        self.send_message(
-            message.GetProperties(version=version, device=device, name=name)
-        )
+        self.send_message(message.GetProperties(version=version, device=device, name=name))
 
     def blob_handshake(self, device):
-        self.send_message(
-            message.EnableBLOB(device=device, value=const.BLOBEnable.NEVER)
-        )
+        self.send_message(message.EnableBLOB(device=device, value=const.BLOBEnable.NEVER))
 
 
 class Client(BaseClient):
@@ -338,28 +333,18 @@ class Client(BaseClient):
 
     def blob_handshake(self, device):
         super().blob_handshake(device)
-        self.blob_connection_handler.send_message(
-            message.EnableBLOB(device=device, value=const.BLOBEnable.ONLY)
-        )
+        self.blob_connection_handler.send_message(message.EnableBLOB(device=device, value=const.BLOBEnable.ONLY))
 
     async def start(self):
         """Starts client and connects to the server.
 
         Connects both connections (control and blob) and sends initial GetProperties message to the server.
         """
-        self.control_connection_handler = await self.control_connection.connect(
-            self.process_message
-        )
-        self.blob_connection_handler = await self.blob_connection.connect(
-            self.process_message, for_blobs=True
-        )
+        self.control_connection_handler = await self.control_connection.connect(self.process_message)
+        self.blob_connection_handler = await self.blob_connection.connect(self.process_message, for_blobs=True)
 
-        asyncio.get_running_loop().create_task(
-            self.control_connection_handler.wait_for_messages()
-        )
-        asyncio.get_running_loop().create_task(
-            self.blob_connection_handler.wait_for_messages()
-        )
+        asyncio.get_running_loop().create_task(self.control_connection_handler.wait_for_messages())
+        asyncio.get_running_loop().create_task(self.blob_connection_handler.wait_for_messages())
 
         self.handshake()
 

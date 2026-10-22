@@ -1,4 +1,3 @@
-from typing import Optional
 from unittest.mock import Mock
 
 from indi import message
@@ -11,22 +10,20 @@ from indi.routing import Router
 class DummyDevice(Driver):
     name = "DEVICE"
 
-    def __init__(
-        self, side_effect, name: Optional[str] = None, router: Optional[Router] = None
-    ):
+    def __init__(self, side_effect, name: str | None = None, router: Router | None = None):
         super().__init__(name, router)
         self.side_effect = side_effect
 
     main = properties.Group(
         "MAIN",
-        vectors=dict(
-            text=properties.TextVector(
+        vectors={
+            "text": properties.TextVector(
                 "TEXT",
-                elements=dict(
-                    txt=properties.Text("TXT", default="lorem"),
-                ),
+                elements={
+                    "txt": properties.Text("TXT", default="lorem"),
+                },
             ),
-        ),
+        },
     )
 
     @on(main.text.txt, Write)
