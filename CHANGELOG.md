@@ -6,6 +6,10 @@
 
 * Packaging now uses `pyproject.toml` and uv. `requires-python` is `>=3.11`. black and isort are replaced by ruff.
 
+### Fixes
+
+* Drop a well-formed XML element that is not a valid INDI message instead of leaving it in the read buffer.
+
 ## 0.4.0
 
 Goodbye threads. Welcome async.
