@@ -56,18 +56,19 @@ class Router:
                     device.message_from_client(message)
 
         if message.from_device:
-            is_blob = isinstance(message, DefBLOBVector | SetBLOBVector)
             for client in self.clients:
-                if client != sender and self._forwards_to_client(client, message.device, is_blob):
+                if client != sender and self._forwards_to_client(client, message.device, message):
                     client.message_from_device(message)
 
-    def _forwards_to_client(self, client: Client, device_name: str | None, is_blob: bool) -> bool:
+    def _forwards_to_client(self, client: Client, device_name: str | None, message: IndiMessage) -> bool:
         policy = self.blob_routing.get(client, {}).get(device_name, self.DEFAULT_BLOB_POLICY)
+        is_blob_definition = isinstance(message, DefBLOBVector)
+        is_blob_value = isinstance(message, SetBLOBVector)
         if policy == const.BLOBEnable.ONLY:
-            return is_blob
+            return is_blob_definition or is_blob_value
         if policy == const.BLOBEnable.ALSO:
             return True
-        return not is_blob
+        return not is_blob_value
 
     def process_enable_blob(self, message: EnableBLOB, sender: SenderType):
         self.blob_routing[sender][message.device] = message.value

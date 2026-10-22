@@ -334,9 +334,6 @@ class Client(BaseClient):
     def blob_handshake(self, device):
         super().blob_handshake(device)
         self.blob_connection_handler.send_message(message.EnableBLOB(device=device, value=const.BLOBEnable.ONLY))
-        self.blob_connection_handler.send_message(
-            message.GetProperties(version=indi.__protocol_version__, device=device),
-        )
 
     async def start(self):
         """Starts client and connects to the server.

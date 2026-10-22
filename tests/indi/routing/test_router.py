@@ -53,20 +53,37 @@ def test_message_from_device():
     client.message_from_device.assert_called_once_with(msg)
 
 
+def _device_message(kind: str) -> message.IndiMessage:
+    if kind == "blob-value":
+        return message.SetBLOBVector(device="SOME_DEVICE", name="VECTOR", state=const.State.OK)
+    if kind == "blob-definition":
+        return message.DefBLOBVector(
+            device="SOME_DEVICE",
+            name="VECTOR",
+            state=const.State.OK,
+            perm=const.Permissions.READ_ONLY,
+        )
+    return message.SetNumberVector(device="SOME_DEVICE", name="VECTOR", state=const.State.OK)
+
+
 @pytest.mark.parametrize(
-    ("policy", "message_class", "forwarded"),
+    ("policy", "kind", "forwarded"),
     [
-        (None, message.SetNumberVector, True),
-        (None, message.SetBLOBVector, False),
-        (const.BLOBEnable.NEVER, message.SetNumberVector, True),
-        (const.BLOBEnable.NEVER, message.SetBLOBVector, False),
-        (const.BLOBEnable.ALSO, message.SetNumberVector, True),
-        (const.BLOBEnable.ALSO, message.SetBLOBVector, True),
-        (const.BLOBEnable.ONLY, message.SetNumberVector, False),
-        (const.BLOBEnable.ONLY, message.SetBLOBVector, True),
+        (None, "number", True),
+        (None, "blob-value", False),
+        (None, "blob-definition", True),
+        (const.BLOBEnable.NEVER, "number", True),
+        (const.BLOBEnable.NEVER, "blob-value", False),
+        (const.BLOBEnable.NEVER, "blob-definition", True),
+        (const.BLOBEnable.ALSO, "number", True),
+        (const.BLOBEnable.ALSO, "blob-value", True),
+        (const.BLOBEnable.ALSO, "blob-definition", True),
+        (const.BLOBEnable.ONLY, "number", False),
+        (const.BLOBEnable.ONLY, "blob-value", True),
+        (const.BLOBEnable.ONLY, "blob-definition", True),
     ],
 )
-def test_blob_policy_filters_device_messages(policy, message_class, forwarded):
+def test_blob_policy_filters_device_messages(policy, kind, forwarded):
     router = Router()
     client = mock.Mock()
     router.register_client(client)
@@ -77,7 +94,7 @@ def test_blob_policy_filters_device_messages(policy, message_class, forwarded):
             sender=client,
         )
 
-    msg = message_class(device="SOME_DEVICE", name="VECTOR", state=const.State.OK)
+    msg = _device_message(kind)
     router.process_message(msg)
 
     if forwarded:

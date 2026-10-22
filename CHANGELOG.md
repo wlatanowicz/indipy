@@ -10,8 +10,7 @@
 
 * Serialize TTY writes so each INDI message is sent whole and in order.
 * Drop a well-formed XML element that is not a valid INDI message instead of leaving it in the read buffer.
-* Forward device traffic for every enableBLOB policy. Never drops blob vectors, Also keeps normal properties, and Only sends blobs.
-* Request property definitions on the blob connection after enableBLOB, so vectors dropped under Never are defined before updates arrive.
+* Forward device traffic for every enableBLOB policy. Never drops setBLOBVector and still sends defBLOBVector. Also sends every message. Only sends defBLOBVector and setBLOBVector.
 
 ## 0.4.0
 
