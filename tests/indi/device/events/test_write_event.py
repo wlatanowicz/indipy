@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from indi import message
 from indi.device import Driver, properties
 from indi.device.events import Write, on
-from indi.message import one_parts
+from indi.message import const, one_parts
 from indi.routing import Router
 
 
@@ -152,6 +152,63 @@ async def _coroutine_write_handler_publishes_before_handler_finishes():
 
     assert not released.is_set()
     assert dev.main.text.txt.value == new_value
+
+    released.set()
+    await asyncio.sleep(0)
+
+
+def test_coroutine_write_then_sync_switch_keeps_later_selection():
+    asyncio.run(_coroutine_write_then_sync_switch_keeps_later_selection())
+
+
+async def _coroutine_write_then_sync_switch_keeps_later_selection():
+    released = asyncio.Event()
+
+    async def side_effect(event):
+        await released.wait()
+
+    class Device(Driver):
+        name = "DEVICE"
+
+        main = properties.Group(
+            "MAIN",
+            vectors={
+                "connection": properties.SwitchVector(
+                    "CONNECTION",
+                    rule=properties.SwitchVector.RULES.ONE_OF_MANY,
+                    default_on="CONNECT",
+                    elements={
+                        "connect": properties.Switch("CONNECT"),
+                        "disconnect": properties.Switch("DISCONNECT"),
+                    },
+                ),
+            },
+        )
+
+        @on(main.connection.connect, Write)
+        async def on_connect(self, event):
+            await side_effect(event)
+
+    dev = Device()
+    dev.message_from_client(
+        message.NewSwitchVector(
+            device="DEVICE",
+            name="CONNECTION",
+            children=(one_parts.OneSwitch(name="CONNECT", value=const.SwitchState.ON),),
+        )
+    )
+    dev.message_from_client(
+        message.NewSwitchVector(
+            device="DEVICE",
+            name="CONNECTION",
+            children=(one_parts.OneSwitch(name="DISCONNECT", value=const.SwitchState.ON),),
+        )
+    )
+    await asyncio.sleep(0)
+
+    assert not released.is_set()
+    assert dev.main.connection.disconnect.bool_value
+    assert not dev.main.connection.connect.bool_value
 
     released.set()
     await asyncio.sleep(0)

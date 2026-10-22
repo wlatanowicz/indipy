@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import TYPE_CHECKING
 
@@ -80,10 +79,11 @@ class Element(EventSource):
     def set_value(self, value):
         event = events.Write(element=self, new_value=value)
         scheduled = self.raise_event(event)
-        if scheduled:
-            # Coroutine handlers are queued ahead of this callback, so each
-            # one runs until its first await before the client value is published.
-            asyncio.get_running_loop().call_soon(self._commit_client_value, event, value)
+        if scheduled or self.vector.has_pending_client_commit():
+            # Coroutine steps are queued ahead of the commit. A later write on
+            # this vector, including one with only synchronous handlers, waits
+            # behind it so client order is preserved.
+            self.vector.defer_client_commit(lambda: self._commit_client_value(event, value))
             return
         if not event.prevent_default:
             self.value = value

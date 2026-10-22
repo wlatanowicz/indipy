@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import logging
+from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
 from indi import message
@@ -39,6 +41,20 @@ class Vector:
         self._definition = definition
         self._elements: dict[str, Element] = {k: v.instance(self) for k, v in definition.elements.items()}
         self._elements_by_name: dict[str, Element] = {v.name: v for k, v in self._elements.items()}
+        self._pending_client_commits = 0
+
+    def has_pending_client_commit(self) -> bool:
+        return self._pending_client_commits > 0
+
+    def defer_client_commit(self, commit: Callable[[], None]) -> None:
+        self._pending_client_commits += 1
+        asyncio.get_running_loop().call_soon(self._run_deferred_client_commit, commit)
+
+    def _run_deferred_client_commit(self, commit: Callable[[], None]) -> None:
+        try:
+            commit()
+        finally:
+            self._pending_client_commits -= 1
 
     def __getattr__(self, item: str):
         element = self._elements.get(item)
