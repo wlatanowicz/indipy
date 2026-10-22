@@ -8,6 +8,7 @@
 
 ### Fixes
 
+* Serialize TTY writes so each INDI message is sent whole and in order.
 * Drop a well-formed XML element that is not a valid INDI message instead of leaving it in the read buffer.
 
 ## 0.4.0
