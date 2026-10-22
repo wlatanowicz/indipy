@@ -19,7 +19,7 @@ class DefLight(DefIndiMessagePart):
 
 class DefNumber(DefIndiMessagePart):
     def __init__(  # noqa: PLR0913
-        self, name: str, format, min: float, max: float, step: float, value=None, label: str | None = None, **junk
+        self, name: str, format: str, min: float, max: float, step: float, value=None, label: str | None = None, **junk
     ):
         super().__init__(name=name, value=value, label=label)
         self.format = format

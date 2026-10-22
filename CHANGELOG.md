@@ -8,6 +8,7 @@
 
 ### Fixes
 
+* Always send `format`, `min`, `max`, and `step` on `defNumber`. Unspecified `min` and `max` are equal, which INDI treats as no range. `FocusMax` forwards `perm`, so the default read-only property is sent as `perm="ro"`.
 * Build message timestamps from a timezone-aware UTC clock so `datetime.utcnow` is no longer used.
 * Honor `prevent_default` on coroutine `Write` handlers. The client value is published only after each coroutine handler reaches its first await, later writes on that vector stay in order, and the read loop keeps running while the handler waits.
 * Ignore client `new*Vector` messages for an unknown property or element, and keep the TTY and TCP read loops running when one client message fails.

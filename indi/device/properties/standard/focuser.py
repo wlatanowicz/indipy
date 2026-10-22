@@ -53,6 +53,11 @@ def FocusMax(
 ):
     return properties.NumberVector(
         name="FOCUS_MAX",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
         elements={"max": properties.Number(name="FOCUS_MAX_VALUE", default=default)},
     )
 
