@@ -1,9 +1,8 @@
 import xml.etree.ElementTree as ET
 
-from indi import message
 from indi.device import Driver, properties
 from indi.device.properties import standard
-from indi.message import const, def_parts
+from indi.message import const
 
 
 class SpeedDevice(Driver):
@@ -55,20 +54,6 @@ def test_number_without_bounds_serializes_min_and_max():
     assert element.get("format") == "%f"
     assert float(element.get("min")) == 0.0
     assert float(element.get("max")) == 0.0
-
-
-def test_def_number_none_bounds_are_serialized():
-    vector = message.DefNumberVector(
-        device="DEVICE",
-        name="SPEED",
-        state=const.State.OK,
-        perm=const.Permissions.READ_WRITE,
-        children=(def_parts.DefNumber(name="SPEED_VALUE", format=None, min=None, max=None, step=None, value="0"),),
-    )
-    element = _number_element(vector.to_xml())
-    _assert_bounds(element)
-    assert element.get("format") == "%f"
-    assert element.get("step") == "0"
 
 
 def test_focus_max_read_only_serializes_perm_and_bounds():

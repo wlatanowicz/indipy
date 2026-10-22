@@ -41,15 +41,15 @@ class Number(Element):
         self,
         *args,
         format: str = "%f",
-        min: float | None = 0.0,
-        max: float | None = 0.0,
+        min: float = 0.0,
+        max: float = 0.0,
         step: float = 0,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.format = format
-        self.min = 0.0 if min is None else min
-        self.max = 0.0 if max is None else max
+        self.min = min
+        self.max = max
         self.step = step
 
 

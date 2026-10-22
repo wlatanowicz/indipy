@@ -19,21 +19,13 @@ class DefLight(DefIndiMessagePart):
 
 class DefNumber(DefIndiMessagePart):
     def __init__(  # noqa: PLR0913
-        self,
-        name: str,
-        format: str | None = "%f",
-        min: float | None = 0.0,
-        max: float | None = 0.0,
-        step: float | None = 0,
-        value=None,
-        label: str | None = None,
-        **junk,
+        self, name: str, format: str, min: float, max: float, step: float, value=None, label: str | None = None, **junk
     ):
         super().__init__(name=name, value=value, label=label)
-        self.format = "%f" if format is None else format
-        self.min = 0.0 if min is None else min
-        self.max = 0.0 if max is None else max
-        self.step = 0 if step is None else step
+        self.format = format
+        self.min = min
+        self.max = max
+        self.step = step
 
     def check_value(self, value):
         return checks.number(value)
