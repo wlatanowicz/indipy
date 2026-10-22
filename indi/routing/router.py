@@ -1,7 +1,7 @@
 import logging
 from typing import TypeAlias
 
-from indi.message import EnableBLOB, IndiMessage, NewBLOBVector, const
+from indi.message import DefBLOBVector, EnableBLOB, IndiMessage, SetBLOBVector, const
 from indi.routing import Client, Device
 
 logger = logging.getLogger(__name__)
@@ -47,8 +47,6 @@ class Router:
             del self.blob_routing[client]
 
     def process_message(self, message: IndiMessage, sender: SenderType = None):
-        is_blob = isinstance(message, NewBLOBVector)
-
         if message.from_client:
             if isinstance(message, EnableBLOB):
                 self.process_enable_blob(message, sender)
@@ -58,19 +56,18 @@ class Router:
                     device.message_from_client(message)
 
         if message.from_device:
+            is_blob = isinstance(message, DefBLOBVector | SetBLOBVector)
             for client in self.clients:
-                if client != sender:
-                    device_name = message.device
-                    client_blob_policy = self.blob_routing.get(client, {}).get(device_name, self.DEFAULT_BLOB_POLICY)
-                    if (
-                        is_blob
-                        and client_blob_policy
-                        in (
-                            const.BLOBEnable.ALSO,
-                            const.BLOBEnable.ONLY,
-                        )
-                    ) or (not is_blob and client_blob_policy == const.BLOBEnable.NEVER):
-                        client.message_from_device(message)
+                if client != sender and self._forwards_to_client(client, message.device, is_blob):
+                    client.message_from_device(message)
+
+    def _forwards_to_client(self, client: Client, device_name: str | None, is_blob: bool) -> bool:
+        policy = self.blob_routing.get(client, {}).get(device_name, self.DEFAULT_BLOB_POLICY)
+        if policy == const.BLOBEnable.ONLY:
+            return is_blob
+        if policy == const.BLOBEnable.ALSO:
+            return True
+        return not is_blob
 
     def process_enable_blob(self, message: EnableBLOB, sender: SenderType):
         self.blob_routing[sender][message.device] = message.value

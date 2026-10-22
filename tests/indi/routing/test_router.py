@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from indi import message
+from indi.message import const
 from indi.routing import Router
 
 messages = [
@@ -50,3 +51,36 @@ def test_message_from_device():
     router.process_message(msg)
 
     client.message_from_device.assert_called_once_with(msg)
+
+
+@pytest.mark.parametrize(
+    ("policy", "message_class", "forwarded"),
+    [
+        (None, message.SetNumberVector, True),
+        (None, message.SetBLOBVector, False),
+        (const.BLOBEnable.NEVER, message.SetNumberVector, True),
+        (const.BLOBEnable.NEVER, message.SetBLOBVector, False),
+        (const.BLOBEnable.ALSO, message.SetNumberVector, True),
+        (const.BLOBEnable.ALSO, message.SetBLOBVector, True),
+        (const.BLOBEnable.ONLY, message.SetNumberVector, False),
+        (const.BLOBEnable.ONLY, message.SetBLOBVector, True),
+    ],
+)
+def test_blob_policy_filters_device_messages(policy, message_class, forwarded):
+    router = Router()
+    client = mock.Mock()
+    router.register_client(client)
+
+    if policy is not None:
+        router.process_message(
+            message.EnableBLOB(device="SOME_DEVICE", value=policy),
+            sender=client,
+        )
+
+    msg = message_class(device="SOME_DEVICE", name="VECTOR", state=const.State.OK)
+    router.process_message(msg)
+
+    if forwarded:
+        client.message_from_device.assert_called_once_with(msg)
+    else:
+        client.message_from_device.assert_not_called()
