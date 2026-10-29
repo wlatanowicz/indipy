@@ -1,3 +1,3 @@
-from . import ccd, common, focuser
+from . import ccd, common, dome, filterwheel, focuser, telescope
 
-__all__ = ["ccd", "common", "focuser"]
+__all__ = ["ccd", "common", "dome", "filterwheel", "focuser", "telescope"]
