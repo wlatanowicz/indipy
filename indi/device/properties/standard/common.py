@@ -4,7 +4,6 @@ from functools import reduce
 import indi
 from indi.device import properties
 from indi.device.properties import const
-from indi.device.properties.standard._vector import number_vector, text_vector
 
 
 def Connection(
@@ -60,15 +59,14 @@ def DevicePort(
     timeout=0,
     enabled=True,
 ):
-    return text_vector(
-        "DEVICE_PORT",
-        (("port", "PORT"),),
+    return properties.TextVector(
+        name="DEVICE_PORT",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={"port": properties.Text(name="PORT", default=default)},
     )
 
 
@@ -83,18 +81,14 @@ def TimeLst(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "TIME_LST",
-        (("lst", "LST"),),
+    return properties.NumberVector(
+        name="TIME_LST",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={"lst": properties.Number(name="LST", default=default, min=min, max=max, step=step)},
     )
 
 
@@ -106,15 +100,17 @@ def TimeUtc(
     timeout=0,
     enabled=True,
 ):
-    return text_vector(
-        "TIME_UTC",
-        (("utc", "UTC"), ("offset", "OFFSET")),
+    return properties.TextVector(
+        name="TIME_UTC",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={
+            "utc": properties.Text(name="UTC", default=default),
+            "offset": properties.Text(name="OFFSET", default=default),
+        },
     )
 
 
@@ -129,18 +125,18 @@ def GeographicCoord(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "GEOGRAPHIC_COORD",
-        (("lat", "LAT"), ("long", "LONG"), ("elev", "ELEV")),
+    return properties.NumberVector(
+        name="GEOGRAPHIC_COORD",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "lat": properties.Number(name="LAT", default=default, min=min, max=max, step=step),
+            "long": properties.Number(name="LONG", default=default, min=min, max=max, step=step),
+            "elev": properties.Number(name="ELEV", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -155,18 +151,18 @@ def Atmosphere(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "ATMOSPHERE",
-        (("temperature", "TEMPERATURE"), ("pressure", "PRESSURE"), ("humidity", "HUMIDITY")),
+    return properties.NumberVector(
+        name="ATMOSPHERE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "temperature": properties.Number(name="TEMPERATURE", default=default, min=min, max=max, step=step),
+            "pressure": properties.Number(name="PRESSURE", default=default, min=min, max=max, step=step),
+            "humidity": properties.Number(name="HUMIDITY", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -178,15 +174,17 @@ def UploadSettings(
     timeout=0,
     enabled=True,
 ):
-    return text_vector(
-        "UPLOAD_SETTINGS",
-        (("directory", "UPLOAD_DIR"), ("prefix", "UPLOAD_PREFIX")),
+    return properties.TextVector(
+        name="UPLOAD_SETTINGS",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={
+            "directory": properties.Text(name="UPLOAD_DIR", default=default),
+            "prefix": properties.Text(name="UPLOAD_PREFIX", default=default),
+        },
     )
 
 
@@ -204,14 +202,12 @@ def ActiveDevices(
     unknown = [member for member in members if member not in _ACTIVE_DEVICE_MEMBERS]
     if unknown:
         raise ValueError(f"Unknown ACTIVE_DEVICES member: {', '.join(unknown)}")
-    elements = tuple((_ACTIVE_DEVICE_MEMBERS[member], member) for member in members)
-    return text_vector(
-        "ACTIVE_DEVICES",
-        elements,
+    return properties.TextVector(
+        name="ACTIVE_DEVICES",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={_ACTIVE_DEVICE_MEMBERS[member]: properties.Text(name=member, default=default) for member in members},
     )

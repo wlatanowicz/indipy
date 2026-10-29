@@ -1,13 +1,5 @@
 from indi.device import properties
 from indi.device.properties import const
-from indi.device.properties.standard._vector import (
-    blob_vector,
-    chip_members,
-    chip_name,
-    number_vector,
-    switch_vector,
-    text_vector,
-)
 
 
 def Exposure(  # noqa: PLR0913
@@ -56,16 +48,16 @@ def AbortExposure(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return switch_vector(
-        chip_name("CCD_ABORT_EXPOSURE", guider),
-        chip_members((("abort", "ABORT"),), guider),
+    return properties.SwitchVector(
+        name="GUIDER_ABORT_EXPOSURE" if guider else "CCD_ABORT_EXPOSURE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={"abort": properties.Switch(name="ABORT")},
     )
 
 
@@ -81,18 +73,19 @@ def Frame(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return number_vector(
-        chip_name("CCD_FRAME", guider),
-        chip_members((("x", "X"), ("y", "Y"), ("width", "WIDTH"), ("height", "HEIGHT")), guider),
+    return properties.NumberVector(
+        name="GUIDER_FRAME" if guider else "CCD_FRAME",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "x": properties.Number(name="X", default=default, min=min, max=max, step=step),
+            "y": properties.Number(name="Y", default=default, min=min, max=max, step=step),
+            "width": properties.Number(name="WIDTH", default=default, min=min, max=max, step=step),
+            "height": properties.Number(name="HEIGHT", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -108,18 +101,22 @@ def Temperature(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return number_vector(
-        chip_name("CCD_TEMPERATURE", guider),
-        chip_members((("temperature", "CCD_TEMPERATURE_VALUE"),), guider),
+    return properties.NumberVector(
+        name="GUIDER_TEMPERATURE" if guider else "CCD_TEMPERATURE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "temperature": properties.Number(
+                name="GUIDER_TEMPERATURE_VALUE" if guider else "CCD_TEMPERATURE_VALUE",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            )
+        },
     )
 
 
@@ -132,16 +129,19 @@ def Cooler(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return switch_vector(
-        chip_name("CCD_COOLER", guider),
-        chip_members((("on", "COOLER_ON"), ("off", "COOLER_OFF")), guider),
+    return properties.SwitchVector(
+        name="GUIDER_COOLER" if guider else "CCD_COOLER",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "on": properties.Switch(name="COOLER_ON"),
+            "off": properties.Switch(name="COOLER_OFF"),
+        },
     )
 
 
@@ -157,18 +157,22 @@ def CoolerPower(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return number_vector(
-        chip_name("CCD_COOLER_POWER", guider),
-        chip_members((("power", "CCD_COOLER_VALUE"),), guider),
+    return properties.NumberVector(
+        name="GUIDER_COOLER_POWER" if guider else "CCD_COOLER_POWER",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "power": properties.Number(
+                name="GUIDER_COOLER_VALUE" if guider else "CCD_COOLER_VALUE",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            )
+        },
     )
 
 
@@ -181,19 +185,21 @@ def FrameType(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return switch_vector(
-        chip_name("CCD_FRAME_TYPE", guider),
-        chip_members(
-            (("light", "FRAME_LIGHT"), ("bias", "FRAME_BIAS"), ("dark", "FRAME_DARK"), ("flat", "FRAME_FLAT")),
-            guider,
-        ),
+    return properties.SwitchVector(
+        name="GUIDER_FRAME_TYPE" if guider else "CCD_FRAME_TYPE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "light": properties.Switch(name="FRAME_LIGHT"),
+            "bias": properties.Switch(name="FRAME_BIAS"),
+            "dark": properties.Switch(name="FRAME_DARK"),
+            "flat": properties.Switch(name="FRAME_FLAT"),
+        },
     )
 
 
@@ -209,18 +215,17 @@ def Binning(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return number_vector(
-        chip_name("CCD_BINNING", guider),
-        chip_members((("horizontal", "HOR_BIN"), ("vertical", "VER_BIN")), guider),
+    return properties.NumberVector(
+        name="GUIDER_BINNING" if guider else "CCD_BINNING",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "horizontal": properties.Number(name="HOR_BIN", default=default, min=min, max=max, step=step),
+            "vertical": properties.Number(name="VER_BIN", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -233,16 +238,19 @@ def Compression(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return switch_vector(
-        chip_name("CCD_COMPRESSION", guider),
-        chip_members((("enable", "INDI_ENABLED"), ("disable", "INDI_DISABLED")), guider),
+    return properties.SwitchVector(
+        name="GUIDER_COMPRESSION" if guider else "CCD_COMPRESSION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "enable": properties.Switch(name="INDI_ENABLED"),
+            "disable": properties.Switch(name="INDI_DISABLED"),
+        },
     )
 
 
@@ -255,16 +263,16 @@ def FrameReset(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return switch_vector(
-        chip_name("CCD_FRAME_RESET", guider),
-        chip_members((("reset", "RESET"),), guider),
+    return properties.SwitchVector(
+        name="GUIDER_FRAME_RESET" if guider else "CCD_FRAME_RESET",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={"reset": properties.Switch(name="RESET")},
     )
 
 
@@ -280,26 +288,21 @@ def Info(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    members = (
-        ("max_x", "CCD_MAX_X"),
-        ("max_y", "CCD_MAX_Y"),
-        ("pixel_size", "CCD_PIXEL_SIZE"),
-        ("pixel_size_x", "CCD_PIXEL_SIZE_X"),
-        ("pixel_size_y", "CCD_PIXEL_SIZE_Y"),
-        ("bits_per_pixel", "CCD_BITSPERPIXEL"),
-    )
-    return number_vector(
-        chip_name("CCD_INFO", guider),
-        chip_members(members, guider, keep=True),
+    return properties.NumberVector(
+        name="GUIDER_INFO" if guider else "CCD_INFO",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "max_x": properties.Number(name="CCD_MAX_X", default=default, min=min, max=max, step=step),
+            "max_y": properties.Number(name="CCD_MAX_Y", default=default, min=min, max=max, step=step),
+            "pixel_size": properties.Number(name="CCD_PIXEL_SIZE", default=default, min=min, max=max, step=step),
+            "pixel_size_x": properties.Number(name="CCD_PIXEL_SIZE_X", default=default, min=min, max=max, step=step),
+            "pixel_size_y": properties.Number(name="CCD_PIXEL_SIZE_Y", default=default, min=min, max=max, step=step),
+            "bits_per_pixel": properties.Number(name="CCD_BITSPERPIXEL", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -312,15 +315,18 @@ def Cfa(  # noqa: PLR0913
     enabled=True,
     guider=False,
 ):
-    return text_vector(
-        chip_name("CCD_CFA", guider),
-        chip_members((("offset_x", "CFA_OFFSET_X"), ("offset_y", "CFA_OFFSET_Y"), ("type", "CFA_TYPE")), guider),
+    return properties.TextVector(
+        name="GUIDER_CFA" if guider else "CCD_CFA",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={
+            "offset_x": properties.Text(name="CFA_OFFSET_X", default=default),
+            "offset_y": properties.Text(name="CFA_OFFSET_Y", default=default),
+            "type": properties.Text(name="CFA_TYPE", default=default),
+        },
     )
 
 
@@ -333,14 +339,14 @@ def Image(
     guider=False,
 ):
     wire_name = "CCD2" if guider else "CCD1"
-    return blob_vector(
-        wire_name,
-        ("image", wire_name),
+    return properties.BLOBVector(
+        name=wire_name,
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
+        elements={"image": properties.BLOB(name=wire_name)},
     )
 
 
@@ -382,16 +388,19 @@ def VideoStream(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "CCD_VIDEO_STREAM",
-        (("on", "STREAM_ON"), ("off", "STREAM_OFF")),
+    return properties.SwitchVector(
+        name="CCD_VIDEO_STREAM",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "on": properties.Switch(name="STREAM_ON"),
+            "off": properties.Switch(name="STREAM_OFF"),
+        },
     )
 
 
@@ -406,18 +415,29 @@ def StreamingExposure(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "STREAMING_EXPOSURE",
-        (("exposure", "STREAMING_EXPOSURE_VALUE"), ("divisor", "STREAMING_DIVISOR_VALUE")),
+    return properties.NumberVector(
+        name="STREAMING_EXPOSURE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "exposure": properties.Number(
+                name="STREAMING_EXPOSURE_VALUE",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            ),
+            "divisor": properties.Number(
+                name="STREAMING_DIVISOR_VALUE",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            ),
+        },
     )
 
 
@@ -432,18 +452,17 @@ def Fps(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "FPS",
-        (("estimated", "EST_FPS"), ("average", "AVG_FPS")),
+    return properties.NumberVector(
+        name="FPS",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "estimated": properties.Number(name="EST_FPS", default=default, min=min, max=max, step=step),
+            "average": properties.Number(name="AVG_FPS", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -455,15 +474,17 @@ def RecordFile(
     timeout=0,
     enabled=True,
 ):
-    return text_vector(
-        "RECORD_FILE",
-        (("directory", "RECORD_FILE_DIR"), ("file_name", "RECORD_FILE_NAME")),
+    return properties.TextVector(
+        name="RECORD_FILE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={
+            "directory": properties.Text(name="RECORD_FILE_DIR", default=default),
+            "file_name": properties.Text(name="RECORD_FILE_NAME", default=default),
+        },
     )
 
 
@@ -478,18 +499,17 @@ def RecordOptions(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "RECORD_OPTIONS",
-        (("duration", "RECORD_DURATION"), ("frames", "RECORD_FRAME_TOTAL")),
+    return properties.NumberVector(
+        name="RECORD_OPTIONS",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "duration": properties.Number(name="RECORD_DURATION", default=default, min=min, max=max, step=step),
+            "frames": properties.Number(name="RECORD_FRAME_TOTAL", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -501,19 +521,19 @@ def RecordStream(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "RECORD_STREAM",
-        (
-            ("on", "RECORD_ON"),
-            ("duration", "RECORD_DURATION_ON"),
-            ("frames", "RECORD_FRAME_ON"),
-            ("off", "RECORD_OFF"),
-        ),
+    return properties.SwitchVector(
+        name="RECORD_STREAM",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "on": properties.Switch(name="RECORD_ON"),
+            "duration": properties.Switch(name="RECORD_DURATION_ON"),
+            "frames": properties.Switch(name="RECORD_FRAME_ON"),
+            "off": properties.Switch(name="RECORD_OFF"),
+        },
     )

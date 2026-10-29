@@ -1,6 +1,5 @@
 from indi.device import properties
 from indi.device.properties import const
-from indi.device.properties.standard._vector import number_vector, switch_vector
 
 
 def AbsolutePosition(  # noqa: PLR0913
@@ -93,18 +92,16 @@ def FocusSpeed(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "FOCUS_SPEED",
-        (("speed", "FOCUS_SPEED_VALUE"),),
+    return properties.NumberVector(
+        name="FOCUS_SPEED",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "speed": properties.Number(name="FOCUS_SPEED_VALUE", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -119,32 +116,16 @@ def FocusTimer(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "FOCUS_TIMER",
-        (("timer", "FOCUS_TIMER_VALUE"),),
+    return properties.NumberVector(
+        name="FOCUS_TIMER",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
-    )
-
-
-def _focus_reverse(enabled_name, disabled_name, *, label, default, state, perm, timeout, enabled):  # noqa: PLR0913
-    return switch_vector(
-        "FOCUS_REVERSE_MOTION",
-        (("enable", enabled_name), ("disable", disabled_name)),
-        label=label,
-        state=state,
-        perm=perm,
-        timeout=timeout,
-        enabled=enabled,
-        default=default,
-        rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "timer": properties.Number(name="FOCUS_TIMER_VALUE", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -156,15 +137,19 @@ def FocusReverseMotion(
     timeout=0,
     enabled=True,
 ):
-    return _focus_reverse(
-        "ENABLED",
-        "DISABLED",
+    return properties.SwitchVector(
+        name="FOCUS_REVERSE_MOTION",
         label=label,
-        default=default,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
+        default_on=default,
+        rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "enable": properties.Switch(name="ENABLED"),
+            "disable": properties.Switch(name="DISABLED"),
+        },
     )
 
 
@@ -176,15 +161,19 @@ def FocusReverseMotionIndi(
     timeout=0,
     enabled=True,
 ):
-    return _focus_reverse(
-        "INDI_ENABLED",
-        "INDI_DISABLED",
+    return properties.SwitchVector(
+        name="FOCUS_REVERSE_MOTION",
         label=label,
-        default=default,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
+        default_on=default,
+        rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "enable": properties.Switch(name="INDI_ENABLED"),
+            "disable": properties.Switch(name="INDI_DISABLED"),
+        },
     )
 
 
@@ -196,16 +185,16 @@ def FocusAbortMotion(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "FOCUS_ABORT_MOTION",
-        (("abort", "ABORT"),),
+    return properties.SwitchVector(
+        name="FOCUS_ABORT_MOTION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={"abort": properties.Switch(name="ABORT")},
     )
 
 
@@ -220,16 +209,14 @@ def FocusSync(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "FOCUS_SYNC",
-        (("position", "FOCUS_SYNC_VALUE"),),
+    return properties.NumberVector(
+        name="FOCUS_SYNC",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "position": properties.Number(name="FOCUS_SYNC_VALUE", default=default, min=min, max=max, step=step),
+        },
     )

@@ -1,13 +1,5 @@
+from indi.device import properties
 from indi.device.properties import const
-from indi.device.properties.standard._vector import number_vector, switch_vector
-
-_MEASUREMENTS = (
-    ("radius", "DM_DOME_RADIUS"),
-    ("north", "DM_NORTH_DISPLACEMENT"),
-    ("east", "DM_EAST_DISPLACEMENT"),
-    ("up", "DM_UP_DISPLACEMENT"),
-    ("ota", "DM_OTA_OFFSET"),
-)
 
 
 def DomeSpeed(  # noqa: PLR0913
@@ -21,18 +13,14 @@ def DomeSpeed(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "DOME_SPEED",
-        (("speed", "DOME_SPEED_VALUE"),),
+    return properties.NumberVector(
+        name="DOME_SPEED",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={"speed": properties.Number(name="DOME_SPEED_VALUE", default=default, min=min, max=max, step=step)},
     )
 
 
@@ -44,16 +32,19 @@ def DomeMotion(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "DOME_MOTION",
-        (("cw", "DOME_CW"), ("ccw", "DOME_CCW")),
+    return properties.SwitchVector(
+        name="DOME_MOTION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={
+            "cw": properties.Switch(name="DOME_CW"),
+            "ccw": properties.Switch(name="DOME_CCW"),
+        },
     )
 
 
@@ -68,18 +59,14 @@ def DomeTimer(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "DOME_TIMER",
-        (("timer", "DOME_TIMER_VALUE"),),
+    return properties.NumberVector(
+        name="DOME_TIMER",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={"timer": properties.Number(name="DOME_TIMER_VALUE", default=default, min=min, max=max, step=step)},
     )
 
 
@@ -94,18 +81,22 @@ def RelativeDomePosition(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "REL_DOME_POSITION",
-        (("position", "DOME_RELATIVE_POSITION"),),
+    return properties.NumberVector(
+        name="REL_DOME_POSITION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "position": properties.Number(
+                name="DOME_RELATIVE_POSITION",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            )
+        },
     )
 
 
@@ -120,18 +111,22 @@ def AbsoluteDomePosition(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "ABS_DOME_POSITION",
-        (("position", "DOME_ABSOLUTE_POSITION"),),
+    return properties.NumberVector(
+        name="ABS_DOME_POSITION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "position": properties.Number(
+                name="DOME_ABSOLUTE_POSITION",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            )
+        },
     )
 
 
@@ -143,16 +138,16 @@ def DomeAbortMotion(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "DOME_ABORT_MOTION",
-        (("abort", "ABORT"),),
+    return properties.SwitchVector(
+        name="DOME_ABORT_MOTION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={"abort": properties.Switch(name="ABORT")},
     )
 
 
@@ -164,16 +159,19 @@ def DomeShutter(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "DOME_SHUTTER",
-        (("open", "SHUTTER_OPEN"), ("close", "SHUTTER_CLOSE")),
+    return properties.SwitchVector(
+        name="DOME_SHUTTER",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "open": properties.Switch(name="SHUTTER_OPEN"),
+            "close": properties.Switch(name="SHUTTER_CLOSE"),
+        },
     )
 
 
@@ -185,16 +183,19 @@ def DomeGoto(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "DOME_GOTO",
-        (("home", "DOME_HOME"), ("park", "DOME_PARK")),
+    return properties.SwitchVector(
+        name="DOME_GOTO",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={
+            "home": properties.Switch(name="DOME_HOME"),
+            "park": properties.Switch(name="DOME_PARK"),
+        },
     )
 
 
@@ -209,18 +210,18 @@ def DomeParams(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "DOME_PARAMS",
-        (("home", "HOME_POSITION"), ("park", "PARK_POSITION"), ("threshold", "AUTOSYNC_THRESHOLD")),
+    return properties.NumberVector(
+        name="DOME_PARAMS",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "home": properties.Number(name="HOME_POSITION", default=default, min=min, max=max, step=step),
+            "park": properties.Number(name="PARK_POSITION", default=default, min=min, max=max, step=step),
+            "threshold": properties.Number(name="AUTOSYNC_THRESHOLD", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -232,33 +233,19 @@ def DomeAutosync(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "DOME_AUTOSYNC",
-        (("enable", "DOME_AUTOSYNC_ENABLE"), ("disable", "DOME_AUTOSYNC_DISABLE")),
+    return properties.SwitchVector(
+        name="DOME_AUTOSYNC",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
-    )
-
-
-def _dome_measurements(shutter_name, *, label, default, min, max, step, state, perm, timeout, enabled):  # noqa: PLR0913
-    members = (_MEASUREMENTS[0], ("shutter", shutter_name), *_MEASUREMENTS[1:])
-    return number_vector(
-        "DOME_MEASUREMENTS",
-        members,
-        label=label,
-        state=state,
-        perm=perm,
-        timeout=timeout,
-        enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "enable": properties.Switch(name="DOME_AUTOSYNC_ENABLE"),
+            "disable": properties.Switch(name="DOME_AUTOSYNC_DISABLE"),
+        },
     )
 
 
@@ -273,17 +260,21 @@ def DomeMeasurements(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return _dome_measurements(
-        "DOME_SHUTTER_WIDTH",
+    return properties.NumberVector(
+        name="DOME_MEASUREMENTS",
         label=label,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
+        elements={
+            "radius": properties.Number(name="DM_DOME_RADIUS", default=default, min=min, max=max, step=step),
+            "shutter": properties.Number(name="DOME_SHUTTER_WIDTH", default=default, min=min, max=max, step=step),
+            "north": properties.Number(name="DM_NORTH_DISPLACEMENT", default=default, min=min, max=max, step=step),
+            "east": properties.Number(name="DM_EAST_DISPLACEMENT", default=default, min=min, max=max, step=step),
+            "up": properties.Number(name="DM_UP_DISPLACEMENT", default=default, min=min, max=max, step=step),
+            "ota": properties.Number(name="DM_OTA_OFFSET", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -298,15 +289,19 @@ def DomeMeasurementsIndi(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return _dome_measurements(
-        "DM_SHUTTER_WIDTH",
+    return properties.NumberVector(
+        name="DOME_MEASUREMENTS",
         label=label,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
+        elements={
+            "radius": properties.Number(name="DM_DOME_RADIUS", default=default, min=min, max=max, step=step),
+            "shutter": properties.Number(name="DM_SHUTTER_WIDTH", default=default, min=min, max=max, step=step),
+            "north": properties.Number(name="DM_NORTH_DISPLACEMENT", default=default, min=min, max=max, step=step),
+            "east": properties.Number(name="DM_EAST_DISPLACEMENT", default=default, min=min, max=max, step=step),
+            "up": properties.Number(name="DM_UP_DISPLACEMENT", default=default, min=min, max=max, step=step),
+            "ota": properties.Number(name="DM_OTA_OFFSET", default=default, min=min, max=max, step=step),
+        },
     )

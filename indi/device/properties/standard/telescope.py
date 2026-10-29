@@ -1,5 +1,5 @@
+from indi.device import properties
 from indi.device.properties import const
-from indi.device.properties.standard._vector import number_vector, switch_vector
 
 _PARK_AXES = {
     "equatorial": (("ra", "PARK_RA"), ("dec", "PARK_DEC")),
@@ -32,18 +32,17 @@ def EquatorialCoord(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "EQUATORIAL_COORD",
-        (("ra", "RA"), ("dec", "DEC")),
+    return properties.NumberVector(
+        name="EQUATORIAL_COORD",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "ra": properties.Number(name="RA", default=default, min=min, max=max, step=step),
+            "dec": properties.Number(name="DEC", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -58,18 +57,17 @@ def EquatorialEodCoord(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "EQUATORIAL_EOD_COORD",
-        (("ra", "RA"), ("dec", "DEC")),
+    return properties.NumberVector(
+        name="EQUATORIAL_EOD_COORD",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "ra": properties.Number(name="RA", default=default, min=min, max=max, step=step),
+            "dec": properties.Number(name="DEC", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -84,18 +82,17 @@ def TargetEodCoord(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "TARGET_EOD_COORD",
-        (("ra", "RA"), ("dec", "DEC")),
+    return properties.NumberVector(
+        name="TARGET_EOD_COORD",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "ra": properties.Number(name="RA", default=default, min=min, max=max, step=step),
+            "dec": properties.Number(name="DEC", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -110,18 +107,17 @@ def HorizontalCoord(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "HORIZONTAL_COORD",
-        (("alt", "ALT"), ("az", "AZ")),
+    return properties.NumberVector(
+        name="HORIZONTAL_COORD",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "alt": properties.Number(name="ALT", default=default, min=min, max=max, step=step),
+            "az": properties.Number(name="AZ", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -133,16 +129,20 @@ def OnCoordSet(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "ON_COORD_SET",
-        (("slew", "SLEW"), ("track", "TRACK"), ("sync", "SYNC")),
+    return properties.SwitchVector(
+        name="ON_COORD_SET",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "slew": properties.Switch(name="SLEW"),
+            "track": properties.Switch(name="TRACK"),
+            "sync": properties.Switch(name="SYNC"),
+        },
     )
 
 
@@ -154,16 +154,19 @@ def TelescopeMotionNS(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_MOTION_NS",
-        (("north", "MOTION_NORTH"), ("south", "MOTION_SOUTH")),
+    return properties.SwitchVector(
+        name="TELESCOPE_MOTION_NS",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={
+            "north": properties.Switch(name="MOTION_NORTH"),
+            "south": properties.Switch(name="MOTION_SOUTH"),
+        },
     )
 
 
@@ -175,16 +178,19 @@ def TelescopeMotionWE(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_MOTION_WE",
-        (("west", "MOTION_WEST"), ("east", "MOTION_EAST")),
+    return properties.SwitchVector(
+        name="TELESCOPE_MOTION_WE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={
+            "west": properties.Switch(name="MOTION_WEST"),
+            "east": properties.Switch(name="MOTION_EAST"),
+        },
     )
 
 
@@ -199,18 +205,17 @@ def TelescopeTimedGuideNS(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "TELESCOPE_TIMED_GUIDE_NS",
-        (("north", "TIMED_GUIDE_N"), ("south", "TIMED_GUIDE_S")),
+    return properties.NumberVector(
+        name="TELESCOPE_TIMED_GUIDE_NS",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "north": properties.Number(name="TIMED_GUIDE_N", default=default, min=min, max=max, step=step),
+            "south": properties.Number(name="TIMED_GUIDE_S", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -225,18 +230,17 @@ def TelescopeTimedGuideWE(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "TELESCOPE_TIMED_GUIDE_WE",
-        (("west", "TIMED_GUIDE_W"), ("east", "TIMED_GUIDE_E")),
+    return properties.NumberVector(
+        name="TELESCOPE_TIMED_GUIDE_WE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "west": properties.Number(name="TIMED_GUIDE_W", default=default, min=min, max=max, step=step),
+            "east": properties.Number(name="TIMED_GUIDE_E", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -250,16 +254,16 @@ def TelescopeSlewRate(  # noqa: PLR0913
     enabled=True,
 ):
     members = [*_SLEW_RATES, *((name.lower(), name) for name in extra)]
-    return switch_vector(
-        "TELESCOPE_SLEW_RATE",
-        members,
+    return properties.SwitchVector(
+        name="TELESCOPE_SLEW_RATE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={key: properties.Switch(name=wire_name) for key, wire_name in members},
     )
 
 
@@ -271,16 +275,19 @@ def TelescopePark(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_PARK",
-        (("park", "PARK"), ("unpark", "UNPARK")),
+    return properties.SwitchVector(
+        name="TELESCOPE_PARK",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "park": properties.Switch(name="PARK"),
+            "unpark": properties.Switch(name="UNPARK"),
+        },
     )
 
 
@@ -300,18 +307,17 @@ def TelescopeParkPosition(  # noqa: PLR0913
         members = _PARK_AXES[system]
     except KeyError:
         raise ValueError("system must be 'equatorial' or 'horizontal'") from None
-    return number_vector(
-        "TELESCOPE_PARK_POSITION",
-        members,
+    return properties.NumberVector(
+        name="TELESCOPE_PARK_POSITION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            key: properties.Number(name=wire_name, default=default, min=min, max=max, step=step)
+            for key, wire_name in members
+        },
     )
 
 
@@ -323,16 +329,20 @@ def TelescopeParkOption(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_PARK_OPTION",
-        (("current", "PARK_CURRENT"), ("default", "PARK_DEFAULT"), ("write", "PARK_WRITE_DATA")),
+    return properties.SwitchVector(
+        name="TELESCOPE_PARK_OPTION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={
+            "current": properties.Switch(name="PARK_CURRENT"),
+            "default": properties.Switch(name="PARK_DEFAULT"),
+            "write": properties.Switch(name="PARK_WRITE_DATA"),
+        },
     )
 
 
@@ -344,16 +354,16 @@ def TelescopeAbortMotion(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_ABORT_MOTION",
-        (("abort", "ABORT_MOTION"),),
+    return properties.SwitchVector(
+        name="TELESCOPE_ABORT_MOTION",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.AT_MOST_ONE,
+        elements={"abort": properties.Switch(name="ABORT_MOTION")},
     )
 
 
@@ -366,16 +376,16 @@ def TelescopeTrackRate(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_TRACK_RATE",
-        _track_modes(custom),
+    return properties.SwitchVector(
+        name="TELESCOPE_TRACK_RATE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={key: properties.Switch(name=wire_name) for key, wire_name in _track_modes(custom)},
     )
 
 
@@ -388,16 +398,16 @@ def TelescopeTrackMode(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_TRACK_MODE",
-        _track_modes(custom),
+    return properties.SwitchVector(
+        name="TELESCOPE_TRACK_MODE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={key: properties.Switch(name=wire_name) for key, wire_name in _track_modes(custom)},
     )
 
 
@@ -412,18 +422,17 @@ def TelescopeAxisTrackRate(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "TELESCOPE_TRACK_RATE",
-        (("ra", "TRACK_RATE_RA"), ("de", "TRACK_RATE_DE")),
+    return properties.NumberVector(
+        name="TELESCOPE_TRACK_RATE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "ra": properties.Number(name="TRACK_RATE_RA", default=default, min=min, max=max, step=step),
+            "de": properties.Number(name="TRACK_RATE_DE", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -438,23 +447,31 @@ def TelescopeInfo(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "TELESCOPE_INFO",
-        (
-            ("aperture", "TELESCOPE_APERTURE"),
-            ("focal_length", "TELESCOPE_FOCAL_LENGTH"),
-            ("guider_aperture", "GUIDER_APERTURE"),
-            ("guider_focal_length", "GUIDER_FOCAL_LENGTH"),
-        ),
+    return properties.NumberVector(
+        name="TELESCOPE_INFO",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "aperture": properties.Number(name="TELESCOPE_APERTURE", default=default, min=min, max=max, step=step),
+            "focal_length": properties.Number(
+                name="TELESCOPE_FOCAL_LENGTH",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            ),
+            "guider_aperture": properties.Number(name="GUIDER_APERTURE", default=default, min=min, max=max, step=step),
+            "guider_focal_length": properties.Number(
+                name="GUIDER_FOCAL_LENGTH",
+                default=default,
+                min=min,
+                max=max,
+                step=step,
+            ),
+        },
     )
 
 
@@ -466,14 +483,17 @@ def TelescopePierSide(
     timeout=0,
     enabled=True,
 ):
-    return switch_vector(
-        "TELESCOPE_PIER_SIDE",
-        (("east", "PIER_EAST"), ("west", "PIER_WEST")),
+    return properties.SwitchVector(
+        name="TELESCOPE_PIER_SIDE",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        default_on=default,
         rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "east": properties.Switch(name="PIER_EAST"),
+            "west": properties.Switch(name="PIER_WEST"),
+        },
     )

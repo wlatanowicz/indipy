@@ -1,5 +1,5 @@
+from indi.device import properties
 from indi.device.properties import const
-from indi.device.properties.standard._vector import number_vector, text_vector
 
 
 def FilterSlot(  # noqa: PLR0913
@@ -13,18 +13,16 @@ def FilterSlot(  # noqa: PLR0913
     timeout=0,
     enabled=True,
 ):
-    return number_vector(
-        "FILTER_SLOT",
-        (("slot", "FILTER_SLOT_VALUE"),),
+    return properties.NumberVector(
+        name="FILTER_SLOT",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
-        min=min,
-        max=max,
-        step=step,
+        elements={
+            "slot": properties.Number(name="FILTER_SLOT_VALUE", default=default, min=min, max=max, step=step),
+        },
     )
 
 
@@ -36,13 +34,12 @@ def FilterName(
     timeout=0,
     enabled=True,
 ):
-    return text_vector(
-        "FILTER_NAME",
-        (("filter_name", "FILTER_NAME_VALUE"),),
+    return properties.TextVector(
+        name="FILTER_NAME",
         label=label,
         state=state,
         perm=perm,
         timeout=timeout,
         enabled=enabled,
-        default=default,
+        elements={"filter_name": properties.Text(name="FILTER_NAME_VALUE", default=default)},
     )
