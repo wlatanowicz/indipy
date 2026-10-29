@@ -79,3 +79,144 @@ def FocusMotion(
             "outward": properties.Switch(name="FOCUS_OUTWARD"),
         },
     )
+
+
+def FocusSpeed(  # noqa: PLR0913
+    label=None,
+    default=0,
+    min=0,
+    max=0,
+    step=0,
+    state=const.State.OK,
+    perm=const.Permissions.READ_WRITE,
+    timeout=0,
+    enabled=True,
+):
+    return properties.NumberVector(
+        name="FOCUS_SPEED",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
+        elements={
+            "speed": properties.Number(name="FOCUS_SPEED_VALUE", default=default, min=min, max=max, step=step),
+        },
+    )
+
+
+def FocusTimer(  # noqa: PLR0913
+    label=None,
+    default=0,
+    min=0,
+    max=0,
+    step=0,
+    state=const.State.OK,
+    perm=const.Permissions.READ_WRITE,
+    timeout=0,
+    enabled=True,
+):
+    return properties.NumberVector(
+        name="FOCUS_TIMER",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
+        elements={
+            "timer": properties.Number(name="FOCUS_TIMER_VALUE", default=default, min=min, max=max, step=step),
+        },
+    )
+
+
+def FocusReverseMotion(
+    label=None,
+    default="DISABLED",
+    state=const.State.OK,
+    perm=const.Permissions.READ_WRITE,
+    timeout=0,
+    enabled=True,
+):
+    return properties.SwitchVector(
+        name="FOCUS_REVERSE_MOTION",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
+        default_on=default,
+        rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "enable": properties.Switch(name="ENABLED"),
+            "disable": properties.Switch(name="DISABLED"),
+        },
+    )
+
+
+def FocusReverseMotionIndi(
+    label=None,
+    default="INDI_DISABLED",
+    state=const.State.OK,
+    perm=const.Permissions.READ_WRITE,
+    timeout=0,
+    enabled=True,
+):
+    return properties.SwitchVector(
+        name="FOCUS_REVERSE_MOTION",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
+        default_on=default,
+        rule=const.SwitchRule.ONE_OF_MANY,
+        elements={
+            "enable": properties.Switch(name="INDI_ENABLED"),
+            "disable": properties.Switch(name="INDI_DISABLED"),
+        },
+    )
+
+
+def FocusAbortMotion(
+    label=None,
+    default=None,
+    state=const.State.OK,
+    perm=const.Permissions.READ_WRITE,
+    timeout=0,
+    enabled=True,
+):
+    return properties.SwitchVector(
+        name="FOCUS_ABORT_MOTION",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
+        default_on=default,
+        rule=const.SwitchRule.AT_MOST_ONE,
+        elements={"abort": properties.Switch(name="ABORT")},
+    )
+
+
+def FocusSync(  # noqa: PLR0913
+    label=None,
+    default=0,
+    min=0,
+    max=0,
+    step=0,
+    state=const.State.OK,
+    perm=const.Permissions.READ_WRITE,
+    timeout=0,
+    enabled=True,
+):
+    return properties.NumberVector(
+        name="FOCUS_SYNC",
+        label=label,
+        state=state,
+        perm=perm,
+        timeout=timeout,
+        enabled=enabled,
+        elements={
+            "position": properties.Number(name="FOCUS_SYNC_VALUE", default=default, min=min, max=max, step=step),
+        },
+    )

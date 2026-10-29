@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+* Add factory helpers for the remaining INDI standard properties: general devices, telescopes, CCDs and guiders, streaming, filter wheels, focusers, and domes.
+
 ### Breaking changes
 
 * Packaging now uses `pyproject.toml` and uv. `requires-python` is `>=3.11`. black and isort are replaced by ruff.
