@@ -38,7 +38,7 @@ def FilterName(
 ):
     return text_vector(
         "FILTER_NAME",
-        (("name", "FILTER_NAME_VALUE"),),
+        (("filter_name", "FILTER_NAME_VALUE"),),
         label=label,
         state=state,
         perm=perm,

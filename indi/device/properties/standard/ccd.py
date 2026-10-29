@@ -235,7 +235,7 @@ def Compression(  # noqa: PLR0913
 ):
     return switch_vector(
         chip_name("CCD_COMPRESSION", guider),
-        chip_members((("enabled", "INDI_ENABLED"), ("disabled", "INDI_DISABLED")), guider),
+        chip_members((("enable", "INDI_ENABLED"), ("disable", "INDI_DISABLED")), guider),
         label=label,
         state=state,
         perm=perm,
@@ -457,7 +457,7 @@ def RecordFile(
 ):
     return text_vector(
         "RECORD_FILE",
-        (("directory", "RECORD_FILE_DIR"), ("name", "RECORD_FILE_NAME")),
+        (("directory", "RECORD_FILE_DIR"), ("file_name", "RECORD_FILE_NAME")),
         label=label,
         state=state,
         perm=perm,

@@ -255,6 +255,30 @@ def test_read_only_defaults():
     assert ccd.Fps().perm == const.Permissions.READ_ONLY
 
 
+def test_element_keys_do_not_hide_vector_attributes():
+    compression = ccd.Compression()
+    assert compression.enabled is True
+    assert compression.enable.name == "INDI_ENABLED"
+    assert compression.disable.name == "INDI_DISABLED"
+
+    record_file = ccd.RecordFile()
+    assert record_file.name == "RECORD_FILE"
+    assert record_file.file_name.name == "RECORD_FILE_NAME"
+
+    filter_name = filterwheel.FilterName()
+    assert filter_name.name == "FILTER_NAME"
+    assert filter_name.filter_name.name == "FILTER_NAME_VALUE"
+
+    reverse = focuser.FocusReverseMotion()
+    assert reverse.enabled is True
+    assert reverse.enable.name == "ENABLED"
+    assert reverse.disable.name == "DISABLED"
+
+    indi_reverse = focuser.FocusReverseMotionIndi()
+    assert indi_reverse.enable.name == "INDI_ENABLED"
+    assert indi_reverse.disable.name == "INDI_DISABLED"
+
+
 def test_perm_is_forwarded():
     port = common.DevicePort(
         label="Port",

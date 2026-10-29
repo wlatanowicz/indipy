@@ -137,7 +137,7 @@ def FocusTimer(  # noqa: PLR0913
 def _focus_reverse(enabled_name, disabled_name, *, label, default, state, perm, timeout, enabled):  # noqa: PLR0913
     return switch_vector(
         "FOCUS_REVERSE_MOTION",
-        (("enabled", enabled_name), ("disabled", disabled_name)),
+        (("enable", enabled_name), ("disable", disabled_name)),
         label=label,
         state=state,
         perm=perm,
